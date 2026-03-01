@@ -20,6 +20,9 @@ import {
   CustomerAddress,
   Wishlist,
   ProductAnalytic,
+  ProductReview,
+  PaymentMethod,
+  POSSyncLog,
 } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -30,6 +33,13 @@ import { PromotionsModule } from './modules/promotions/promotions.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UsersModule } from './modules/users/users.module';
+import { WishlistsModule } from './modules/wishlists/wishlists.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { POSSyncModule } from './modules/pos-sync/pos-sync.module';
+import { SearchModule } from './modules/search/search.module';
+import { ProductAnalyticsModule } from './modules/product-analytics/product-analytics.module';
 import { RolesGuard } from './common/guards/roles.guard';
 
 @Module({
@@ -65,6 +75,9 @@ import { RolesGuard } from './common/guards/roles.guard';
           CustomerAddress,
           Wishlist,
           ProductAnalytic,
+          ProductReview,
+          PaymentMethod,
+          POSSyncLog,
         ],
         synchronize: config.get('DB_SYNCHRONIZE') === 'true',
         logging: config.get('DB_LOGGING') === 'true',
@@ -107,6 +120,13 @@ import { RolesGuard } from './common/guards/roles.guard';
     AnalyticsModule,
     CloudinaryModule,
     UsersModule,
+    WishlistsModule,
+    AddressesModule,
+    ReviewsModule,
+    PaymentsModule,
+    POSSyncModule,
+    SearchModule,
+    ProductAnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

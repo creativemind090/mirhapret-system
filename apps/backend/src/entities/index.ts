@@ -11,3 +11,6 @@ export { PaymentTransaction } from './payment-transaction.entity';
 export { CustomerAddress } from './customer-address.entity';
 export { Wishlist } from './wishlist.entity';
 export { ProductAnalytic } from './product-analytic.entity';
+export { ProductReview } from './product-review.entity';
+export { PaymentMethod } from './payment-method.entity';
+export { POSSyncLog } from './pos-sync-log.entity';
