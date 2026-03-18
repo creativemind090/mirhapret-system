@@ -16,6 +16,7 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
   const { user, isLoggedIn, logout } = useAuth();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <>
@@ -42,20 +43,17 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
         </a>
 
         {/* Nav Links - Center */}
-        <div style={{ display: 'flex', gap: '40px', fontSize: '14px', fontWeight: 500 }}>
-          <a href="/" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
-            Home
-          </a>
-          <a href="/products" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
-            Shop
-          </a>
-          <a href="/about" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
-            About
-          </a>
-          <a href="/contact" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
-            Contact
-          </a>
+        <div className="nav-links">
+          <a href="/" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Home</a>
+          <a href="/products" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Shop</a>
+          <a href="/about" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>About</a>
+          <a href="/contact" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Contact</a>
         </div>
+
+        {/* Hamburger - mobile only */}
+        <button className="nav-hamburger" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
+          <span /><span /><span />
+        </button>
 
         {/* Cart & Profile - Right */}
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
@@ -234,6 +232,27 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
       </nav>
 
       <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Mobile nav overlay */}
+      <div className={`mobile-nav-overlay${isMobileMenuOpen ? ' open' : ''}`}>
+        <button className="mobile-nav-close" onClick={() => setIsMobileMenuOpen(false)}>×</button>
+        <a href="/" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '2px', color: '#000', textDecoration: 'none', marginBottom: '24px', display: 'block' }}>MirhaPret</a>
+        <a href="/" onClick={() => setIsMobileMenuOpen(false)}>Home</a>
+        <a href="/products" onClick={() => setIsMobileMenuOpen(false)}>Shop</a>
+        <a href="/about" onClick={() => setIsMobileMenuOpen(false)}>About</a>
+        <a href="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact</a>
+        <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '0' }}>
+          {isLoggedIn ? (
+            <>
+              <a href="/my-orders" onClick={() => setIsMobileMenuOpen(false)}>My Orders</a>
+              <a href="/my-wishlist" onClick={() => setIsMobileMenuOpen(false)}>Wishlist</a>
+              <button className="nav-link-btn" onClick={() => { logout(); setIsMobileMenuOpen(false); router.push('/'); }}>Logout</button>
+            </>
+          ) : (
+            <a href="/signin" onClick={() => setIsMobileMenuOpen(false)}>Sign In</a>
+          )}
+        </div>
+      </div>
     </>
   );
 }

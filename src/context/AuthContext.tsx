@@ -1,57 +1,43 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '@/lib/api';
 
 export interface User {
   id: string;
-  name: string;
   email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  phone?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
-  login: (email: string, password: string) => boolean;
-  register: (name: string, email: string, password: string) => boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (firstName: string, lastName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Dummy credentials for testing
-const DUMMY_USERS = [
-  {
-    id: '1',
-    name: 'Test User',
-    email: 'test@example.com',
-    password: 'password123',
-  },
-  {
-    id: '2',
-    name: 'Demo User',
-    email: 'demo@example.com',
-    password: 'demo123',
-  },
-];
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
-      } catch (err) {
-        console.error('Failed to load user:', err);
+      } catch {
+        localStorage.removeItem('user');
       }
     }
     setIsHydrated(true);
   }, []);
 
-  // Save user to localStorage whenever it changes
   useEffect(() => {
     if (isHydrated) {
       if (user) {
@@ -62,51 +48,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, isHydrated]);
 
-  const login = (email: string, password: string): boolean => {
-    const foundUser = DUMMY_USERS.find(
-      (u) => u.email === email && u.password === password
-    );
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      const { access_token, refresh_token, user: userData } = res.data;
 
-    if (foundUser) {
-      const userData: User = {
-        id: foundUser.id,
-        name: foundUser.name,
-        email: foundUser.email,
-      };
-      setUser(userData);
-      return true;
+      localStorage.setItem('access_token', access_token);
+      if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
+
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        role: userData.role,
+        phone: userData.phone,
+      });
+
+      return { success: true };
+    } catch (err: any) {
+      const message = err?.response?.data?.message || 'Invalid email or password';
+      return { success: false, error: Array.isArray(message) ? message[0] : message };
     }
-
-    return false;
   };
 
-  const register = (name: string, email: string, password: string): boolean => {
-    // Check if user already exists
-    const userExists = DUMMY_USERS.some((u) => u.email === email);
-    if (userExists) {
-      return false;
+  const register = async (
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.post('/auth/register', {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password,
+      });
+      const { access_token, refresh_token, user: userData } = res.data;
+
+      localStorage.setItem('access_token', access_token);
+      if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
+
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        role: userData.role,
+        phone: userData.phone,
+      });
+
+      return { success: true };
+    } catch (err: any) {
+      const message = err?.response?.data?.message || 'Registration failed';
+      return { success: false, error: Array.isArray(message) ? message[0] : message };
     }
-
-    // Add new user to dummy list
-    const newUser = {
-      id: String(DUMMY_USERS.length + 1),
-      name,
-      email,
-      password,
-    };
-    DUMMY_USERS.push(newUser);
-
-    // Log in the new user
-    const userData: User = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-    };
-    setUser(userData);
-    return true;
   };
 
   const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
     setUser(null);
   };
 

@@ -1,726 +1,638 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { PageHeader } from '@/components/PageHeader';
+import api from '@/lib/api';
 
 gsap.registerPlugin(ScrollTrigger);
-
-// Lofi image placeholder component
-function LofiImage({ width = 400, height = 300 }: { width?: number; height?: number }) {
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      style={{ background: '#f5f5f5', display: 'block' }}
-    >
-      {/* Background */}
-      <rect width={width} height={height} fill="#f5f5f5" />
-      
-      {/* Diagonal lines pattern */}
-      {Array.from({ length: 20 }).map((_, i) => (
-        <line
-          key={i}
-          x1={i * (width / 10) - height}
-          y1="0"
-          x2={i * (width / 10)}
-          y2={height}
-          stroke="#e0e0e0"
-          strokeWidth="2"
-        />
-      ))}
-      
-      {/* Center text */}
-      <text
-        x={width / 2}
-        y={height / 2}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize="14"
-        fill="#999999"
-        fontFamily="system-ui"
-      >
-        Collection Image
-      </text>
-    </svg>
-  );
-}
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [apiCategories, setApiCategories] = useState<any[]>([]);
+  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      const [prodsRes, catsRes] = await Promise.allSettled([
+        api.get('/products?is_featured=true&take=8'),
+        api.get('/categories'),
+      ]);
+      if (prodsRes.status === 'fulfilled') setFeaturedProducts(prodsRes.value.data.data ?? []);
+      if (catsRes.status === 'fulfilled') setApiCategories(catsRes.value.data.data ?? []);
+    };
+    fetchHomeData();
+  }, []);
 
   const heroSlides = [
     {
-      title: 'Timeless Elegance',
-      subtitle: 'Discover our Premium Pret collection — ready-to-wear luxury crafted for the modern Pakistani woman',
-      tagline: 'Effortless sophistication for every occasion',
-      cta: 'Explore Pret',
-      color: '#000000',
+      tag: 'New Season · 2026',
+      title: 'Dressed to\nBe Remembered',
+      subtitle: 'Premium Pret & Haute Couture for the modern Pakistani woman.',
+      cta: 'Shop Collection',
+      ctaLink: '/products',
     },
     {
-      title: 'Contemporary Luxury',
-      subtitle: 'Octa West 2026 — where tradition meets avant-garde design in stunning contemporary pieces',
-      tagline: 'Bold, artistic, unapologetically modern',
-      cta: 'Shop Octa West',
-      color: '#1a1a1a',
+      tag: 'Now Available',
+      title: 'Octa West\n2026',
+      subtitle: 'Where tradition meets avant-garde — bold, artistic, unapologetically modern.',
+      cta: 'Explore Octa West',
+      ctaLink: '/products',
     },
     {
-      title: 'Haute Couture',
-      subtitle: 'The Desire Collection — our most exclusive pieces for those who demand perfection',
-      tagline: 'Luxury redefined, one stitch at a time',
+      tag: 'Exclusive Collection',
+      title: 'The Desire\nEdit',
+      subtitle: 'Our most coveted pieces — luxury redefined, one stitch at a time.',
       cta: 'View Desire',
-      color: '#333333',
+      ctaLink: '/products',
     },
   ];
 
   useEffect(() => {
-    // Carousel auto-advance
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
     }, 6000);
-
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Carousel animations
     const ctx = gsap.context(() => {
-      gsap.from('.carousel-content', {
-        duration: 0.8,
-        opacity: 0,
-        y: 30,
-        ease: 'power3.out',
-      });
-
-      gsap.from('.carousel-cta', {
-        duration: 0.8,
-        opacity: 0,
-        y: 20,
-        delay: 0.2,
-        ease: 'power3.out',
-      });
+      gsap.from('.hero-tag', { opacity: 0, y: 12, duration: 0.5, ease: 'power2.out' });
+      gsap.from('.hero-title', { opacity: 0, y: 28, duration: 0.7, delay: 0.1, ease: 'power3.out' });
+      gsap.from('.hero-sub', { opacity: 0, y: 16, duration: 0.6, delay: 0.25, ease: 'power2.out' });
+      gsap.from('.hero-ctas', { opacity: 0, y: 16, duration: 0.5, delay: 0.4, ease: 'power2.out' });
     });
-
     return () => ctx.revert();
   }, [currentSlide]);
 
   useEffect(() => {
-    // Scroll animations
     const ctx = gsap.context(() => {
-      // Collection cards stagger
+      gsap.from('.usp-item', {
+        opacity: 0, y: 20, stagger: 0.1, duration: 0.6,
+        scrollTrigger: { trigger: '.usp-strip', start: 'top 85%' },
+      });
       gsap.from('.collection-card', {
-        duration: 0.8,
-        opacity: 0,
-        y: 50,
-        stagger: 0.15,
-        scrollTrigger: {
-          trigger: '.collections-section',
-          start: 'top 80%',
-          end: 'top 20%',
-          scrub: false,
-        },
-        ease: 'power3.out',
+        opacity: 0, y: 50, stagger: 0.12, duration: 0.7,
+        scrollTrigger: { trigger: '.collections-grid', start: 'top 80%' },
       });
-
-      // Featured products animation
-      gsap.from('.product-item', {
-        duration: 0.8,
-        opacity: 0,
-        y: 40,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: '.featured-section',
-          start: 'top 80%',
-          end: 'top 20%',
-          scrub: false,
-        },
-        ease: 'power3.out',
+      gsap.from('.product-card', {
+        opacity: 0, y: 30, stagger: 0.08, duration: 0.6,
+        scrollTrigger: { trigger: '.products-grid', start: 'top 80%' },
       });
-
-      // Testimonials animation
+      gsap.from('.brand-content', {
+        opacity: 0, x: -40, duration: 0.8,
+        scrollTrigger: { trigger: '.brand-section', start: 'top 75%' },
+      });
+      gsap.from('.brand-stats', {
+        opacity: 0, x: 40, duration: 0.8,
+        scrollTrigger: { trigger: '.brand-section', start: 'top 75%' },
+      });
       gsap.from('.testimonial-card', {
-        duration: 0.8,
-        opacity: 0,
-        y: 40,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: '.testimonials-section',
-          start: 'top 80%',
-          end: 'top 20%',
-          scrub: false,
-        },
-        ease: 'power3.out',
+        opacity: 0, y: 30, stagger: 0.12, duration: 0.6,
+        scrollTrigger: { trigger: '.testimonials-section', start: 'top 80%' },
       });
     });
-
     return () => ctx.revert();
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const collections = apiCategories.length > 0
+    ? apiCategories.slice(0, 3)
+    : [
+        { id: 'pret', name: 'Premium Pret', description: 'Ready-to-wear elegance', image_url: null },
+        { id: 'octa-west', name: 'Octa West 2026', description: 'Contemporary luxury', image_url: null },
+        { id: 'desire', name: 'The Desire Edit', description: 'Haute couture pieces', image_url: null },
+      ];
+
+  const collectionBgs = ['#1c1c1c', '#2a2018', '#1a1f2e'];
+
   return (
-    <div style={{ background: '#ffffff', color: '#000000' }}>
+    <div style={{ background: '#fff', color: '#000', overflowX: 'hidden' }}>
+
+      {/* ─── Announcement Bar ─────────────────────────────── */}
+      <div style={{
+        background: '#000',
+        color: '#fff',
+        textAlign: 'center',
+        padding: '10px 20px',
+        fontSize: '12px',
+        letterSpacing: '1.5px',
+        textTransform: 'uppercase',
+        fontWeight: 500,
+      }}>
+        Free Shipping on Orders Above PKR 5,000 &nbsp;·&nbsp; New: Octa West 2026 Now Live
+      </div>
+
+      {/* ─── Header ───────────────────────────────────────── */}
       <PageHeader isScrolled={isScrolled} />
 
-      {/* Hero Carousel Section */}
-      <section
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingTop: '60px',
-          background: '#ffffff',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Carousel Slides */}
+      {/* ─── Hero ─────────────────────────────────────────── */}
+      <section className="hero-section">
         {heroSlides.map((slide, idx) => (
           <div
             key={idx}
+            className="hero-slide"
             style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingLeft: '60px',
-              paddingRight: '60px',
               opacity: currentSlide === idx ? 1 : 0,
-              transition: 'opacity 0.8s ease-in-out',
               pointerEvents: currentSlide === idx ? 'auto' : 'none',
             }}
           >
-            {/* Left Content */}
-            <div style={{ flex: 1, maxWidth: '600px', zIndex: 10 }}>
-              <div className="carousel-content">
-                <p
-                  style={{
-                    fontSize: '0.9rem',
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    color: '#666666',
-                    marginBottom: '16px',
-                    fontWeight: 600,
-                  }}
-                >
-                  {slide.tagline}
-                </p>
-                <h1
-                  style={{
-                    fontSize: '4rem',
-                    fontWeight: 700,
-                    lineHeight: 1.1,
-                    marginBottom: '24px',
-                    letterSpacing: '-1px',
-                  }}
-                >
-                  {slide.title}
-                </h1>
-                <p
-                  style={{
-                    fontSize: '1.1rem',
-                    color: '#666666',
-                    marginBottom: '40px',
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {slide.subtitle}
-                </p>
+            {/* Left — text */}
+            <div className="hero-left">
+              <p className="hero-tag" style={{
+                fontSize: '11px',
+                letterSpacing: '3px',
+                textTransform: 'uppercase',
+                color: '#999',
+                marginBottom: '20px',
+                fontWeight: 600,
+              }}>
+                {slide.tag}
+              </p>
+              <h1 className="hero-title" style={{
+                fontSize: 'clamp(2.4rem, 4.5vw, 5rem)',
+                fontWeight: 800,
+                lineHeight: 1.05,
+                letterSpacing: '-2px',
+                marginBottom: '24px',
+                whiteSpace: 'pre-line',
+                color: '#000',
+              }}>
+                {slide.title}
+              </h1>
+              <p className="hero-sub" style={{
+                fontSize: '1rem',
+                color: '#666',
+                lineHeight: 1.8,
+                marginBottom: '40px',
+                maxWidth: '380px',
+              }}>
+                {slide.subtitle}
+              </p>
+              <div className="hero-ctas" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <a href={slide.ctaLink} style={{
+                  display: 'inline-block',
+                  padding: '14px 32px',
+                  background: '#000',
+                  color: '#fff',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '1.5px',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                }}>
+                  {slide.cta}
+                </a>
+                <a href="/about" style={{
+                  display: 'inline-block',
+                  padding: '14px 32px',
+                  background: 'transparent',
+                  color: '#000',
+                  border: '1.5px solid #000',
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  letterSpacing: '1.5px',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                }}>
+                  Our Story
+                </a>
               </div>
 
-              <div className="carousel-cta" style={{ display: 'flex', gap: '16px' }}>
-                <button
-                  style={{
-                    padding: '14px 32px',
-                    background: '#000000',
-                    color: '#ffffff',
-                    border: '1px solid #000000',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {slide.cta}
-                </button>
-                <button
-                  style={{
-                    padding: '14px 32px',
-                    background: '#ffffff',
-                    color: '#000000',
-                    border: '1px solid #000000',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  View Lookbook
-                </button>
+              {/* Slide indicators */}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '56px', alignItems: 'center' }}>
+                {heroSlides.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    style={{
+                      width: currentSlide === i ? '36px' : '8px',
+                      height: '3px',
+                      background: currentSlide === i ? '#000' : '#ddd',
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      padding: 0,
+                    }}
+                  />
+                ))}
+                <span style={{ fontSize: '11px', color: '#bbb', marginLeft: '8px', letterSpacing: '1px' }}>
+                  {String(currentSlide + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}
+                </span>
               </div>
             </div>
 
-            {/* Right Image */}
-            <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', marginLeft: '60px' }}>
-              <LofiImage width={500} height={600} />
+            {/* Right — editorial dark panel (hidden on mobile via CSS) */}
+            <div className="hero-right" style={{
+              background: '#111',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute',
+                fontSize: '22vw',
+                fontWeight: 900,
+                color: 'rgba(255,255,255,0.03)',
+                letterSpacing: '-6px',
+                userSelect: 'none',
+                lineHeight: 1,
+                right: '-2vw',
+              }}>
+                MP
+              </div>
+              <div style={{ width: '1px', height: '70px', background: 'linear-gradient(to bottom, transparent, #c8a96e, transparent)', marginBottom: '24px', zIndex: 1 }} />
+              <p style={{
+                fontSize: '11px',
+                color: 'rgba(255,255,255,0.2)',
+                letterSpacing: '4px',
+                textTransform: 'uppercase',
+                fontWeight: 500,
+                zIndex: 1,
+                textAlign: 'center',
+                lineHeight: 2,
+              }}>
+                MirhaPret · 2026<br />
+                <span style={{ color: '#c8a96e', letterSpacing: '2px' }}>{slide.tag}</span>
+              </p>
+              <div style={{ width: '1px', height: '70px', background: 'linear-gradient(to bottom, transparent, #c8a96e, transparent)', marginTop: '24px', zIndex: 1 }} />
             </div>
           </div>
         ))}
+      </section>
 
-        {/* Carousel Controls */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '40px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            gap: '12px',
-            zIndex: 20,
-          }}
-        >
-          {heroSlides.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentSlide(idx)}
-              style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                background: currentSlide === idx ? '#000000' : '#e0e0e0',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background 0.3s ease',
-              }}
-            />
+      {/* ─── USP Strip ────────────────────────────────────── */}
+      <section className="usp-strip" style={{ borderTop: '1px solid #e8e8e8', borderBottom: '1px solid #e8e8e8' }}>
+        <div className="usp-grid">
+          {[
+            { icon: '✦', title: 'Free Shipping', sub: 'On orders above PKR 5,000' },
+            { icon: '↩', title: 'Easy Returns', sub: '7-day hassle-free returns' },
+            { icon: '◈', title: '100% Authentic', sub: 'Genuine quality guaranteed' },
+            { icon: '⬡', title: 'Secure Checkout', sub: 'Your data is always protected' },
+          ].map((usp, i) => (
+            <div
+              key={i}
+              className={`usp-item${i < 3 ? ' usp-item-border' : ''}`}
+              style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '24px 28px' }}
+            >
+              <span style={{ fontSize: '18px', color: '#c8a96e', flexShrink: 0 }}>{usp.icon}</span>
+              <div>
+                <p style={{ fontSize: '13px', fontWeight: 700, color: '#000', marginBottom: '2px' }}>{usp.title}</p>
+                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{usp.sub}</p>
+              </div>
+            </div>
           ))}
-        </div>
-
-        {/* Slide Counter */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '40px',
-            right: '60px',
-            fontSize: '14px',
-            color: '#666666',
-            fontWeight: 600,
-            zIndex: 20,
-          }}
-        >
-          {String(currentSlide + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}
         </div>
       </section>
 
-      {/* Collections Section */}
-      <section
-        id="collections"
-        className="collections-section"
-        style={{
-          padding: '80px 60px',
-          background: '#ffffff',
-        }}
-      >
-        <div style={{ marginBottom: '60px', textAlign: 'center' }}>
-          <p
-            style={{
-              fontSize: '0.9rem',
-              letterSpacing: '2px',
-              textTransform: 'uppercase',
-              color: '#666666',
-              marginBottom: '16px',
-              fontWeight: 600,
-            }}
-          >
-            Our Collections
-          </p>
-          <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '16px' }}>
-            Curated for You
-          </h2>
-          <p style={{ fontSize: '1.1rem', color: '#666666', maxWidth: '600px', margin: '0 auto' }}>
-            Each collection represents our commitment to quality, elegance, and the modern Pakistani woman
-          </p>
+      {/* ─── Collections ──────────────────────────────────── */}
+      <section className="home-section">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: '10px' }}>
+              Shop By Collection
+            </p>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
+              Our Collections
+            </h2>
+          </div>
+          <a href="/products" style={{ fontSize: '12px', fontWeight: 700, color: '#000', textDecoration: 'none', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1.5px solid #000', paddingBottom: '3px' }}>
+            View All →
+          </a>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '32px',
-          }}
-        >
-          {[
-            {
-              name: 'Premium Pret',
-              desc: 'Ready-to-wear elegance for everyday luxury',
-              pieces: '120+ pieces',
-              price: 'From PKR 2,999',
-              highlight: 'Perfect for work, brunch, and evening gatherings',
-              categoryId: 'pret',
-            },
-            {
-              name: 'Octa West 2026',
-              desc: 'Contemporary designs with traditional roots',
-              pieces: '85+ pieces',
-              price: 'From PKR 5,999',
-              highlight: 'Modern silhouettes with intricate detailing',
-              categoryId: 'octa-west',
-            },
-            {
-              name: 'Desire Collection',
-              desc: 'Haute couture for special moments',
-              pieces: '45+ pieces',
-              price: 'From PKR 8,999',
-              highlight: 'Exclusive pieces for weddings and celebrations',
-              categoryId: 'desire',
-            },
-          ].map((collection, idx) => (
+        <div className="collections-grid">
+          {collections.map((col: any, idx: number) => (
             <div
               key={idx}
               className="collection-card"
-              style={{
-                border: '1px solid #e0e0e0',
-                overflow: 'hidden',
-                cursor: 'pointer',
-              }}
+              onClick={() => (window.location.href = `/products?category=${col.id}`)}
+              style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer', background: collectionBgs[idx], minHeight: '320px' }}
             >
-              <div style={{ marginBottom: '24px' }}>
-                <LofiImage width={400} height={400} />
+              {col.image_url && (
+                <img src={col.image_url} alt={col.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+              )}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)' }} />
+              <div style={{ position: 'absolute', top: '24px', left: '24px' }}>
+                <span style={{ fontSize: '10px', letterSpacing: '3px', textTransform: 'uppercase', color: '#c8a96e', fontWeight: 700 }}>
+                  {`0${idx + 1}`}
+                </span>
               </div>
-              <div style={{ padding: '0 16px 24px 16px' }}>
-                <p
-                  style={{
-                    fontSize: '0.85rem',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                    color: '#999999',
-                    marginBottom: '8px',
-                    fontWeight: 600,
-                  }}
-                >
-                  {collection.pieces}
-                </p>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>
-                  {collection.name}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 24px' }}>
+                <h3 style={{ fontSize: idx === 0 ? '1.8rem' : '1.3rem', fontWeight: 800, color: '#fff', marginBottom: '8px', letterSpacing: '-0.5px' }}>
+                  {col.name}
                 </h3>
-                <p style={{ fontSize: '0.95rem', color: '#666666', marginBottom: '12px' }}>
-                  {collection.desc}
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '18px' }}>
+                  {col.description ?? ''}
                 </p>
-                <p style={{ fontSize: '0.9rem', color: '#999999', marginBottom: '16px', fontStyle: 'italic' }}>
-                  {collection.highlight}
-                </p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: '1rem', fontWeight: 600, color: '#000000' }}>
-                    {collection.price}
-                  </p>
-                  <button
-                    onClick={() => window.location.href = `/products?category=${collection.categoryId}`}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#000000',
-                      color: '#ffffff',
-                      border: '1px solid #000000',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    View All
-                  </button>
-                </div>
+                <span style={{
+                  display: 'inline-block',
+                  padding: '8px 20px',
+                  border: '1px solid rgba(200,169,110,0.5)',
+                  color: '#c8a96e',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  letterSpacing: '1.5px',
+                  textTransform: 'uppercase',
+                }}>
+                  Shop Now
+                </span>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section
-        id="featured"
-        className="featured-section"
-        style={{
-          padding: '80px 60px',
-          background: '#f5f5f5',
-        }}
-      >
-        <div style={{ marginBottom: '60px', textAlign: 'center' }}>
-          <p
-            style={{
-              fontSize: '0.9rem',
-              letterSpacing: '2px',
-              textTransform: 'uppercase',
-              color: '#666666',
-              marginBottom: '16px',
-              fontWeight: 600,
-            }}
-          >
-            This Season
-          </p>
-          <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '16px' }}>
-            Featured Pieces
-          </h2>
-          <p style={{ fontSize: '1.1rem', color: '#666666', maxWidth: '600px', margin: '0 auto' }}>
-            Handpicked selections that define contemporary luxury fashion
-          </p>
+      {/* ─── Featured Products ────────────────────────────── */}
+      <section className="home-section-sm">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: '10px' }}>
+              Handpicked
+            </p>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
+              Featured Pieces
+            </h2>
+          </div>
+          <a href="/products" style={{ fontSize: '12px', fontWeight: 700, color: '#000', textDecoration: 'none', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1.5px solid #000', paddingBottom: '3px' }}>
+            View All →
+          </a>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '24px',
-          }}
-        >
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
-            <div
-              key={item}
-              className="product-item"
-              style={{
-                background: '#ffffff',
-                border: '1px solid #e0e0e0',
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{ marginBottom: '16px' }}>
-                <LofiImage width={300} height={350} />
-              </div>
-              <div style={{ padding: '0 16px 16px 16px' }}>
-                <p
-                  style={{
-                    fontSize: '0.8rem',
-                    letterSpacing: '1px',
-                    textTransform: 'uppercase',
-                    color: '#999999',
-                    marginBottom: '6px',
-                    fontWeight: 600,
-                  }}
-                >
-                  Premium Collection
+        <div className="products-grid">
+          {(featuredProducts.length > 0 ? featuredProducts.slice(0, 8) : Array.from({ length: 8 })).map((item: any, idx) => {
+            const pid = item?.id ?? `p${idx}`;
+            const isHovered = hoveredProduct === pid;
+            return (
+              <div
+                key={pid}
+                className="product-card"
+                onMouseEnter={() => setHoveredProduct(pid)}
+                onMouseLeave={() => setHoveredProduct(null)}
+                onClick={() => item && (window.location.href = `/products/${item.id}`)}
+                style={{ cursor: item ? 'pointer' : 'default' }}
+              >
+                {/* Image */}
+                <div style={{ aspectRatio: '3/4', overflow: 'hidden', marginBottom: '14px', position: 'relative', background: '#f4f4f4' }}>
+                  {item?.main_image ? (
+                    <img
+                      src={item.main_image}
+                      alt={item.name}
+                      style={{
+                        width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                        transform: isHovered ? 'scale(1.06)' : 'scale(1)',
+                        transition: 'transform 0.5s ease',
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '100%', height: '100%',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      background: isHovered ? '#ececec' : '#f4f4f4', transition: 'background 0.3s ease',
+                    }}>
+                      <span style={{ fontSize: '2rem', color: '#ddd', fontWeight: 800, letterSpacing: '-2px' }}>
+                        {item?.name ? item.name.slice(0, 2).toUpperCase() : 'MP'}
+                      </span>
+                      <span style={{ fontSize: '9px', color: '#ccc', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '6px' }}>
+                        MirhaPret
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Quick view overlay */}
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                    background: 'rgba(0,0,0,0.82)',
+                    padding: '13px', textAlign: 'center',
+                    color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
+                    opacity: isHovered && item ? 1 : 0,
+                    transform: isHovered ? 'translateY(0)' : 'translateY(8px)',
+                    transition: 'all 0.3s ease',
+                  }}>
+                    Quick View
+                  </div>
+
+                  {item?.is_featured && (
+                    <span style={{
+                      position: 'absolute', top: '10px', left: '10px',
+                      background: '#000', color: '#fff',
+                      fontSize: '9px', fontWeight: 700, letterSpacing: '1.5px',
+                      padding: '4px 9px', textTransform: 'uppercase',
+                    }}>
+                      Featured
+                    </span>
+                  )}
+                </div>
+
+                {/* Info */}
+                <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#bbb', marginBottom: '4px', fontWeight: 600 }}>
+                  {item?.category?.name ?? 'MirhaPret'}
                 </p>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '8px' }}>
-                  Piece {item}
+                <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#000', marginBottom: '5px', lineHeight: 1.3 }}>
+                  {item?.name ?? `Piece ${idx + 1}`}
                 </h4>
-                <p style={{ fontSize: '0.85rem', color: '#666666', marginBottom: '12px' }}>
-                  Available in S, M, L, XL
-                </p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <p style={{ fontSize: '1rem', fontWeight: 700, color: '#000000' }}>
-                    PKR {(2999 + item * 1000).toLocaleString()}
+                {item?.available_sizes?.length > 0 && (
+                  <p style={{ fontSize: '11px', color: '#ccc', marginBottom: '7px' }}>
+                    {item.available_sizes.slice(0, 4).join(' · ')}{item.available_sizes.length > 4 ? ' +more' : ''}
                   </p>
-                  <button
-                    onClick={() => window.location.href = `/products/featured-${item}`}
-                    style={{
-                      padding: '6px 12px',
-                      background: '#000000',
-                      color: '#ffffff',
-                      border: '1px solid #000000',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    View
-                  </button>
-                </div>
+                )}
+                <p style={{ fontSize: '14px', fontWeight: 700, color: '#000' }}>
+                  {item ? `PKR ${Number(item.price).toLocaleString()}` : '—'}
+                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section
-        className="testimonials-section"
-        style={{
-          padding: '80px 60px',
-          background: '#f5f5f5',
-        }}
-      >
-        <div style={{ marginBottom: '60px', textAlign: 'center' }}>
-          <p
-            style={{
-              fontSize: '0.9rem',
-              letterSpacing: '2px',
-              textTransform: 'uppercase',
-              color: '#666666',
-              marginBottom: '16px',
-              fontWeight: 600,
-            }}
-          >
+      {/* ─── Brand Story ──────────────────────────────────── */}
+      <section className="brand-section" style={{ background: '#0e0e0e', color: '#fff' }}>
+        <div className="brand-inner" style={{ padding: '96px 60px' }}>
+          <div className="brand-content" style={{ flex: '0 0 50%', maxWidth: '520px' }}>
+            <div style={{ width: '40px', height: '2px', background: '#c8a96e', marginBottom: '28px' }} />
+            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#555', fontWeight: 600, marginBottom: '20px' }}>
+              Our Philosophy
+            </p>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 3.2rem)', fontWeight: 800, letterSpacing: '-1px', lineHeight: 1.15, marginBottom: '24px', color: '#fff' }}>
+              Crafted with Intention.<br />Worn with Pride.
+            </h2>
+            <p style={{ fontSize: '15px', color: '#666', lineHeight: 1.9, marginBottom: '36px' }}>
+              MirhaPret was born from a deep love for Pakistani craftsmanship. Every stitch, every fabric, every silhouette is chosen to celebrate the modern Pakistani woman — bold, elegant, and unapologetically herself.
+            </p>
+            <a href="/about" style={{
+              display: 'inline-block',
+              padding: '14px 32px',
+              border: '1px solid rgba(200,169,110,0.4)',
+              color: '#c8a96e',
+              fontSize: '11px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', textDecoration: 'none',
+            }}>
+              Read Our Story →
+            </a>
+          </div>
+
+          <div className="brand-stats brand-stats-grid" style={{ flex: '0 0 42%', gap: '1px', background: 'rgba(255,255,255,0.05)' }}>
+            {[
+              { num: '500+', label: 'Products' },
+              { num: '10K+', label: 'Happy Customers' },
+              { num: '3', label: 'Collections' },
+              { num: '2016', label: 'Est.' },
+            ].map((stat, i) => (
+              <div key={i} style={{
+                padding: '40px 32px',
+                background: '#0e0e0e',
+                borderTop: i < 2 ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                borderRight: i % 2 === 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              }}>
+                <p style={{ fontSize: '2.5rem', fontWeight: 800, color: '#c8a96e', letterSpacing: '-1px', marginBottom: '6px' }}>{stat.num}</p>
+                <p style={{ fontSize: '11px', color: '#555', letterSpacing: '2px', textTransform: 'uppercase' }}>{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Testimonials ─────────────────────────────────── */}
+      <section className="testimonials-section home-section" style={{ background: '#fafafa' }}>
+        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+          <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: '12px' }}>
             Customer Love
           </p>
-          <h2 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '16px' }}>
-            What Our Customers Say
+          <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
+            What They're Saying
           </h2>
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '32px',
-          }}
-        >
+        <div className="testimonials-grid">
           {[
-            {
-              name: 'Ayesha Khan',
-              city: 'Karachi',
-              text: 'NEXUS has completely transformed my wardrobe. The quality is unmatched and the designs are so elegant.',
-              rating: 5,
-            },
-            {
-              name: 'Zainab Ahmed',
-              city: 'Lahore',
-              text: 'I love how each piece tells a story. The attention to detail is incredible. Highly recommend!',
-              rating: 5,
-            },
-            {
-              name: 'Hira Malik',
-              city: 'Islamabad',
-              text: 'Finally found a boutique that understands modern Pakistani fashion. Absolutely in love with my purchases.',
-              rating: 5,
-            },
-          ].map((testimonial, idx) => (
-            <div
-              key={idx}
-              className="testimonial-card"
-              style={{
-                background: '#ffffff',
-                border: '1px solid #e0e0e0',
-                padding: '32px',
-              }}
-            >
-              <div style={{ marginBottom: '16px' }}>
-                {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <span key={i} style={{ fontSize: '1.2rem', color: '#f5a623' }}>
-                    ★
-                  </span>
+            { name: 'Ayesha K.', city: 'Karachi', text: 'The quality is unmatched. I get compliments every time I wear MirhaPret. My wardrobe is complete.', rating: 5 },
+            { name: 'Zainab A.', city: 'Lahore', text: 'Each piece feels intentional. The attention to detail is incredible — worth every rupee spent.', rating: 5 },
+            { name: 'Hira M.', city: 'Islamabad', text: 'Finally a brand that understands modern Pakistani fashion. Absolutely obsessed with my purchases!', rating: 5 },
+          ].map((t, i) => (
+            <div key={i} className="testimonial-card" style={{ background: '#fff', padding: '36px 32px', borderTop: '3px solid #000', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
+              <div style={{ marginBottom: '18px' }}>
+                {Array.from({ length: t.rating }).map((_, j) => (
+                  <span key={j} style={{ color: '#c8a96e', fontSize: '14px' }}>★</span>
                 ))}
               </div>
-              <p style={{ fontSize: '1rem', color: '#333333', marginBottom: '24px', lineHeight: 1.7 }}>
-                "{testimonial.text}"
+              <p style={{ fontSize: '15px', color: '#333', lineHeight: 1.85, marginBottom: '24px', fontStyle: 'italic' }}>
+                "{t.text}"
               </p>
-              <div>
-                <p style={{ fontSize: '0.95rem', fontWeight: 700, color: '#000000' }}>
-                  {testimonial.name}
-                </p>
-                <p style={{ fontSize: '0.85rem', color: '#666666' }}>{testimonial.city}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '34px', height: '34px', borderRadius: '50%',
+                  background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontSize: '12px', fontWeight: 700, flexShrink: 0,
+                }}>
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <p style={{ fontSize: '13px', fontWeight: 700, color: '#000' }}>{t.name}</p>
+                  <p style={{ fontSize: '11px', color: '#999', marginTop: '1px' }}>{t.city}</p>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section
-        style={{
-          padding: '80px 60px',
-          background: '#000000',
-          color: '#ffffff',
-          textAlign: 'center',
-        }}
-      >
-        <h2 style={{ fontSize: '2.5rem', fontWeight: 700, marginBottom: '16px' }}>
-          Stay in the Loop
-        </h2>
-        <p style={{ fontSize: '1.1rem', color: '#cccccc', marginBottom: '32px', maxWidth: '600px', margin: '0 auto 32px' }}>
-          Subscribe to get exclusive offers, new collection launches, and styling tips delivered to your inbox
-        </p>
-        <div style={{ display: 'flex', gap: '12px', maxWidth: '500px', margin: '0 auto' }}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              border: '1px solid #333333',
-              background: '#1a1a1a',
-              color: '#ffffff',
-              fontSize: '14px',
-              fontFamily: 'inherit',
-            }}
-          />
-          <button
-            style={{
-              padding: '12px 32px',
-              background: '#ffffff',
-              color: '#000000',
-              border: '1px solid #ffffff',
-              fontSize: '14px',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Subscribe
-          </button>
+      {/* ─── Newsletter ───────────────────────────────────── */}
+      <section style={{ borderTop: '1px solid #e8e8e8' }}>
+        <div className="newsletter-inner" style={{ padding: '96px 60px' }}>
+          <div style={{ flex: '0 0 42%' }}>
+            <div style={{ width: '40px', height: '2px', background: '#000', marginBottom: '24px' }} />
+            <h2 style={{ fontSize: 'clamp(1.6rem, 2.5vw, 2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000', marginBottom: '12px', lineHeight: 1.2 }}>
+              Get Early Access
+            </h2>
+            <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7 }}>
+              New drops, exclusive offers, and styling inspiration — straight to your inbox.
+            </p>
+          </div>
+          <div style={{ flex: 1, maxWidth: '480px' }}>
+            <div style={{ display: 'flex' }}>
+              <input
+                type="email"
+                placeholder="your@email.com"
+                style={{
+                  flex: 1,
+                  padding: '16px 20px',
+                  border: '1.5px solid #000',
+                  borderRight: 'none',
+                  background: '#fff',
+                  color: '#000',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                  outline: 'none',
+                  minWidth: 0,
+                }}
+              />
+              <button style={{
+                padding: '16px 24px',
+                background: '#000',
+                color: '#fff',
+                border: 'none',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}>
+                Subscribe
+              </button>
+            </div>
+            <p style={{ fontSize: '11px', color: '#bbb', marginTop: '10px' }}>
+              No spam, ever. Unsubscribe anytime.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer
-        style={{
-          padding: '60px',
-          background: '#1a1a1a',
-          color: '#ffffff',
-          borderTop: '1px solid #333333',
-        }}
-      >
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '40px',
-            marginBottom: '40px',
-          }}
-        >
+      {/* ─── Footer ───────────────────────────────────────── */}
+      <footer style={{ background: '#0e0e0e', color: '#fff', padding: '64px 60px 40px' }}>
+        <div className="footer-grid" style={{ marginBottom: '48px' }}>
+          <div>
+            <h4 style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '1px', color: '#fff', marginBottom: '16px' }}>MirhaPret</h4>
+            <p style={{ fontSize: '13px', color: '#555', lineHeight: 1.9, maxWidth: '260px', marginBottom: '24px' }}>
+              Premium Pakistani fashion for the modern woman. Celebrating craftsmanship, elegance, and identity.
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {['IG', 'FB', 'TT'].map(s => (
+                <a key={s} href="#" style={{
+                  width: '34px', height: '34px',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '10px', fontWeight: 700, color: '#555', textDecoration: 'none',
+                }}>
+                  {s}
+                </a>
+              ))}
+            </div>
+          </div>
+
           {[
-            {
-              title: 'Shop',
-              links: ['All Collections', 'Premium Pret', 'Octa West', 'Desire', 'Sale'],
-            },
-            {
-              title: 'Customer Care',
-              links: ['Contact Us', 'Shipping Info', 'Returns & Exchanges', 'Size Guide', 'FAQ'],
-            },
-            {
-              title: 'About',
-              links: ['Our Story', 'Craftsmanship', 'Sustainability', 'Press', 'Careers'],
-            },
-            {
-              title: 'Connect',
-              links: ['Instagram', 'Facebook', 'TikTok', 'Pinterest', 'WhatsApp'],
-            },
-          ].map((section, idx) => (
-            <div key={idx}>
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '16px' }}>
+            { title: 'Shop', links: [['All Products', '/products'], ['Premium Pret', '/products'], ['Octa West 2026', '/products'], ['The Desire Edit', '/products'], ['Sale', '/products']] },
+            { title: 'Help', links: [['Contact Us', '/contact'], ['Shipping Info', '#'], ['Returns', '#'], ['Size Guide', '#'], ['FAQ', '#']] },
+            { title: 'Company', links: [['About Us', '/about'], ['Our Story', '/about'], ['Careers', '#'], ['Instagram', '#'], ['WhatsApp', '#']] },
+          ].map((section, i) => (
+            <div key={i}>
+              <h5 style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#fff', marginBottom: '20px' }}>
                 {section.title}
-              </h4>
+              </h5>
               <ul style={{ listStyle: 'none' }}>
-                {section.links.map((link, i) => (
-                  <li key={i} style={{ marginBottom: '8px' }}>
-                    <a
-                      href="#"
-                      style={{
-                        fontSize: '0.9rem',
-                        color: '#cccccc',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {link}
-                    </a>
+                {section.links.map(([label, href], j) => (
+                  <li key={j} style={{ marginBottom: '10px' }}>
+                    <a href={href} style={{ fontSize: '13px', color: '#555', textDecoration: 'none' }}>{label}</a>
                   </li>
                 ))}
               </ul>
@@ -728,25 +640,11 @@ export default function Home() {
           ))}
         </div>
 
-        <div
-          style={{
-            borderTop: '1px solid #333333',
-            paddingTop: '24px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            fontSize: '0.9rem',
-            color: '#999999',
-          }}
-        >
-          <p>© 2026 MirhaPret. All rights reserved. Celebrating the modern Pakistani woman.</p>
+        <div className="footer-bottom" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '28px' }}>
+          <p style={{ fontSize: '12px', color: '#333' }}>© 2026 MirhaPret. All rights reserved.</p>
           <div style={{ display: 'flex', gap: '24px' }}>
-            <a href="#" style={{ cursor: 'pointer' }}>
-              Privacy Policy
-            </a>
-            <a href="#" style={{ cursor: 'pointer' }}>
-              Terms of Service
-            </a>
+            <a href="#" style={{ fontSize: '12px', color: '#333', textDecoration: 'none' }}>Privacy Policy</a>
+            <a href="#" style={{ fontSize: '12px', color: '#333', textDecoration: 'none' }}>Terms</a>
           </div>
         </div>
       </footer>

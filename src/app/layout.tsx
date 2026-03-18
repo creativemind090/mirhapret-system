@@ -3,6 +3,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { FloatingChat } from "@/components/FloatingChat";
+import { ReviewPopup } from "@/components/ReviewPopup";
 
 export const metadata: Metadata = {
   title: "MirhaPret - Luxury Boutique Fashion",
@@ -21,6 +22,7 @@ export default function RootLayout({
           <CartProvider>
             {children}
             <FloatingChat />
+            <ReviewPopup />
           </CartProvider>
         </AuthProvider>
       </body>

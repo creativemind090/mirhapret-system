@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useCartContext } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { PageHeader } from '@/components/PageHeader';
+import api from '@/lib/api';
+import { FiLock } from 'react-icons/fi';
 
 type CheckoutStep = 'shipping' | 'billing' | 'payment' | 'email-confirmation' | 'confirmation';
 
@@ -32,8 +34,10 @@ export default function CheckoutPage() {
   const { user, isLoggedIn } = useAuth();
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('shipping');
   const [promoCode, setPromoCode] = useState('');
+  const [appliedPromoCode, setAppliedPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoError, setPromoError] = useState('');
+  const [showPromoLoginModal, setShowPromoLoginModal] = useState(false);
 
   // Form states
   const [shippingData, setShippingData] = useState({
@@ -52,9 +56,10 @@ export default function CheckoutPage() {
     if (isLoggedIn && user) {
       setShippingData((prev) => ({
         ...prev,
-        customer_first_name: user.name.split(' ')[0] || '',
-        customer_last_name: user.name.split(' ').slice(1).join(' ') || '',
+        customer_first_name: user.first_name || '',
+        customer_last_name: user.last_name || '',
         customer_email: user.email || '',
+        customer_phone: user.phone || prev.customer_phone,
       }));
     }
   }, [isLoggedIn, user]);
@@ -74,9 +79,11 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [orderNumber, setOrderNumber] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [mockOtp, setMockOtp] = useState('');
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
-  const [mockOtp, setMockOtp] = useState(''); // For demo purposes
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState('');
 
   // Calculations
   const subtotal = total;
@@ -84,31 +91,52 @@ export default function CheckoutPage() {
   const shipping_amount = subtotal > 5000 ? 0 : 300;
   const finalTotal = subtotal - promoDiscount + tax_amount + shipping_amount;
 
-  // Promo code validation
-  const handleApplyPromo = () => {
+  // Promo code validation via backend
+  const handleApplyPromo = async () => {
     setPromoError('');
     const code = promoCode.toUpperCase().trim();
+    if (!code) { setPromoError('Please enter a promo code'); return; }
+    if (appliedPromoCode && code === appliedPromoCode) { setPromoError('This promo code is already applied'); return; }
 
-    // Mock promo codes for demo
-    const validPromos: Record<string, number> = {
-      'SAVE10': 0.10, // 10% off
-      'SAVE20': 0.20, // 20% off
-      'WELCOME': 0.15, // 15% off
-    };
-
-    if (!code) {
-      setPromoError('Please enter a promo code');
-      return;
+    try {
+      const res = await api.get('/promotions/active');
+      const promotions: any[] = res.data.data ?? [];
+      const match = promotions.find((p: any) =>
+        p.name?.toUpperCase() === code || p.code?.toUpperCase() === code
+      );
+      if (match) {
+        if (match.requires_login && !isLoggedIn) {
+          setShowPromoLoginModal(true);
+          return;
+        }
+        let discount = 0;
+        if (match.discount_type === 'percentage') {
+          discount = subtotal * (Number(match.discount_value) / 100);
+          if (match.max_discount_amount) discount = Math.min(discount, Number(match.max_discount_amount));
+        } else if (match.discount_type === 'fixed') {
+          discount = Number(match.discount_value);
+        }
+        if (Number(match.min_purchase_amount) > 0 && subtotal < Number(match.min_purchase_amount)) {
+          setPromoError(`Minimum purchase of PKR ${Number(match.min_purchase_amount).toLocaleString()} required`);
+          setPromoDiscount(0);
+        } else {
+          setPromoDiscount(discount);
+          setAppliedPromoCode(code);
+          setPromoCode('');
+        }
+      } else {
+        setPromoError('Invalid promo code');
+      }
+    } catch {
+      setPromoError('Could not validate promo code');
     }
+  };
 
-    if (validPromos[code]) {
-      const discount = subtotal * validPromos[code];
-      setPromoDiscount(discount);
-      setPromoError('');
-    } else {
-      setPromoError('Invalid promo code');
-      setPromoDiscount(0);
-    }
+  const handleRemovePromo = () => {
+    setPromoDiscount(0);
+    setAppliedPromoCode('');
+    setPromoCode('');
+    setPromoError('');
   };
 
   // Validation functions
@@ -182,74 +210,161 @@ export default function CheckoutPage() {
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setMockOtp(String(Math.floor(100000 + Math.random() * 900000)));
     setCurrentStep('email-confirmation');
   };
 
   const handleEmailConfirmation = () => {
-    // Generate a 6-digit OTP for demo
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setMockOtp(generatedOtp);
     setOtpSent(true);
     setOtp('');
     setOtpError('');
-    
-    // TODO: Send OTP to email via backend API
-    console.log(`OTP sent to ${shippingData.customer_email}: ${generatedOtp}`);
+    // OTP step is skipped — we go straight to order submission on "confirm"
   };
 
-  const handleOtpVerification = () => {
-    if (otp === mockOtp) {
-      setOtpError('');
-      
-      // Build order payload matching backend DTO
-      const orderPayload = {
-        customer_email: shippingData.customer_email,
-        customer_phone: shippingData.customer_phone,
-        customer_first_name: shippingData.customer_first_name,
-        customer_last_name: shippingData.customer_last_name,
-        items: items.map(item => ({
-          product_id: item.product_id,
-          product_name: item.product_name,
-          sku: item.sku,
-          product_size: item.product_size,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-        })),
-        shipping_address: {
-          street_address: shippingData.street_address,
-          city: shippingData.city,
-          province: shippingData.province,
-          postal_code: shippingData.postal_code,
-          phone: shippingData.customer_phone,
-        },
-        billing_address: billingData.sameAsShipping ? undefined : {
-          street_address: billingData.street_address,
-          city: billingData.city,
-          province: billingData.province,
-          postal_code: billingData.postal_code,
-        },
-        tax_amount: Math.round(tax_amount),
-        shipping_amount,
-        payment_method: paymentMethod,
-      };
+  const handleOtpVerification = async () => {
+    setOrderError('');
+    setOrderLoading(true);
 
-      // TODO: Send to backend API
-      console.log('Order payload:', orderPayload);
+    const orderPayload: any = {
+      customer_email: shippingData.customer_email,
+      customer_phone: shippingData.customer_phone,
+      customer_first_name: shippingData.customer_first_name,
+      customer_last_name: shippingData.customer_last_name || undefined,
+      items: items.map(item => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        sku: item.sku,
+        product_size: item.product_size,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+      })),
+      shipping_address: {
+        street_address: shippingData.street_address,
+        city: shippingData.city,
+        province: shippingData.province,
+        postal_code: shippingData.postal_code,
+        phone: shippingData.customer_phone,
+      },
+      billing_address: billingData.sameAsShipping ? undefined : {
+        street_address: billingData.street_address,
+        city: billingData.city,
+        province: billingData.province,
+        postal_code: billingData.postal_code,
+      },
+      tax_amount: Math.round(tax_amount),
+      shipping_amount,
+      discount_amount: Math.round(promoDiscount),
+      payment_method: paymentMethod,
+    };
 
-      const orderNum = `ORD-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-      setOrderNumber(orderNum);
-      
-      // Clear cart after successful order
+    if (user?.id) orderPayload.customer_id = user.id;
+
+    try {
+      const res = await api.post('/orders', orderPayload);
+      const createdOrder = res.data.data ?? res.data;
+      setOrderNumber(createdOrder.order_number || createdOrder.id);
       clearCart();
-      
       setCurrentStep('confirmation');
-    } else {
-      setOtpError('Invalid OTP. Please try again.');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      const errorText = Array.isArray(msg) ? msg.join(', ') : (msg || 'Failed to place order. Please try again.');
+      console.error('Order creation failed:', err?.response?.data);
+      setOrderError(errorText);
+    } finally {
+      setOrderLoading(false);
     }
   };
 
   return (
     <div style={{ background: '#ffffff', color: '#000000' }}>
+
+      {/* Promo Login Required Modal */}
+      {showPromoLoginModal && (
+        <>
+          <div
+            onClick={() => setShowPromoLoginModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 500 }}
+          />
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: '#ffffff',
+            zIndex: 501,
+            width: '100%',
+            maxWidth: '440px',
+            padding: '48px 40px 40px',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
+          }}>
+            {/* Icon */}
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                background: '#000',
+                borderRadius: '50%',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <FiLock size={24} color="#ffffff" strokeWidth={2.5} />
+              </div>
+            </div>
+
+            {/* Heading */}
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, textAlign: 'center', margin: '0 0 12px', letterSpacing: '-0.3px' }}>
+              Members-Only Offer
+            </h2>
+
+            {/* Body */}
+            <p style={{ fontSize: '14px', color: '#555', textAlign: 'center', lineHeight: 1.7, margin: '0 0 8px' }}>
+              This promo code is exclusively available to registered members.
+            </p>
+            <p style={{ fontSize: '14px', color: '#555', textAlign: 'center', lineHeight: 1.7, margin: '0 0 32px' }}>
+              Sign in to your account to unlock this discount and enjoy exclusive member benefits on every order.
+            </p>
+
+            {/* Buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                onClick={() => { window.location.href = '/signin'; }}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: '#000000',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontFamily: 'system-ui',
+                  letterSpacing: '0.3px',
+                }}
+              >
+                Sign In to Apply Discount
+              </button>
+              <button
+                onClick={() => setShowPromoLoginModal(false)}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: '#ffffff',
+                  color: '#666',
+                  border: '1px solid #e0e0e0',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  fontFamily: 'system-ui',
+                }}
+              >
+                Continue Without Discount
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       <PageHeader />
 
       <section
@@ -770,6 +885,12 @@ export default function CheckoutPage() {
                           >
                             Resend OTP
                           </button>
+                        {orderError && (
+                          <div style={{ marginBottom: '16px', padding: '12px 14px', background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '13px', lineHeight: 1.5 }}>
+                            {orderError}
+                          </div>
+                        )}
+
                           <button
                             type="button"
                             onClick={handleOtpVerification}
@@ -871,10 +992,8 @@ export default function CheckoutPage() {
                       <input
                         type="text"
                         value={promoCode}
-                        onChange={(e) => {
-                          setPromoCode(e.target.value);
-                          setPromoError('');
-                        }}
+                        onChange={(e) => { setPromoCode(e.target.value); setPromoError(''); }}
+                        onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
                         placeholder="Enter code"
                         style={{
                           flex: 1,
@@ -902,13 +1021,56 @@ export default function CheckoutPage() {
                         Apply
                       </button>
                     </div>
+
                     {promoError && (
                       <p style={{ fontSize: '12px', color: '#c0392b', margin: '6px 0 0' }}>{promoError}</p>
                     )}
-                    {promoDiscount > 0 && (
-                      <p style={{ fontSize: '12px', color: '#1a7a4a', margin: '6px 0 0', fontWeight: 600 }}>
-                        Discount applied: PKR {Math.round(promoDiscount).toLocaleString()}
-                      </p>
+
+                    {appliedPromoCode && (
+                      <div style={{
+                        marginTop: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        background: '#f0fdf4',
+                        border: '1px dashed #1a7a4a',
+                        padding: '10px 14px',
+                        width: '100%',
+                        boxSizing: 'border-box',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span style={{ fontSize: '14px', letterSpacing: '1px', color: '#1a7a4a', fontWeight: 700 }}>%</span>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: '#1a7a4a', letterSpacing: '0.5px' }}>
+                            {appliedPromoCode}
+                          </span>
+                          <span style={{ fontSize: '12px', color: '#1a7a4a', fontWeight: 400 }}>
+                            — PKR {Math.round(promoDiscount).toLocaleString()} off
+                          </span>
+                        </div>
+                        <button
+                          onClick={handleRemovePromo}
+                          title="Remove promo code"
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid #1a7a4a',
+                            borderRadius: '50%',
+                            width: '22px',
+                            height: '22px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            color: '#1a7a4a',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            lineHeight: 1,
+                            padding: 0,
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
                     )}
                   </div>
 

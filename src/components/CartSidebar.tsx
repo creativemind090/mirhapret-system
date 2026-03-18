@@ -107,7 +107,15 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       fontWeight: 500,
                     }}
                   >
-                    {item.main_image || 'Image'}
+                    {item.main_image ? (
+                      <img
+                        src={item.main_image}
+                        alt={item.product_name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '11px', color: '#999999' }}>No image</span>
+                    )}
                   </div>
 
                   {/* Product Info */}
