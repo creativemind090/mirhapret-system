@@ -15,12 +15,14 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private categoriesService: CategoriesService) {}
 
   @Get()
+  @Public()
   async getAllCategories(@Query('is_active') is_active?: string) {
     const isActive = is_active === 'true' ? true : is_active === 'false' ? false : null;
     const categories = await this.categoriesService.findAll(isActive);
@@ -31,6 +33,7 @@ export class CategoriesController {
   }
 
   @Get(':slug')
+  @Public()
   async getCategoryBySlug(@Param('slug') slug: string) {
     const category = await this.categoriesService.findBySlug(slug);
     return {

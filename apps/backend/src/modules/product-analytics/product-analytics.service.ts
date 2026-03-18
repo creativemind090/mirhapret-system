@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product, ProductAnalytic } from '../../entities';
 import { TrackProductEventDto } from './dto';
+import { EventsGateway } from '../events/events.gateway';
 
 // Safe columns that can be used as sort metrics
 const ALLOWED_SORT_METRICS: Record<string, keyof Product> = {
@@ -18,6 +19,7 @@ export class ProductAnalyticsService {
     private analyticRepository: Repository<ProductAnalytic>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    private eventsGateway: EventsGateway,
   ) {}
 
   async trackProductEvent(
@@ -37,7 +39,18 @@ export class ProductAnalyticsService {
       referrer: trackProductEventDto.referrer,
     });
 
-    return this.analyticRepository.save(analytic);
+    await this.analyticRepository.save(analytic);
+
+    // Increment denormalized counter on product for fast reads + broadcast via WS
+    if (trackProductEventDto.event_type === 'view') {
+      await this.productRepository.increment({ id: productId }, 'view_count', 1);
+      this.eventsGateway.emitProductView(productId);
+    } else if (trackProductEventDto.event_type === 'purchase') {
+      await this.productRepository.increment({ id: productId }, 'purchase_count', 1);
+      this.eventsGateway.emitProductSale(productId, 1);
+    }
+
+    return analytic;
   }
 
   async getProductAnalytics(productId: string, eventType?: string, skip = 0, take = 100) {

@@ -7,6 +7,10 @@ export class UpdateCategoryDto {
 
   @IsString()
   @IsOptional()
+  slug?: string;
+
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @IsString()

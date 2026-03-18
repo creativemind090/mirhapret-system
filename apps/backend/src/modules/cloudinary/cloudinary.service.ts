@@ -19,33 +19,24 @@ export class CloudinaryService implements OnModuleInit {
     });
   }
 
-  async uploadImage(file: any, folder = 'ecommerce'): Promise<any> {
-    if (!file) {
-      throw new BadRequestException('No file provided');
+  async uploadBase64(dataUrl: string, folder = 'ecommerce'): Promise<any> {
+    if (!dataUrl) {
+      throw new BadRequestException('No image data provided');
     }
 
-    const validMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!validMimes.includes(file.mimetype)) {
-      throw new BadRequestException('Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed');
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate base64 size (~5MB limit: base64 is ~33% larger than binary)
+    const base64Data = dataUrl.split(',')[1] || '';
+    if (base64Data.length > 7 * 1024 * 1024) {
       throw new BadRequestException('File size exceeds 5MB limit');
     }
 
     try {
-      const result: any = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder,
-            resource_type: 'auto',
-            quality: 'auto',
-            fetch_format: 'auto',
-            transformation: [{ width: 1000, crop: 'scale' }],
-          },
-          (error, res) => (error ? reject(error) : resolve(res)),
-        );
-        stream.end(file.buffer);
+      const result: any = await cloudinary.uploader.upload(dataUrl, {
+        folder,
+        resource_type: 'auto',
+        quality: 'auto',
+        fetch_format: 'auto',
+        transformation: [{ width: 1000, crop: 'scale' }],
       });
 
       return {

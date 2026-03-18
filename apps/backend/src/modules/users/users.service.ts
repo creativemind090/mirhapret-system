@@ -5,7 +5,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, In, Repository } from 'typeorm';
 import { User } from '../../entities';
 import { UpdateUserDto, ChangePasswordDto } from './dto';
 import * as bcrypt from 'bcrypt';
@@ -117,6 +117,7 @@ export class UsersService {
       const [users, total] = await this.usersRepository.findAndCount({
         skip,
         take,
+        where: { role: Not(In(['admin', 'super_admin', 'cashier', 'store_manager'])) },
         select: [
           'id',
           'email',
@@ -126,6 +127,7 @@ export class UsersService {
           'role',
           'is_active',
           'created_at',
+          'last_login_at',
         ],
         order: { created_at: 'DESC' },
       });

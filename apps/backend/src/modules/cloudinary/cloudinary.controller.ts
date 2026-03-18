@@ -4,17 +4,24 @@ import {
   Delete,
   Put,
   UseGuards,
-  UseInterceptors,
-  UploadedFile,
   Param,
   Body,
   BadRequestException,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { IsString, IsOptional } from 'class-validator';
 import { CloudinaryService } from './cloudinary.service';
-import { UploadImageDto, UpdateImageDto } from './dto';
+import { UpdateImageDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+
+class UploadBase64Dto {
+  @IsString()
+  data: string; // base64 data URL e.g. "data:image/jpeg;base64,..."
+
+  @IsString()
+  @IsOptional()
+  folder?: string;
+}
 
 @Controller('images')
 @UseGuards(JwtAuthGuard)
@@ -23,17 +30,16 @@ export class CloudinaryController {
   constructor(private cloudinaryService: CloudinaryService) {}
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(
-    @UploadedFile() file: any,
-    @Body() uploadImageDto: UploadImageDto,
-  ) {
-    if (!file) {
-      throw new BadRequestException('No file provided');
+  async uploadImage(@Body() body: UploadBase64Dto) {
+    if (!body.data) {
+      throw new BadRequestException('No image data provided');
+    }
+    if (!body.data.startsWith('data:image/')) {
+      throw new BadRequestException('Invalid image data. Must be a base64 data URL.');
     }
 
-    const folder = uploadImageDto.folder || 'ecommerce';
-    const result = await this.cloudinaryService.uploadImage(file, folder);
+    const folder = body.folder || 'ecommerce';
+    const result = await this.cloudinaryService.uploadBase64(body.data, folder);
 
     return {
       message: 'Image uploaded successfully',
@@ -44,10 +50,7 @@ export class CloudinaryController {
   @Delete(':publicId')
   async deleteImage(@Param('publicId') publicId: string) {
     await this.cloudinaryService.deleteImage(publicId);
-
-    return {
-      message: 'Image deleted successfully',
-    };
+    return { message: 'Image deleted successfully' };
   }
 
   @Put(':publicId')
@@ -55,11 +58,7 @@ export class CloudinaryController {
     @Param('publicId') publicId: string,
     @Body() updateImageDto: UpdateImageDto,
   ) {
-    const result = await this.cloudinaryService.updateImage(
-      publicId,
-      updateImageDto,
-    );
-
+    const result = await this.cloudinaryService.updateImage(publicId, updateImageDto);
     return {
       message: 'Image updated successfully',
       data: result,

@@ -14,9 +14,10 @@ public partial class CheckoutDialog : Window
         {
             if (result.name != string.Empty)
             {
-                CustomerName = result.name;
+                CustomerName  = result.name;
                 CustomerPhone = result.phone;
-                DialogResult = true;
+                PaymentMethod = result.paymentMethod;
+                DialogResult  = true;
             }
             else
             {
@@ -26,6 +27,7 @@ public partial class CheckoutDialog : Window
         };
     }
 
-    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerName  { get; set; } = string.Empty;
     public string CustomerPhone { get; set; } = string.Empty;
+    public string PaymentMethod { get; set; } = "cash";
 }

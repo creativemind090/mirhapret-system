@@ -15,6 +15,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderStatusDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('orders')
 export class OrdersController {
@@ -25,6 +26,8 @@ export class OrdersController {
     @Query('customer_id') customer_id?: string,
     @Query('status') status?: string,
     @Query('payment_status') payment_status?: string,
+    @Query('source') source?: string,
+    @Query('date_from') date_from?: string,
     @Query('skip') skip?: string,
     @Query('take') take?: string,
   ) {
@@ -32,6 +35,8 @@ export class OrdersController {
       customer_id,
       status,
       payment_status,
+      source,
+      date_from,
       skip: skip ? parseInt(skip) : 0,
       take: take ? parseInt(take) : 20,
     };
@@ -62,6 +67,7 @@ export class OrdersController {
   }
 
   @Post()
+  @Public()
   @HttpCode(HttpStatus.CREATED)
   async createOrder(@Body() createOrderDto: CreateOrderDto) {
     const order = await this.ordersService.create(createOrderDto);

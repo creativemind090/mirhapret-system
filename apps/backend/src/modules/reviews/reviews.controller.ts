@@ -16,12 +16,14 @@ import { CreateReviewDto, UpdateReviewDto, ApproveReviewDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('reviews')
 export class ReviewsController {
   constructor(private reviewsService: ReviewsService) {}
 
   @Get('product/:productId')
+  @Public()
   async getProductReviews(
     @Param('productId') productId: string,
     @Query('skip') skip?: string,
@@ -40,6 +42,7 @@ export class ReviewsController {
   }
 
   @Get('product/:productId/rating')
+  @Public()
   async getProductRating(@Param('productId') productId: string) {
     const rating = await this.reviewsService.getProductRating(productId);
     return {

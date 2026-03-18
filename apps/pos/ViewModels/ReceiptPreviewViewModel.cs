@@ -36,7 +36,8 @@ public class ReceiptPreviewViewModel : BaseViewModel
 
     private void Print()
     {
-        _receiptService.PrintReceipt(_receipt);
+        // Output receipt to debug console (no physical printer required)
+        System.Diagnostics.Debug.WriteLine(_receiptService.GetReceiptAsText(_receipt));
         DialogClosed?.Invoke(true);
     }
 

@@ -14,7 +14,7 @@ public class Product
     public decimal TaxRate { get; set; } = 0.17m; // 17% default
     public string MainImage { get; set; } = string.Empty;
     public string Images { get; set; } = string.Empty; // JSON array
-    public string AvailableSizes { get; set; } = string.Empty; // JSON array
+    public List<string> Sizes { get; set; } = new(); // parsed from available_sizes
     public string SizeGuideHtml { get; set; } = string.Empty;
     public string Barcode { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;

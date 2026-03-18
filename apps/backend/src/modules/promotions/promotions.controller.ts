@@ -15,6 +15,7 @@ import { CreatePromotionDto, UpdatePromotionDto, CreatePromoCodeDto } from './dt
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('promotions')
 export class PromotionsController {
@@ -32,7 +33,7 @@ export class PromotionsController {
   }
 
   @Get('active')
-  @UseGuards(JwtAuthGuard)
+  @Public()
   async getActivePromotions() {
     const promotions = await this.promotionsService.getActivePromotions();
     return {

@@ -10,11 +10,12 @@ public class CheckoutDialogViewModel : BaseViewModel
     private string _customerPhone = "+92";
     private string _phoneError = string.Empty;
     private bool _isPhoneValid = false;
+    private string _paymentMethod = "cash";
 
     public ICommand PrintCommand { get; }
     public ICommand CancelCommand { get; }
 
-    public event Action<(string name, string phone)>? DialogClosed;
+    public event Action<(string name, string phone, string paymentMethod)>? DialogClosed;
 
     public CheckoutDialogViewModel()
     {
@@ -51,6 +52,27 @@ public class CheckoutDialogViewModel : BaseViewModel
         get => _isPhoneValid;
         set => SetProperty(ref _isPhoneValid, value);
     }
+
+    public string PaymentMethod
+    {
+        get => _paymentMethod;
+        set
+        {
+            if (SetProperty(ref _paymentMethod, value))
+            {
+                OnPropertyChanged(nameof(IsCash));
+                OnPropertyChanged(nameof(IsCard));
+                OnPropertyChanged(nameof(IsEasyPaisa));
+                OnPropertyChanged(nameof(IsJazzCash));
+            }
+        }
+    }
+
+    // Convenience bool properties for radio-button two-way binding
+    public bool IsCash       { get => _paymentMethod == "cash";      set { if (value) PaymentMethod = "cash"; } }
+    public bool IsCard       { get => _paymentMethod == "card";      set { if (value) PaymentMethod = "card"; } }
+    public bool IsEasyPaisa  { get => _paymentMethod == "easypaisa"; set { if (value) PaymentMethod = "easypaisa"; } }
+    public bool IsJazzCash   { get => _paymentMethod == "jazzcash";  set { if (value) PaymentMethod = "jazzcash"; } }
 
     private void ValidatePhone()
     {
@@ -91,11 +113,11 @@ public class CheckoutDialogViewModel : BaseViewModel
             return;
         }
 
-        DialogClosed?.Invoke((CustomerName, CustomerPhone));
+        DialogClosed?.Invoke((CustomerName, CustomerPhone, PaymentMethod));
     }
 
     private void Cancel()
     {
-        DialogClosed?.Invoke((string.Empty, string.Empty));
+        DialogClosed?.Invoke((string.Empty, string.Empty, string.Empty));
     }
 }

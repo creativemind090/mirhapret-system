@@ -1,0 +1,98 @@
+<Window x:Class="pos.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:pos.Utils"
+        Title="MirhaPret POS — Sign In"
+        Height="460"
+        Width="420"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        Background="#f5f5f5">
+    <Window.Resources>
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    </Window.Resources>
+    <Grid>
+        <!-- Header -->
+        <Grid Height="60" VerticalAlignment="Top" Background="#000000">
+            <StackPanel VerticalAlignment="Center" Margin="24,0">
+                <TextBlock Text="MirhaPret" Foreground="#ffffff" FontSize="20" FontWeight="Bold"/>
+                <TextBlock Text="Point of Sale" Foreground="#aaaaaa" FontSize="11"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Form -->
+        <StackPanel Margin="32,80,32,32" VerticalAlignment="Top">
+            <TextBlock Text="Cashier Sign In" FontSize="18" FontWeight="Bold" Margin="0,0,0,24"/>
+
+            <!-- Error -->
+            <Border Background="#ffe0e0" BorderBrush="#c0392b" BorderThickness="1" Padding="10,8" Margin="0,0,0,16"
+                    Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="#c0392b" FontSize="12" TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- Email -->
+            <TextBlock Text="Email" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>
+            <TextBox x:Name="EmailBox"
+                     Padding="10,10"
+                     FontSize="13"
+                     Background="#ffffff"
+                     BorderBrush="#e0e0e0"
+                     BorderThickness="1"
+                     Margin="0,0,0,16"
+                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+
+            <!-- Password -->
+            <TextBlock Text="Password" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>
+            <Grid Margin="0,0,0,24">
+                <PasswordBox x:Name="PasswordBox"
+                             Padding="10,10"
+                             FontSize="13"
+                             Background="#ffffff"
+                             BorderBrush="#e0e0e0"
+                             BorderThickness="1"
+                             PasswordChanged="PasswordBox_PasswordChanged"/>
+                <!-- Plain TextBox shown when eye is toggled on -->
+                <TextBox x:Name="PasswordTextBox"
+                         Padding="10,10"
+                         FontSize="13"
+                         Background="#ffffff"
+                         BorderBrush="#e0e0e0"
+                         BorderThickness="1"
+                         Visibility="Collapsed"
+                         Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}"/>
+                <!-- Eye toggle button -->
+                <Button x:Name="EyeButton"
+                        Content="👁"
+                        FontSize="14"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Margin="0,0,8,0"
+                        Padding="4,2"
+                        Click="EyeButton_Click"
+                        Focusable="False"/>
+            </Grid>
+
+            <!-- Sign In Button -->
+            <Button Content="{Binding LoginButtonText}"
+                    Background="#000000"
+                    Foreground="#ffffff"
+                    FontSize="13"
+                    FontWeight="Bold"
+                    Padding="0,14"
+                    Cursor="Hand"
+                    IsDefault="True"
+                    Command="{Binding LoginCommand}"/>
+        </StackPanel>
+
+        <!-- Footer -->
+        <TextBlock Text="© 2026 MirhaPret"
+                   Foreground="#999999"
+                   FontSize="10"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Bottom"
+                   Margin="0,0,0,16"/>
+    </Grid>
+</Window>

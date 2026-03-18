@@ -1,5 +1,9 @@
 using pos.Models;
 using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace pos.Services;
 
@@ -12,29 +16,49 @@ public class ReceiptService
         decimal subtotal,
         decimal taxAmount,
         decimal discountAmount,
-        decimal total)
+        decimal total,
+        string orderNumber = "",
+        string paymentMethod = "Cash")
     {
-        var receipt = new Receipt
+        return new Receipt
         {
-            CustomerName = customerName,
+            OrderNumber   = orderNumber,
+            CustomerName  = customerName,
             CustomerPhone = customerPhone,
-            PurchasedAt = DateTime.Now,
-            Items = cartItems.ToList(),
-            Subtotal = subtotal,
-            TaxAmount = taxAmount,
-            DiscountAmount = discountAmount,
-            Total = total
+            PaymentMethod = paymentMethod,
+            PurchasedAt   = DateTime.Now,
+            Items         = cartItems.ToList(),
+            Subtotal      = subtotal,
+            TaxAmount     = taxAmount,
+            DiscountAmount= discountAmount,
+            Total         = total,
         };
-
-        return receipt;
     }
 
     public void PrintReceipt(Receipt receipt)
     {
-        // TODO: Integrate with thermal printer hardware
-        // For now, this will be called when user clicks Print
-        var receiptText = receipt.GetFormattedReceipt();
-        System.Diagnostics.Debug.WriteLine(receiptText);
+        var printDialog = new PrintDialog();
+        if (printDialog.ShowDialog() != true) return;
+
+        var text = receipt.GetFormattedReceipt();
+
+        // Build a FlowDocument with monospace font (thermal-printer style)
+        var doc = new FlowDocument
+        {
+            FontFamily  = new FontFamily("Courier New"),
+            FontSize    = 10,
+            PageWidth   = printDialog.PrintableAreaWidth,
+            PagePadding = new Thickness(20),
+            ColumnWidth = printDialog.PrintableAreaWidth,
+        };
+
+        doc.Blocks.Add(new Paragraph(new Run(text))
+        {
+            LineHeight = 14,
+        });
+
+        var paginator = ((IDocumentPaginatorSource)doc).DocumentPaginator;
+        printDialog.PrintDocument(paginator, $"Receipt {receipt.OrderNumber}");
     }
 
     public string GetReceiptAsText(Receipt receipt)

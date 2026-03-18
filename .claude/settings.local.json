@@ -9,7 +9,17 @@
       "Bash(npx ts-node:*)",
       "Bash(docker ps:*)",
       "Bash(docker exec:*)",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Bash(node -e \"require\\(''multer''\\); console.log\\(''multer ok''\\)\")",
+      "Bash(grep -n \"res.data.data\\\\|\\\\.toLocaleString\\\\|\\\\.map\\(\\\\|\\\\.filter\\(\" d:/temp/development/mirhapret-system/apps/admin/src/app/dashboard/customers/[id]/page.tsx)",
+      "Bash(grep -n \"return \\(\" d:/temp/development/mirhapret-system/apps/ecommerce/src/app/products/[id]/page.tsx)",
+      "Bash(grep -n \"LofiImage\\\\|images\\\\[selectedImageIndex\\\\]\\\\|Main View\\\\|Side View\" d:/temp/development/mirhapret-system/apps/ecommerce/src/app/products/[id]/page.tsx)",
+      "Bash(grep -n \"sizeGuide\\\\|size_guide\\\\|S.*chest\\\\|M.*chest\" d:/temp/development/mirhapret-system/apps/ecommerce/src/app/products/[id]/page.tsx)",
+      "Bash(grep -r pos /d/temp/development/mirhapret-system/apps/admin/src/app/dashboard --include=*.tsx --include=*.ts -l)",
+      "Bash(grep -E \"\\\\.\\(cs|xaml\\)$\")",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet build:*)",
+      "Bash(grep -n className= d:/temp/development/mirhapret-system/apps/ecommerce/src/app/products/page.tsx d:/temp/development/mirhapret-system/apps/ecommerce/src/app/products/[id]/page.tsx d:/temp/development/mirhapret-system/apps/ecommerce/src/components/PageHeader.tsx)"
     ]
   }
 }

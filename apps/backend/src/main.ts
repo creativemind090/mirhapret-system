@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters';
 import { ResponseInterceptor } from './common/interceptors';
 import helmet from 'helmet';
+import { json, urlencoded } from 'express';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const compression = require('compression');
 
@@ -24,6 +25,10 @@ async function bootstrap() {
     crossOriginResourcePolicy: { policy: 'cross-origin' }, // allow CDN images
     contentSecurityPolicy: isProduction ? undefined : false, // disable CSP in dev to allow Swagger
   }));
+
+  // Increase body size limit for base64 image uploads (~7MB for a 5MB image)
+  app.use(json({ limit: '10mb' }));
+  app.use(urlencoded({ extended: true, limit: '10mb' }));
 
   // Gzip compression
   app.use(compression());

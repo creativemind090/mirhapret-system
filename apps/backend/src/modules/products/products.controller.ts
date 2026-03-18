@@ -15,12 +15,14 @@ import { ProductsService } from './products.service';
 import { CreateProductDto, UpdateProductDto, TrackProductDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
+  @Public()
   async getAllProducts(
     @Query('category_id') category_id?: string,
     @Query('search') search?: string,
@@ -34,8 +36,8 @@ export class ProductsController {
     const filters = {
       category_id,
       search,
-      is_active: is_active === 'true',
-      is_featured: is_featured === 'true',
+      is_active: is_active !== undefined ? is_active === 'true' : undefined,
+      is_featured: is_featured !== undefined ? is_featured === 'true' : undefined,
       min_price: min_price ? parseFloat(min_price) : undefined,
       max_price: max_price ? parseFloat(max_price) : undefined,
       skip: skip ? parseInt(skip) : 0,
@@ -55,6 +57,7 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @Public()
   async getProductById(@Param('id') id: string) {
     const product = await this.productsService.findById(id);
     return {

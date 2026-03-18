@@ -3,8 +3,11 @@ namespace pos.Models;
 public class Receipt
 {
     public string OrderId { get; set; } = Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+    /// <summary>Backend order number e.g. ORD-20260316-ABC12345 — set after API call.</summary>
+    public string OrderNumber { get; set; } = string.Empty;
     public string CustomerName { get; set; } = string.Empty;
     public string CustomerPhone { get; set; } = string.Empty;
+    public string PaymentMethod { get; set; } = "Cash";
     public DateTime PurchasedAt { get; set; } = DateTime.Now;
     public List<CartItem> Items { get; set; } = new();
     public decimal Subtotal { get; set; }
@@ -23,14 +26,18 @@ public class Receipt
         lines.Add("");
 
         // Order Info
-        lines.Add($"Order ID: {OrderId}");
+        if (!string.IsNullOrEmpty(OrderNumber))
+            lines.Add($"Order #: {OrderNumber}");
+        else
+            lines.Add($"Order ID: {OrderId}");
         lines.Add($"Date: {PurchasedAt:dd/MM/yyyy}");
-        lines.Add($"Time: {PurchasedAt:HH:mm:ss}");
+        lines.Add($"Time: {PurchasedAt:hh:mm tt}");
         lines.Add("");
 
         // Customer Info
         lines.Add($"Customer: {CustomerName}");
         lines.Add($"Phone: {CustomerPhone}");
+        lines.Add($"Payment: {PaymentMethod}");
         lines.Add("");
 
         // Items Header

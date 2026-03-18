@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderItem, PaymentTransaction } from '../../entities';
+import { Order, OrderItem, PaymentTransaction, Product } from '../../entities';
 import { CreateOrderDto } from './dto';
 import { InventoryService } from '../inventory/inventory.service';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class OrdersService {
@@ -16,6 +17,9 @@ export class OrdersService {
     private paymentTransactionsRepository: Repository<PaymentTransaction>,
     @Inject(InventoryService)
     private inventoryService: InventoryService,
+    private eventsGateway: EventsGateway,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
   ) {}
 
   async generateOrderNumber(): Promise<string> {
@@ -30,6 +34,8 @@ export class OrdersService {
     customer_id?: string;
     status?: string;
     payment_status?: string;
+    source?: string;
+    date_from?: string;
     skip?: number;
     take?: number;
   }): Promise<{ data: Order[]; total: number }> {
@@ -45,6 +51,14 @@ export class OrdersService {
 
     if (filters?.payment_status) {
       query.andWhere('order.payment_status = :payment_status', { payment_status: filters.payment_status });
+    }
+
+    if (filters?.source) {
+      query.andWhere('order.source = :source', { source: filters.source });
+    }
+
+    if (filters?.date_from) {
+      query.andWhere('order.created_at >= :date_from', { date_from: filters.date_from });
     }
 
     const total = await query.getCount();
@@ -98,9 +112,13 @@ export class OrdersService {
       const discountAmount = createOrderDto.discount_amount || 0;
       const total = subtotal + taxAmount + shippingAmount - discountAmount;
 
-      // Validate and reserve inventory for each item
+      // Validate and reserve inventory for each item (only when inventory records exist)
       for (const item of createOrderDto.items) {
         const inventories = await this.inventoryService.getInventoryByProduct(item.product_id);
+
+        // Skip inventory check if product has no inventory records (treat as unlimited stock)
+        if (inventories.length === 0) continue;
+
         const sizeInventory = inventories.find((inv) => inv.size === item.product_size);
 
         if (!sizeInventory) {
@@ -120,6 +138,8 @@ export class OrdersService {
         await this.inventoryService.reserveInventory(sizeInventory.id, item.quantity);
       }
 
+      const posAddress = { type: 'in_store', note: 'POS transaction — no shipping address' };
+      const shippingAddr = createOrderDto.shipping_address ?? posAddress;
       const order = this.ordersRepository.create({
         order_number: orderNumber,
         customer_id: (createOrderDto.customer_id || undefined) as any,
@@ -127,12 +147,14 @@ export class OrdersService {
         customer_phone: createOrderDto.customer_phone,
         customer_first_name: createOrderDto.customer_first_name,
         customer_last_name: createOrderDto.customer_last_name || '',
-        shipping_address: createOrderDto.shipping_address,
-        billing_address: createOrderDto.billing_address || createOrderDto.shipping_address,
+        shipping_address: shippingAddr,
+        billing_address: createOrderDto.billing_address ?? shippingAddr,
         shipping_same_as_billing: !createOrderDto.billing_address,
-        source: 'online',
-        status: 'pending',
-        payment_status: 'pending',
+        source: (createOrderDto.source || 'online') as any,
+        cashier_id: (createOrderDto.cashier_id || undefined) as any,
+        // POS = in-store sale, immediately confirmed and paid
+        status: createOrderDto.source === 'pos' ? 'confirmed' : 'pending',
+        payment_status: createOrderDto.source === 'pos' ? 'paid' : 'pending',
         subtotal,
         tax_amount: taxAmount,
         shipping_amount: shippingAmount,
@@ -145,9 +167,15 @@ export class OrdersService {
       const savedOrder = await this.ordersRepository.save(order);
       const savedOrderId = (savedOrder as any).id;
 
-      // Add order items
+      // Add order items + increment purchase_count + emit WS sale events
       if (createOrderDto.items && createOrderDto.items.length > 0) {
         await this.addOrderItems(savedOrderId, createOrderDto.items);
+        for (const item of createOrderDto.items) {
+          if (item.product_id) {
+            await this.productRepository.increment({ id: item.product_id }, 'purchase_count', item.quantity ?? 1);
+            this.eventsGateway.emitProductSale(item.product_id, item.quantity ?? 1);
+          }
+        }
       }
 
       return this.findById(savedOrderId);

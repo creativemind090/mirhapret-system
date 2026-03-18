@@ -173,6 +173,56 @@ export class AuthService {
     await this.usersRepository.update(userId, { refresh_token: null as any });
   }
 
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+
+    // Always return the same message to prevent user enumeration
+    const genericMessage = 'If an account exists with this email, a reset code has been sent.';
+
+    if (!user || !user.is_active) {
+      return { message: genericMessage };
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await this.usersRepository.update(user.id, {
+      reset_token: otp,
+      reset_token_expiry: expiry,
+    } as any);
+
+    // TODO: Send OTP via email. For now logging to console.
+    console.log(`[FORGOT PASSWORD] OTP for ${email}: ${otp}`);
+
+    return { message: genericMessage };
+  }
+
+  async resetPassword(email: string, token: string, newPassword: string): Promise<{ message: string }> {
+    const user = await this.usersRepository.findOne({ where: { email } });
+
+    if (!user || !(user as any).reset_token || !(user as any).reset_token_expiry) {
+      throw new BadRequestException('Invalid or expired reset code');
+    }
+
+    if ((user as any).reset_token !== token) {
+      throw new BadRequestException('Invalid reset code');
+    }
+
+    if (new Date() > (user as any).reset_token_expiry) {
+      throw new BadRequestException('Reset code has expired. Please request a new one.');
+    }
+
+    const hashedPassword = await this.hashPassword(newPassword);
+
+    await this.usersRepository.update(user.id, {
+      password: hashedPassword,
+      reset_token: null,
+      reset_token_expiry: null,
+    } as any);
+
+    return { message: 'Password reset successfully. You can now sign in with your new password.' };
+  }
+
   async validateUser(userId: string): Promise<Omit<User, 'password' | 'refresh_token'> | null> {
     const user = await this.usersRepository.findOne({
       where: { id: userId },

@@ -41,6 +41,8 @@ import { POSSyncModule } from './modules/pos-sync/pos-sync.module';
 import { SearchModule } from './modules/search/search.module';
 import { ProductAnalyticsModule } from './modules/product-analytics/product-analytics.module';
 import { RolesGuard } from './common/guards/roles.guard';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { EventsModule } from './modules/events/events.module';
 
 @Module({
   imports: [
@@ -125,6 +127,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     POSSyncModule,
     SearchModule,
     ProductAnalyticsModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -132,6 +135,11 @@ import { RolesGuard } from './common/guards/roles.guard';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    // JWT auth runs globally before RolesGuard so request.user is populated
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
     // Role-based access control
     {

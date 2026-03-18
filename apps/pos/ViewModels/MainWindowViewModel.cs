@@ -10,332 +10,390 @@ namespace pos.ViewModels;
 
 public class MainWindowViewModel : BaseViewModel
 {
-    private readonly MockDataService _mockDataService;
-    private readonly ReceiptService _receiptService;
-    private readonly BarcodeScanner _barcodeScanner;
-    private string _searchInput = string.Empty;
+    // ── Services ──────────────────────────────────────────────────────────────
+    private readonly ApiService     _apiService     = ApiService.Instance;
+    private readonly ReceiptService _receiptService = new();
+    private readonly BarcodeScanner _barcodeScanner = new();
+
+    // Local product cache — loaded from API on startup
+    private List<Product> _products = new();
+
+    // ── Observable state ─────────────────────────────────────────────────────
+    public ObservableCollection<CartItem>  CartItems         { get; } = new();
+    public ObservableCollection<Product>   SearchSuggestions { get; } = new();
+    public ObservableCollection<ApiOrder>  TodaysOrders      { get; } = new();
+
+    // ── Bindable properties ───────────────────────────────────────────────────
+    private string _searchInput    = string.Empty;
     private decimal _discountAmount = 0;
-    private string _promoCode = string.Empty;
-    private string _errorMessage = string.Empty;
-    private bool _isScannerConnected = false;
-
-    public ObservableCollection<CartItem> CartItems { get; }
-    public ObservableCollection<Product> SearchSuggestions { get; }
-    public ICommand AddToCartCommand { get; }
-    public ICommand RemoveFromCartCommand { get; }
-    public ICommand IncreaseQuantityCommand { get; }
-    public ICommand DecreaseQuantityCommand { get; }
-    public ICommand ApplyPromoCommand { get; }
-    public ICommand CompleteSaleCommand { get; }
-    public ICommand ClearCartCommand { get; }
-    public ICommand SelectProductCommand { get; }
-    public ICommand ConnectScannerCommand { get; }
-    public ICommand DisconnectScannerCommand { get; }
-
-    public MainWindowViewModel()
-    {
-        _mockDataService = MockDataService.Instance;
-        _receiptService = new ReceiptService();
-        _barcodeScanner = new BarcodeScanner();
-        CartItems = new ObservableCollection<CartItem>();
-        SearchSuggestions = new ObservableCollection<Product>();
-
-        AddToCartCommand = new RelayCommand(_ => AddToCart());
-        RemoveFromCartCommand = new RelayCommand<CartItem>(item => RemoveFromCart(item));
-        IncreaseQuantityCommand = new RelayCommand<CartItem>(item => IncreaseQuantity(item));
-        DecreaseQuantityCommand = new RelayCommand<CartItem>(item => DecreaseQuantity(item));
-        ApplyPromoCommand = new RelayCommand(_ => ApplyPromo());
-        CompleteSaleCommand = new RelayCommand(_ => CompleteSale());
-        ClearCartCommand = new RelayCommand(_ => ClearCart());
-        SelectProductCommand = new RelayCommand<Product>(product => SelectProduct(product));
-        ConnectScannerCommand = new RelayCommand(_ => ConnectScanner());
-        DisconnectScannerCommand = new RelayCommand(_ => DisconnectScanner());
-
-        // Subscribe to barcode scanner events
-        _barcodeScanner.BarcodeScanned += OnBarcodeScanned;
-        _barcodeScanner.ErrorOccurred += OnScannerError;
-
-        // Auto-connect to scanner if available (optional)
-        TryAutoConnectScanner();
-    }
+    private string _promoCode      = string.Empty;
+    private string _errorMessage   = string.Empty;
+    private bool   _isScannerConnected = false;
+    private bool   _isLoadingProducts  = true;
+    private bool   _isLoadingOrders    = false;
 
     public string SearchInput
     {
         get => _searchInput;
-        set
-        {
-            if (SetProperty(ref _searchInput, value))
-            {
-                UpdateSearchSuggestions();
-            }
-        }
+        set { if (SetProperty(ref _searchInput, value)) UpdateSearchSuggestions(); }
     }
-
     public decimal DiscountAmount
     {
         get => _discountAmount;
         set => SetProperty(ref _discountAmount, value);
     }
-
     public string PromoCode
     {
         get => _promoCode;
         set => SetProperty(ref _promoCode, value);
     }
-
     public string ErrorMessage
     {
         get => _errorMessage;
         set => SetProperty(ref _errorMessage, value);
     }
-
     public bool IsScannerConnected
     {
         get => _isScannerConnected;
         set => SetProperty(ref _isScannerConnected, value);
     }
+    public bool IsLoadingProducts
+    {
+        get => _isLoadingProducts;
+        set => SetProperty(ref _isLoadingProducts, value);
+    }
+    public bool IsLoadingOrders
+    {
+        get => _isLoadingOrders;
+        set => SetProperty(ref _isLoadingOrders, value);
+    }
 
-    public decimal Subtotal => CartItems.Sum(item => item.Subtotal);
-    public decimal TaxAmount => CartItems.Sum(item => item.TaxAmount);
-    public decimal Total => Subtotal + TaxAmount - DiscountAmount;
+    // ── Computed totals ───────────────────────────────────────────────────────
+    public decimal Subtotal  => CartItems.Sum(i => i.Subtotal);
+    public decimal TaxAmount => CartItems.Sum(i => i.TaxAmount);
+    public decimal Total     => Subtotal + TaxAmount - DiscountAmount;
+
+    // ── Cashier info (shown in header) ────────────────────────────────────────
+    public string CashierName => SessionManager.Cashier?.FullName ?? "Cashier";
+
+    // ── Today's order summary stats ───────────────────────────────────────────
+    public int     OrderCount     => TodaysOrders.Count;
+    public decimal OrdersRevenue  => TodaysOrders.Sum(o => o.Total);
+
+    // ── Commands ──────────────────────────────────────────────────────────────
+    public ICommand AddToCartCommand        { get; }
+    public ICommand RemoveFromCartCommand   { get; }
+    public ICommand IncreaseQuantityCommand { get; }
+    public ICommand DecreaseQuantityCommand { get; }
+    public ICommand ApplyPromoCommand       { get; }
+    public ICommand CompleteSaleCommand     { get; }
+    public ICommand ClearCartCommand        { get; }
+    public ICommand SelectProductCommand    { get; }
+    public ICommand ConnectScannerCommand   { get; }
+    public ICommand DisconnectScannerCommand{ get; }
+    public ICommand RefreshOrdersCommand    { get; }
+
+    public MainWindowViewModel()
+    {
+        AddToCartCommand         = new RelayCommand(_ => AddToCart());
+        RemoveFromCartCommand    = new RelayCommand<CartItem>(RemoveFromCart);
+        IncreaseQuantityCommand  = new RelayCommand<CartItem>(IncreaseQuantity);
+        DecreaseQuantityCommand  = new RelayCommand<CartItem>(DecreaseQuantity);
+        ApplyPromoCommand        = new RelayCommand(_ => _ = ApplyPromoAsync());
+        CompleteSaleCommand      = new RelayCommand(_ => _ = CompleteSaleAsync());
+        ClearCartCommand         = new RelayCommand(_ => ClearCart());
+        SelectProductCommand     = new RelayCommand<Product>(SelectProduct);
+        ConnectScannerCommand    = new RelayCommand(_ => ConnectScanner());
+        DisconnectScannerCommand = new RelayCommand(_ => DisconnectScanner());
+        RefreshOrdersCommand     = new RelayCommand(_ => _ = LoadOrdersAsync());
+
+        _barcodeScanner.BarcodeScanned += OnBarcodeScanned;
+        _barcodeScanner.ErrorOccurred  += OnScannerError;
+
+        TryAutoConnectScanner();
+
+        // Load data from API asynchronously
+        _ = LoadProductsAsync();
+        _ = LoadOrdersAsync();
+    }
+
+    // ── Product loading ───────────────────────────────────────────────────────
+
+    private async Task LoadProductsAsync()
+    {
+        IsLoadingProducts = true;
+        ErrorMessage = "Loading products from server...";
+
+        var apiProducts = await _apiService.GetAllProductsAsync();
+
+        _products = apiProducts.Select(p => p.ToPosProduct()).ToList();
+
+        ErrorMessage = _products.Count > 0
+            ? string.Empty
+            : "⚠ Could not load products. Check server connection.";
+
+        IsLoadingProducts = false;
+    }
+
+    // ── Cart operations ───────────────────────────────────────────────────────
 
     private void AddToCart()
     {
-        if (string.IsNullOrWhiteSpace(SearchInput))
-        {
-            ErrorMessage = "Please enter a barcode or product name";
-            return;
-        }
+        if (string.IsNullOrWhiteSpace(SearchInput)) { ErrorMessage = "Please enter a barcode or product name"; return; }
 
         ErrorMessage = string.Empty;
 
-        // Try to find by barcode first
-        var product = _mockDataService.GetProductByBarcode(SearchInput);
+        var product = _products.FirstOrDefault(p => p.Barcode == SearchInput && p.IsActive)
+                   ?? _products.FirstOrDefault(p => p.IsActive &&
+                          (p.Name.Contains(SearchInput, StringComparison.OrdinalIgnoreCase) ||
+                           p.Barcode.Contains(SearchInput, StringComparison.OrdinalIgnoreCase)));
 
-        // If not found, search by name
-        if (product == null)
+        if (product == null) { ErrorMessage = "Product not found"; return; }
+
+        // Size selection — show dialog if product has sizes
+        string selectedSize = string.Empty;
+        if (product.Sizes.Count > 0)
         {
-            var results = _mockDataService.SearchProducts(SearchInput);
-            product = results.FirstOrDefault();
+            var sizeDialog = new SizeSelectionDialog(product.Name, product.Sizes);
+            if (sizeDialog.ShowDialog() != true) return;
+            selectedSize = sizeDialog.SelectedSize ?? string.Empty;
         }
 
-        if (product == null)
-        {
-            ErrorMessage = "Product not found";
-            return;
-        }
+        // Match existing cart line only if same product AND same size
+        var existing = CartItems.FirstOrDefault(i =>
+            i.ProductId == product.Id && i.SelectedSize == selectedSize);
 
-        // Check if product already in cart
-        var existingItem = CartItems.FirstOrDefault(item => item.ProductId == product.Id);
-        if (existingItem != null)
+        if (existing != null)
         {
-            existingItem.Quantity++;
+            existing.Quantity++;
         }
         else
         {
             CartItems.Add(new CartItem
             {
-                Id = Guid.NewGuid(),
-                ProductId = product.Id,
-                ProductName = product.Name,
-                Barcode = product.Barcode,
-                UnitPrice = product.Price,
-                Quantity = 1,
-                TaxRate = product.TaxRate
+                Id           = Guid.NewGuid(),
+                ProductId    = product.Id,
+                ProductName  = product.Name,
+                Barcode      = product.Barcode,
+                SelectedSize = selectedSize,
+                UnitPrice    = product.Price,
+                Quantity     = 1,
+                TaxRate      = product.TaxRate
             });
         }
 
         SearchInput = string.Empty;
+        NotifyTotals();
+    }
+
+    private void RemoveFromCart(CartItem? item)
+    {
+        if (item != null) { CartItems.Remove(item); NotifyTotals(); }
+    }
+
+    private void IncreaseQuantity(CartItem? item)
+    {
+        if (item != null) { item.Quantity++; NotifyTotals(); }
+    }
+
+    private void DecreaseQuantity(CartItem? item)
+    {
+        if (item != null && item.Quantity > 1) { item.Quantity--; NotifyTotals(); }
+    }
+
+    private void NotifyTotals()
+    {
         OnPropertyChanged(nameof(Subtotal));
         OnPropertyChanged(nameof(TaxAmount));
         OnPropertyChanged(nameof(Total));
     }
 
-    private void RemoveFromCart(CartItem? item)
-    {
-        if (item != null)
-        {
-            CartItems.Remove(item);
-            OnPropertyChanged(nameof(Subtotal));
-            OnPropertyChanged(nameof(TaxAmount));
-            OnPropertyChanged(nameof(Total));
-        }
-    }
+    // ── Promo code ────────────────────────────────────────────────────────────
 
-    private void IncreaseQuantity(CartItem? item)
+    private async Task ApplyPromoAsync()
     {
-        if (item != null)
-        {
-            item.Quantity++;
-            OnPropertyChanged(nameof(Subtotal));
-            OnPropertyChanged(nameof(TaxAmount));
-            OnPropertyChanged(nameof(Total));
-        }
-    }
+        if (string.IsNullOrWhiteSpace(PromoCode)) { ErrorMessage = "Please enter a promo code"; return; }
 
-    private void DecreaseQuantity(CartItem? item)
-    {
-        if (item != null && item.Quantity > 1)
-        {
-            item.Quantity--;
-            OnPropertyChanged(nameof(Subtotal));
-            OnPropertyChanged(nameof(TaxAmount));
-            OnPropertyChanged(nameof(Total));
-        }
-    }
+        ErrorMessage = "Validating promo code...";
+        var promo = await _apiService.ValidatePromoCodeAsync(PromoCode);
 
-    private void ApplyPromo()
-    {
-        if (string.IsNullOrWhiteSpace(PromoCode))
-        {
-            ErrorMessage = "Please enter a promo code";
-            return;
-        }
-
-        var promo = _mockDataService.GetPromotionByCode(PromoCode);
-        if (promo == null)
-        {
-            ErrorMessage = "Invalid promo code";
-            return;
-        }
+        if (promo == null) { ErrorMessage = "Invalid or expired promo code"; return; }
 
         ErrorMessage = string.Empty;
+        DiscountAmount = promo.DiscountType == "percentage"
+            ? Subtotal * (promo.DiscountValue / 100m)
+            : promo.DiscountValue;
 
-        if (promo.DiscountType == "percentage")
-        {
-            DiscountAmount = Subtotal * (promo.DiscountValue / 100);
-        }
-        else if (promo.DiscountType == "fixed")
-        {
-            DiscountAmount = promo.DiscountValue;
-        }
-
-        OnPropertyChanged(nameof(Total));
+        NotifyTotals();
     }
 
-    private void CompleteSale()
+    // ── Complete sale ─────────────────────────────────────────────────────────
+
+    private async Task CompleteSaleAsync()
     {
-        if (CartItems.Count == 0)
-        {
-            ErrorMessage = "Cart is empty";
-            return;
-        }
+        if (CartItems.Count == 0) { ErrorMessage = "Cart is empty"; return; }
 
         ErrorMessage = string.Empty;
+        try
+        {
+            await CompleteSaleInternalAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Unexpected error: {ex.Message}";
+        }
+    }
 
-        // Show checkout dialog
+    private async Task CompleteSaleInternalAsync()
+    {
+
         var dialog = new CheckoutDialog();
-        if (dialog.ShowDialog() == true)
+        if (dialog.ShowDialog() != true) return;
+
+        var customerName  = dialog.CustomerName ?? "Walk-in Customer";
+        var customerPhone = dialog.CustomerPhone ?? "03000000000";
+        var paymentMethod = dialog.PaymentMethod ?? "cash";
+        var nameParts     = customerName.Trim().Split(' ', 2);
+        var firstName     = nameParts[0];
+        var lastName      = nameParts.Length > 1 ? nameParts[1] : string.Empty;
+
+        // Build the order payload
+        var payload = new
         {
-            var customerName = dialog.CustomerName;
-            var customerPhone = dialog.CustomerPhone;
+            customer_first_name = firstName,
+            customer_last_name  = string.IsNullOrEmpty(lastName) ? null : lastName,
+            customer_email      = $"pos_{Guid.NewGuid():N}@mirhapret.pos",
+            customer_phone      = customerPhone,
+            source              = "pos",
+            cashier_id          = SessionManager.Cashier?.Id,
+            payment_method      = paymentMethod,
+            tax_amount          = (double)TaxAmount,
+            discount_amount     = (double)DiscountAmount,
+            items               = CartItems.Select(i => new
+            {
+                product_id    = i.ProductId.ToString(),
+                product_name  = i.ProductName,
+                sku           = i.Barcode,
+                quantity      = i.Quantity,
+                unit_price    = (double)i.UnitPrice,
+                total         = (double)(i.UnitPrice * i.Quantity),
+                product_size  = i.SelectedSize,
+            }).ToList(),
+        };
 
-            // Generate receipt
-            var receipt = _receiptService.GenerateReceipt(
-                customerName,
-                customerPhone,
-                CartItems,
-                Subtotal,
-                TaxAmount,
-                DiscountAmount,
-                Total);
+        ErrorMessage = "Processing sale...";
+        var (orderNumber, error) = await _apiService.CreateOrderAsync(payload);
 
-            // Show receipt preview
-            var receiptWindow = new ReceiptPreviewWindow(receipt);
-            receiptWindow.ShowDialog();
-
-            // Clear cart after successful sale
-            ClearCart();
+        if (orderNumber == null)
+        {
+            ErrorMessage = error ?? "Failed to save order";
+            return;
         }
+
+        ErrorMessage = string.Empty;
+
+        // Log receipt text to debug output (no printer required)
+        var receipt = _receiptService.GenerateReceipt(
+            customerName, customerPhone, CartItems,
+            Subtotal, TaxAmount, DiscountAmount, Total,
+            orderNumber: orderNumber,
+            paymentMethod: paymentMethod);
+        System.Diagnostics.Debug.WriteLine(_receiptService.GetReceiptAsText(receipt));
+
+        var saleTotal = Total;
+        ClearCart();
+
+        MessageBox.Show(
+            $"Sale completed!\nOrder #{orderNumber}\nTotal: PKR {saleTotal:N0}",
+            "Sale Complete",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+
+        // Refresh orders list
+        _ = LoadOrdersAsync();
     }
 
     private void ClearCart()
     {
         CartItems.Clear();
-        SearchInput = string.Empty;
-        PromoCode = string.Empty;
+        SearchInput    = string.Empty;
+        PromoCode      = string.Empty;
         DiscountAmount = 0;
-        ErrorMessage = string.Empty;
-        OnPropertyChanged(nameof(Subtotal));
-        OnPropertyChanged(nameof(TaxAmount));
-        OnPropertyChanged(nameof(Total));
+        ErrorMessage   = string.Empty;
+        NotifyTotals();
     }
+
+    // ── Orders tab ────────────────────────────────────────────────────────────
+
+    public async Task LoadOrdersAsync()
+    {
+        IsLoadingOrders = true;
+        var orders = await _apiService.GetPosOrdersAsync();
+
+        TodaysOrders.Clear();
+        foreach (var o in orders)
+            TodaysOrders.Add(o);
+
+        OnPropertyChanged(nameof(OrderCount));
+        OnPropertyChanged(nameof(OrdersRevenue));
+        IsLoadingOrders = false;
+    }
+
+    // ── Search suggestions ────────────────────────────────────────────────────
 
     private void UpdateSearchSuggestions()
     {
         SearchSuggestions.Clear();
+        if (string.IsNullOrWhiteSpace(SearchInput)) return;
 
-        if (string.IsNullOrWhiteSpace(SearchInput))
-            return;
+        var results = _products
+            .Where(p => p.IsActive &&
+                (p.Name.Contains(SearchInput, StringComparison.OrdinalIgnoreCase) ||
+                 p.Barcode.Contains(SearchInput, StringComparison.OrdinalIgnoreCase)))
+            .Take(5);
 
-        var results = _mockDataService.SearchProducts(SearchInput);
-        foreach (var product in results.Take(5))
-        {
-            SearchSuggestions.Add(product);
-        }
+        foreach (var p in results) SearchSuggestions.Add(p);
     }
 
     private void SelectProduct(Product? product)
     {
-        if (product != null)
-        {
-            SearchInput = product.Barcode;
-            SearchSuggestions.Clear();
-            AddToCart();
-        }
+        if (product == null) return;
+        SearchInput = product.Barcode;
+        SearchSuggestions.Clear();
+        AddToCart();
     }
 
-    // Barcode Scanner Methods
+    // ── Barcode scanner ───────────────────────────────────────────────────────
+
     private void TryAutoConnectScanner()
     {
-        // Try to auto-connect to first available COM port
         var ports = BarcodeScanner.GetAvailablePorts();
-        if (ports.Length > 0)
-        {
-            try
-            {
-                _barcodeScanner.Connect(ports[0]);
-                IsScannerConnected = true;
-                ErrorMessage = $"Scanner connected on {ports[0]}";
-            }
-            catch
-            {
-                // Silent fail - scanner not available
-            }
-        }
+        if (ports.Length == 0) return;
+        try { _barcodeScanner.Connect(ports[0]); IsScannerConnected = true; } catch { }
     }
 
     private void ConnectScanner()
     {
         var ports = BarcodeScanner.GetAvailablePorts();
-        if (ports.Length == 0)
-        {
-            ErrorMessage = "No COM ports available";
-            return;
-        }
-
-        // Connect to first available port
+        if (ports.Length == 0) { ErrorMessage = "No COM ports available"; return; }
         _barcodeScanner.Connect(ports[0]);
         IsScannerConnected = _barcodeScanner.IsConnected;
-        ErrorMessage = IsScannerConnected ? $"Scanner connected on {ports[0]}" : "Failed to connect scanner";
     }
 
     private void DisconnectScanner()
     {
         _barcodeScanner.Disconnect();
         IsScannerConnected = false;
-        ErrorMessage = "Scanner disconnected";
     }
 
     private void OnBarcodeScanned(object? sender, BarcodeScannedEventArgs e)
     {
-        // Automatically add product to cart when barcode is scanned
-        SearchInput = e.Barcode;
-        AddToCart();
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            SearchInput = e.Barcode;
+            AddToCart();
+        });
     }
 
-    private void OnScannerError(object? sender, string error)
-    {
-        ErrorMessage = error;
-    }
+    private void OnScannerError(object? sender, string error) => ErrorMessage = error;
 }

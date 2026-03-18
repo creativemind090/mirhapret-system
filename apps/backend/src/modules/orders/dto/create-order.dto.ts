@@ -102,10 +102,10 @@ export class CreateOrderDto {
   items: OrderItemDto[];
 
   @IsObject()
-  @IsNotEmpty()
   @ValidateNested()
   @Type(() => AddressDto)
-  shipping_address: AddressDto;
+  @IsOptional()
+  shipping_address?: AddressDto;
 
   @IsObject()
   @ValidateNested()
@@ -139,4 +139,12 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   customer_id?: string;
+
+  @IsString()
+  @IsOptional()
+  source?: string;
+
+  @IsString()
+  @IsOptional()
+  cashier_id?: string;
 }

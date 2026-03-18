@@ -14,12 +14,14 @@ import { TrackProductEventDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('products/analytics')
 export class ProductAnalyticsController {
   constructor(private productAnalyticsService: ProductAnalyticsService) {}
 
   @Post(':id/track')
+  @Public()
   @HttpCode(HttpStatus.CREATED)
   async trackProductEvent(
     @Param('id') productId: string,
@@ -38,6 +40,7 @@ export class ProductAnalyticsController {
   }
 
   @Get(':id/analytics')
+  @Public()
   async getProductAnalytics(
     @Param('id') productId: string,
     @Query('eventType') eventType?: string,
@@ -57,6 +60,7 @@ export class ProductAnalyticsController {
   }
 
   @Get(':id/performance')
+  @Public()
   async getProductPerformance(@Param('id') productId: string) {
     const performance = await this.productAnalyticsService.getProductPerformance(productId);
     return {

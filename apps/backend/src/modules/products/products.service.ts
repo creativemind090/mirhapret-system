@@ -36,7 +36,8 @@ export class ProductsService {
     skip?: number;
     take?: number;
   }): Promise<{ data: Product[]; total: number }> {
-    const query = this.productsRepository.createQueryBuilder('product');
+    const query = this.productsRepository.createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category');
 
     if (filters?.category_id) {
       query.andWhere('product.category_id = :category_id', { category_id: filters.category_id });
