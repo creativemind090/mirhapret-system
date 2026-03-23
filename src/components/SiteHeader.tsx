@@ -17,7 +17,7 @@ export function SiteHeader() {
   return (
     <>
       {/* Announcement bar */}
-      <div style={{
+      <div className="site-announcement" style={{
         background: '#000',
         color: '#fff',
         textAlign: 'center',

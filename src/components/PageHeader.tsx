@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCartContext } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { CartSidebar } from './CartSidebar';
+import { MirhaPretLogo } from './MirhaPretLogo';
 
 interface PageHeaderProps {
   isScrolled?: boolean;
@@ -21,6 +22,7 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
   return (
     <>
       <nav
+        className="site-nav"
         style={{
           position: 'fixed',
           top: 0,
@@ -38,22 +40,23 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
         }}
       >
         {/* Logo - Left */}
-        <a href="/" style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '2px', cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
-          MirhaPret
+        <a href="/" style={{ cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <MirhaPretLogo height={46} color="black" />
         </a>
 
-        {/* Nav Links - Center */}
-        <div className="nav-links">
-          <a href="/" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Home</a>
-          <a href="/products" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Shop</a>
-          <a href="/about" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>About</a>
-          <a href="/contact" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Contact</a>
-        </div>
-
-        {/* Hamburger - mobile only */}
+        {/* Hamburger - show on mobile (before nav-links for CSS order control) */}
         <button className="nav-hamburger" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
           <span /><span /><span />
         </button>
+
+        {/* Nav Links - Center desktop only */}
+        <div className="nav-links">
+          <a href="/" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Home</a>
+          <a href="/products" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Shop</a>
+          <a href="/blog" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Journal</a>
+          <a href="/about" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>About</a>
+          <a href="/contact" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Contact</a>
+        </div>
 
         {/* Cart & Profile - Right */}
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
@@ -236,9 +239,12 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
       {/* Mobile nav overlay */}
       <div className={`mobile-nav-overlay${isMobileMenuOpen ? ' open' : ''}`}>
         <button className="mobile-nav-close" onClick={() => setIsMobileMenuOpen(false)}>×</button>
-        <a href="/" style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '2px', color: '#000', textDecoration: 'none', marginBottom: '24px', display: 'block' }}>MirhaPret</a>
+        <a href="/" style={{ textDecoration: 'none', marginBottom: '24px', display: 'block' }}>
+          <MirhaPretLogo height={80} color="black" />
+        </a>
         <a href="/" onClick={() => setIsMobileMenuOpen(false)}>Home</a>
         <a href="/products" onClick={() => setIsMobileMenuOpen(false)}>Shop</a>
+        <a href="/blog" onClick={() => setIsMobileMenuOpen(false)}>Journal</a>
         <a href="/about" onClick={() => setIsMobileMenuOpen(false)}>About</a>
         <a href="/contact" onClick={() => setIsMobileMenuOpen(false)}>Contact</a>
         <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '0' }}>

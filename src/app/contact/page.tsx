@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { FaInstagram, FaFacebookF, FaTiktok, FaWhatsapp, FaYoutube, FaPinterestP } from 'react-icons/fa';
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
@@ -10,6 +11,11 @@ export default function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const subject = encodeURIComponent(`[MirhaPret Contact] ${form.subject || 'Enquiry'}`);
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}\nSubject: ${form.subject}\n\n${form.message}`
+    );
+    window.location.href = `mailto:mirhapret@gmail.com?subject=${subject}&body=${body}`;
     setSubmitted(true);
   };
 
@@ -98,14 +104,40 @@ export default function ContactPage() {
                 Follow Us
               </p>
               <div style={{ display: 'flex', gap: '10px' }}>
-                {['IG', 'FB', 'TT', 'WA'].map(s => (
-                  <a key={s} href="#" style={{
-                    width: '40px', height: '40px',
-                    border: '1.5px solid #000',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '10px', fontWeight: 700, color: '#000', textDecoration: 'none',
-                  }}>
-                    {s}
+                {[
+                  { icon: <FaInstagram size={18} />, href: 'https://www.instagram.com/mirhapret_official', label: 'Instagram', hoverColor: '#E1306C' },
+                  { icon: <FaFacebookF size={18} />, href: 'https://www.facebook.com/mirhapret', label: 'Facebook', hoverColor: '#1877F2' },
+                  { icon: <FaTiktok size={18} />, href: 'https://www.tiktok.com/@mirhapret', label: 'TikTok', hoverColor: '#010101' },
+                  { icon: <FaYoutube size={18} />, href: 'https://www.youtube.com/@mirhapret', label: 'YouTube', hoverColor: '#FF0000' },
+                  { icon: <FaPinterestP size={18} />, href: 'https://www.pinterest.com/mirhapret', label: 'Pinterest', hoverColor: '#E60023' },
+                  { icon: <FaWhatsapp size={18} />, href: 'https://wa.me/923244577066', label: 'WhatsApp', hoverColor: '#25D366' },
+                ].map(({ icon, href, label, hoverColor }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    title={label}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.background = hoverColor;
+                      (e.currentTarget as HTMLElement).style.borderColor = hoverColor;
+                      (e.currentTarget as HTMLElement).style.color = '#fff';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.background = 'transparent';
+                      (e.currentTarget as HTMLElement).style.borderColor = '#000';
+                      (e.currentTarget as HTMLElement).style.color = '#000';
+                    }}
+                    style={{
+                      width: '40px', height: '40px',
+                      border: '1.5px solid #000',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#000', textDecoration: 'none',
+                      transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+                    }}
+                  >
+                    {icon}
                   </a>
                 ))}
               </div>

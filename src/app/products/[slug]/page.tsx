@@ -1,16 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useCartContext } from '@/context/CartContext';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import api from '@/lib/api';
 import { getWishlistIds, toggleWishlist } from '@/app/my-wishlist/page';
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default function ProductDetailPage() {
   const params = useParams();
-  const productId = params.id as string;
+  const router = useRouter();
+  const slug = params.slug as string;
   const { addItem } = useCartContext();
   const [selectedSize, setSelectedSize] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -27,10 +30,24 @@ export default function ProductDetailPage() {
     const fetchProduct = async () => {
       setProductLoading(true);
       try {
-        const res = await api.get(`/products/${productId}`);
-        const p = res.data.data ?? res.data;
+        let p: any;
+
+        if (UUID_RE.test(slug)) {
+          // Legacy UUID URL — fetch by ID then redirect to slug URL
+          const res = await api.get(`/products/${slug}`);
+          p = res.data.data ?? res.data;
+          if (p?.slug) {
+            router.replace(`/products/${p.slug}`);
+            return;
+          }
+        } else {
+          const res = await api.get(`/products/slug/${slug}`);
+          p = res.data.data ?? res.data;
+        }
+
         setProduct({
           id: p.id,
+          slug: p.slug,
           name: p.name,
           category: p.category?.name ?? '',
           price: Number(p.price),
@@ -48,7 +65,7 @@ export default function ProductDetailPage() {
         const sessionKey = `viewed_${p.id}`;
         if (!sessionStorage.getItem(sessionKey)) {
           sessionStorage.setItem(sessionKey, '1');
-          api.post(`/products/analytics/${p.id}/track`, { event_type: 'view' }).catch(() => {});
+          api.post(`/products/${p.id}/track`, { event_type: 'view' }).catch(() => {});
         }
       } catch {
         setProduct(null);
@@ -57,10 +74,14 @@ export default function ProductDetailPage() {
       }
     };
     fetchProduct();
-  }, [productId]);
+  }, [slug, router]);
 
   const handleAddToCart = () => {
     if (!product) return;
+    if (product.sizes.length > 0 && selectedSize === '') {
+      alert('Please select a size');
+      return;
+    }
     addItem({
       product_id: product.id,
       product_name: product.name,
@@ -100,22 +121,71 @@ export default function ProductDetailPage() {
     );
   }
 
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description,
+    sku: product.sku,
+    brand: { '@type': 'Brand', name: 'MirhaPret' },
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'PKR',
+      price: product.price,
+      availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: { '@type': 'Organization', name: 'MirhaPret' },
+    },
+    ...(product.images?.length ? { image: product.images } : {}),
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://mirhapret.com' },
+      { '@type': 'ListItem', position: 2, name: 'Products', item: 'https://mirhapret.com/products' },
+      { '@type': 'ListItem', position: 3, name: product.name, item: `https://mirhapret.com/products/${product.slug}` },
+    ],
+  };
+
   return (
     <div style={{ background: '#fff', color: '#000' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <SiteHeader />
 
       {/* Size Guide Modal */}
       {isSizeGuideOpen && (
         <>
           <div onClick={() => setIsSizeGuideOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 300 }} />
-          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#fff', padding: '40px', zIndex: 301, maxWidth: '600px', width: '90%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+          <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: '#fff', padding: '36px 40px', zIndex: 301, maxWidth: '680px', width: '92%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '1.3rem', fontWeight: 700 }}>Size Guide</h2>
               <button onClick={() => setIsSizeGuideOpen(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>×</button>
             </div>
-            <style>{`.sg table{width:100%;border-collapse:collapse;font-size:14px}.sg th{background:#000;color:#fff;padding:10px 16px;text-align:left;font-size:11px;letter-spacing:1px;text-transform:uppercase}.sg td{padding:10px 16px;border-bottom:1px solid #e8e8e8;color:#333}.sg tr:last-child td{border-bottom:none}.sg tr:nth-child(even) td{background:#fafafa}`}</style>
+            <style>{`
+              .sg h4{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#c8a96e;margin:20px 0 8px 0;padding-bottom:4px;border-bottom:1px solid #eae8e3}
+              .sg h4:first-child{margin-top:0}
+              .sg table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px}
+              .sg thead th{background:#111;color:#fff;padding:9px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+              .sg thead th:first-child{color:#c8a96e}
+              .sg tbody td{padding:9px 14px;border-bottom:1px solid #eae8e3;color:#333;font-size:13px}
+              .sg tbody td:first-child{font-weight:600;color:#111;background:#faf9f6;white-space:nowrap}
+              .sg tbody tr:last-child td{border-bottom:none}
+              .sg tbody tr:hover td{background:#f5f4f0}
+              .sg tbody tr:hover td:first-child{background:#f0ede6}
+            `}</style>
             {product.size_guide_html ? (
-              <div className="sg" dangerouslySetInnerHTML={{ __html: product.size_guide_html }} />
+              <div className="sg" dangerouslySetInnerHTML={{ __html: (() => {
+                const sanitizeHtml = (html: string) => {
+                  return html
+                    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                    .replace(/on\w+="[^"]*"/gi, '')
+                    .replace(/on\w+='[^']*'/gi, '')
+                    .replace(/javascript:/gi, '');
+                };
+                return sanitizeHtml(product.size_guide_html || '');
+              })() }} />
             ) : (
               <p style={{ color: '#999', fontSize: '14px' }}>No size guide available for this product.</p>
             )}
@@ -151,7 +221,7 @@ export default function ProductDetailPage() {
                 }}
               >
                 {image ? (
-                  <img src={image} alt={`View ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={image} alt={`${product.name} - image ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <span style={{ fontSize: '11px', color: '#bbb' }}>{idx + 1}</span>
                 )}

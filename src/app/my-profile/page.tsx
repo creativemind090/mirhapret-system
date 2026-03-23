@@ -14,6 +14,8 @@ export default function MyProfilePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [emailNotif, setEmailNotif] = useState(true);
+  const [smsNotif, setSmsNotif] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -306,12 +308,13 @@ export default function MyProfilePage() {
                 <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', width: '50px', height: '28px' }}>
                   <input
                     type="checkbox"
-                    defaultChecked={true}
+                    checked={emailNotif}
+                    onChange={(e) => setEmailNotif(e.target.checked)}
                     style={{
                       appearance: 'none',
                       width: '100%',
                       height: '100%',
-                      background: '#000000',
+                      background: emailNotif ? '#000000' : '#e0e0e0',
                       border: 'none',
                       borderRadius: '14px',
                       cursor: 'pointer',
@@ -325,7 +328,8 @@ export default function MyProfilePage() {
                       height: '24px',
                       background: '#ffffff',
                       borderRadius: '50%',
-                      right: '2px',
+                      right: emailNotif ? '2px' : undefined,
+                      left: emailNotif ? undefined : '2px',
                       top: '2px',
                       pointerEvents: 'none',
                     }}
@@ -341,12 +345,13 @@ export default function MyProfilePage() {
                 <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', width: '50px', height: '28px' }}>
                   <input
                     type="checkbox"
-                    defaultChecked={false}
+                    checked={smsNotif}
+                    onChange={(e) => setSmsNotif(e.target.checked)}
                     style={{
                       appearance: 'none',
                       width: '100%',
                       height: '100%',
-                      background: '#e0e0e0',
+                      background: smsNotif ? '#000000' : '#e0e0e0',
                       border: 'none',
                       borderRadius: '14px',
                       cursor: 'pointer',
@@ -360,7 +365,8 @@ export default function MyProfilePage() {
                       height: '24px',
                       background: '#ffffff',
                       borderRadius: '50%',
-                      left: '2px',
+                      right: smsNotif ? '2px' : undefined,
+                      left: smsNotif ? undefined : '2px',
                       top: '2px',
                       pointerEvents: 'none',
                     }}

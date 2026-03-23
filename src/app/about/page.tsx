@@ -1,7 +1,16 @@
-'use client';
-
+import type { Metadata } from 'next';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Learn about MirhaPret — Pakistan\'s premium pret boutique celebrating the modern Pakistani woman through timeless elegance and authentic craftsmanship since 2016.',
+  openGraph: {
+    title: 'About MirhaPret',
+    description: 'Pakistan\'s premium pret boutique celebrating the modern Pakistani woman through timeless elegance and authentic craftsmanship since 2016.',
+    type: 'website',
+  },
+};
 
 export default function AboutPage() {
   return (
@@ -109,12 +118,12 @@ export default function AboutPage() {
             { num: '02', name: 'Octa West 2026', desc: 'Where Pakistani craft meets contemporary western silhouettes. Bold, artistic, unapologetic.', bg: '#2a2018' },
             { num: '03', name: 'The Desire Edit', desc: 'Our most exclusive line. Haute couture pieces for those who demand perfection in every detail.', bg: '#1a1f2e' },
           ].map((col, i) => (
-            <div key={i} onClick={() => window.location.href = '/products'} style={{ background: col.bg, padding: '48px 36px', cursor: 'pointer', position: 'relative', minHeight: '280px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+            <a key={i} href="/products" style={{ background: col.bg, padding: '48px 36px', cursor: 'pointer', position: 'relative', minHeight: '280px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', textDecoration: 'none' }}>
               <span style={{ position: 'absolute', top: '28px', left: '36px', fontSize: '10px', letterSpacing: '3px', color: '#c8a96e', fontWeight: 700 }}>{col.num}</span>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>{col.name}</h3>
               <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: 1.7, marginBottom: '24px' }}>{col.desc}</p>
               <span style={{ fontSize: '11px', color: '#c8a96e', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Shop Now →</span>
-            </div>
+            </a>
           ))}
         </div>
       </section>

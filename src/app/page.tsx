@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { PageHeader } from '@/components/PageHeader';
 import api from '@/lib/api';
+import { blogs } from '@/data/blogs';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,19 +14,40 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [apiCategories, setApiCategories] = useState<any[]>([]);
+  const [activePromotions, setActivePromotions] = useState<any[]>([]);
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   useEffect(() => {
     const fetchHomeData = async () => {
-      const [prodsRes, catsRes] = await Promise.allSettled([
-        api.get('/products?is_featured=true&take=8'),
+      setProductsLoading(true);
+      const [prodsRes, catsRes, promoRes] = await Promise.allSettled([
+        api.get('/products?is_active=true&sort_by=view_ratio&take=8')
+          .catch(() => api.get('/products?is_active=true&take=8')),
         api.get('/categories'),
+        api.get('/promotions/active'),
       ]);
       if (prodsRes.status === 'fulfilled') setFeaturedProducts(prodsRes.value.data.data ?? []);
       if (catsRes.status === 'fulfilled') setApiCategories(catsRes.value.data.data ?? []);
+      if (promoRes.status === 'fulfilled') setActivePromotions(promoRes.value.data.data ?? []);
+      setProductsLoading(false);
     };
     fetchHomeData();
   }, []);
+
+  const getHomeDiscount = (item: any): number => {
+    if (!item) return 0;
+    const global = activePromotions.find(p => p.promotion_scope === 'global' && p.discount_type === 'percentage');
+    const category = activePromotions.find(p => p.promotion_scope === 'category' && p.category_id === item.category_id && p.discount_type === 'percentage');
+    const best = [global, category].filter(Boolean).reduce((max: any, p: any) =>
+      !max || Number(p.discount_value) > Number(max.discount_value) ? p : max, null);
+    return best ? Number(best.discount_value) : 0;
+  };
+
+  const isNewProduct = (item: any): boolean => {
+    if (!item?.created_at) return false;
+    return Date.now() - new Date(item.created_at).getTime() < 3 * 24 * 60 * 60 * 1000;
+  };
 
   const heroSlides = [
     {
@@ -38,14 +60,14 @@ export default function Home() {
     {
       tag: 'Now Available',
       title: 'Octa West\n2026',
-      subtitle: 'Where tradition meets avant-garde — bold, artistic, unapologetically modern.',
+      subtitle: 'Where tradition meets avant-garde, bold, artistic, unapologetically modern.',
       cta: 'Explore Octa West',
       ctaLink: '/products',
     },
     {
       tag: 'Exclusive Collection',
       title: 'The Desire\nEdit',
-      subtitle: 'Our most coveted pieces — luxury redefined, one stitch at a time.',
+      subtitle: 'Our most coveted pieces, luxury redefined, one stitch at a time.',
       cta: 'View Desire',
       ctaLink: '/products',
     },
@@ -178,7 +200,7 @@ export default function Home() {
                 {slide.subtitle}
               </p>
               <div className="hero-ctas" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <a href={slide.ctaLink} style={{
+                <a href={slide.ctaLink} className="hero-cta-primary" style={{
                   display: 'inline-block',
                   padding: '14px 32px',
                   background: '#000',
@@ -191,7 +213,7 @@ export default function Home() {
                 }}>
                   {slide.cta}
                 </a>
-                <a href="/about" style={{
+                <a href="/about" className="hero-cta-secondary" style={{
                   display: 'inline-block',
                   padding: '14px 32px',
                   background: 'transparent',
@@ -208,10 +230,11 @@ export default function Home() {
               </div>
 
               {/* Slide indicators */}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '56px', alignItems: 'center' }}>
+              <div className="hero-indicators" style={{ display: 'flex', gap: '8px', marginTop: '56px', alignItems: 'center' }}>
                 {heroSlides.map((_, i) => (
                   <button
                     key={i}
+                    className={`hero-indicator${currentSlide === i ? ' hero-indicator-active' : ''}`}
                     onClick={() => setCurrentSlide(i)}
                     style={{
                       width: currentSlide === i ? '36px' : '8px',
@@ -224,7 +247,7 @@ export default function Home() {
                     }}
                   />
                 ))}
-                <span style={{ fontSize: '11px', color: '#bbb', marginLeft: '8px', letterSpacing: '1px' }}>
+                <span className="hero-counter" style={{ fontSize: '11px', color: '#bbb', marginLeft: '8px', letterSpacing: '1px' }}>
                   {String(currentSlide + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}
                 </span>
               </div>
@@ -355,6 +378,7 @@ export default function Home() {
       </section>
 
       {/* ─── Featured Products ────────────────────────────── */}
+      {(productsLoading || featuredProducts.length > 0) && (
       <section className="home-section-sm">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
@@ -371,7 +395,16 @@ export default function Home() {
         </div>
 
         <div className="products-grid">
-          {(featuredProducts.length > 0 ? featuredProducts.slice(0, 8) : Array.from({ length: 8 })).map((item: any, idx) => {
+          {productsLoading
+            ? Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} className="product-card">
+                  <div style={{ aspectRatio: '3/4', background: 'linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite', marginBottom: '14px' }} />
+                  <div style={{ height: '10px', width: '60%', background: '#f0f0f0', borderRadius: 2, marginBottom: '8px' }} />
+                  <div style={{ height: '14px', width: '80%', background: '#ebebeb', borderRadius: 2, marginBottom: '8px' }} />
+                  <div style={{ height: '14px', width: '40%', background: '#f0f0f0', borderRadius: 2 }} />
+                </div>
+              ))
+            : featuredProducts.slice(0, 8).map((item: any, idx) => {
             const pid = item?.id ?? `p${idx}`;
             const isHovered = hoveredProduct === pid;
             return (
@@ -380,7 +413,7 @@ export default function Home() {
                 className="product-card"
                 onMouseEnter={() => setHoveredProduct(pid)}
                 onMouseLeave={() => setHoveredProduct(null)}
-                onClick={() => item && (window.location.href = `/products/${item.id}`)}
+                onClick={() => item && (window.location.href = `/products/${item.slug || item.id}`)}
                 style={{ cursor: item ? 'pointer' : 'default' }}
               >
                 {/* Image */}
@@ -423,16 +456,19 @@ export default function Home() {
                     Quick View
                   </div>
 
-                  {item?.is_featured && (
-                    <span style={{
-                      position: 'absolute', top: '10px', left: '10px',
-                      background: '#000', color: '#fff',
-                      fontSize: '9px', fontWeight: 700, letterSpacing: '1.5px',
-                      padding: '4px 9px', textTransform: 'uppercase',
-                    }}>
-                      Featured
-                    </span>
-                  )}
+                  {/* SALE / NEW tags */}
+                  <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: 4, zIndex: 2 }}>
+                    {getHomeDiscount(item) > 0 && (
+                      <span style={{ background: '#c8a96e', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '4px 9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                        SALE
+                      </span>
+                    )}
+                    {isNewProduct(item) && (
+                      <span style={{ background: '#111', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '4px 9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                        NEW
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Info */}
@@ -447,14 +483,26 @@ export default function Home() {
                     {item.available_sizes.slice(0, 4).join(' · ')}{item.available_sizes.length > 4 ? ' +more' : ''}
                   </p>
                 )}
-                <p style={{ fontSize: '14px', fontWeight: 700, color: '#000' }}>
-                  {item ? `PKR ${Number(item.price).toLocaleString()}` : '—'}
-                </p>
+                {(() => {
+                  if (!item) return <p style={{ fontSize: '14px', fontWeight: 700, color: '#000' }}>—</p>;
+                  const disc = getHomeDiscount(item);
+                  const salePrice = disc > 0 ? Math.round(Number(item.price) * (1 - disc / 100)) : 0;
+                  return disc > 0 ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <p style={{ fontSize: '14px', fontWeight: 800, color: '#c8a96e', margin: 0 }}>PKR {salePrice.toLocaleString()}</p>
+                      <p style={{ fontSize: '12px', color: '#aaa', textDecoration: 'line-through', margin: 0 }}>PKR {Number(item.price).toLocaleString()}</p>
+                      <span style={{ fontSize: '9px', fontWeight: 800, background: '#c8a96e', color: '#fff', padding: '2px 6px', borderRadius: 3 }}>{disc}% OFF</span>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '14px', fontWeight: 700, color: '#000', margin: 0 }}>PKR {Number(item.price).toLocaleString()}</p>
+                  );
+                })()}
               </div>
             );
           })}
         </div>
       </section>
+      )}
 
       {/* ─── Brand Story ──────────────────────────────────── */}
       <section className="brand-section" style={{ background: '#0e0e0e', color: '#fff' }}>
@@ -468,7 +516,7 @@ export default function Home() {
               Crafted with Intention.<br />Worn with Pride.
             </h2>
             <p style={{ fontSize: '15px', color: '#666', lineHeight: 1.9, marginBottom: '36px' }}>
-              MirhaPret was born from a deep love for Pakistani craftsmanship. Every stitch, every fabric, every silhouette is chosen to celebrate the modern Pakistani woman — bold, elegant, and unapologetically herself.
+              MirhaPret was born from a deep love for Pakistani craftsmanship. Every stitch, every fabric, every silhouette is chosen to celebrate the modern Pakistani woman, bold, elegant, and unapologetically herself.
             </p>
             <a href="/about" style={{
               display: 'inline-block',
@@ -483,7 +531,7 @@ export default function Home() {
 
           <div className="brand-stats brand-stats-grid" style={{ flex: '0 0 42%', gap: '1px', background: 'rgba(255,255,255,0.05)' }}>
             {[
-              { num: '500+', label: 'Products' },
+              { num: '300+', label: 'Products' },
               { num: '10K+', label: 'Happy Customers' },
               { num: '3', label: 'Collections' },
               { num: '2016', label: 'Est.' },
@@ -516,7 +564,7 @@ export default function Home() {
         <div className="testimonials-grid">
           {[
             { name: 'Ayesha K.', city: 'Karachi', text: 'The quality is unmatched. I get compliments every time I wear MirhaPret. My wardrobe is complete.', rating: 5 },
-            { name: 'Zainab A.', city: 'Lahore', text: 'Each piece feels intentional. The attention to detail is incredible — worth every rupee spent.', rating: 5 },
+            { name: 'Zainab A.', city: 'Lahore', text: 'Each piece feels intentional. The attention to detail is incredible, worth every rupee spent.', rating: 5 },
             { name: 'Hira M.', city: 'Islamabad', text: 'Finally a brand that understands modern Pakistani fashion. Absolutely obsessed with my purchases!', rating: 5 },
           ].map((t, i) => (
             <div key={i} className="testimonial-card" style={{ background: '#fff', padding: '36px 32px', borderTop: '3px solid #000', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
@@ -546,6 +594,68 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─── Journal / Blog ───────────────────────────────── */}
+      <section style={{ borderTop: '1px solid #e8e8e8', padding: 'clamp(56px, 6vw, 96px) clamp(24px, 5vw, 60px)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48, flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: 10 }}>
+              The MirhaPret Journal
+            </p>
+            <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
+              Style, Craft & Culture
+            </h2>
+          </div>
+          <a href="/blog" style={{
+            fontSize: '11px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
+            color: '#000', textDecoration: 'none', borderBottom: '1.5px solid #000', paddingBottom: 2, whiteSpace: 'nowrap',
+          }}>
+            All Articles →
+          </a>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }} className="home-blog-grid">
+          {blogs.slice(0, 3).map(post => (
+            <a key={post.slug} href={`/blog/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+              onMouseEnter={e => { (e.currentTarget.querySelector('.blog-title') as HTMLElement).style.color = '#c8a96e'; }}
+              onMouseLeave={e => { (e.currentTarget.querySelector('.blog-title') as HTMLElement).style.color = '#000'; }}
+            >
+              {/* Cover */}
+              <div style={{
+                height: 220, background: post.coverGradient,
+                marginBottom: 22, overflow: 'hidden', position: 'relative',
+              }}>
+                <div style={{
+                  position: 'absolute', bottom: 12, left: 16,
+                  fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
+                  color: '#c8a96e', background: 'rgba(0,0,0,0.55)', padding: '4px 10px',
+                }}>
+                  {post.category}
+                </div>
+              </div>
+              {/* Meta */}
+              <p style={{ fontSize: 11, color: '#aaa', marginBottom: 10 }}>
+                {post.date} · {post.readTime}
+              </p>
+              <h3 className="blog-title" style={{
+                fontSize: 16, fontWeight: 700, letterSpacing: '-0.2px', lineHeight: 1.4,
+                color: '#000', marginBottom: 10, transition: 'color 0.2s',
+              }}>
+                {post.title}
+              </h3>
+              <p style={{ fontSize: 13, color: '#666', lineHeight: 1.7 }}>
+                {post.excerpt.slice(0, 110)}…
+              </p>
+            </a>
+          ))}
+        </div>
+
+        <style>{`
+          @media (max-width: 768px) {
+            .home-blog-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+          }
+        `}</style>
+      </section>
+
       {/* ─── Newsletter ───────────────────────────────────── */}
       <section style={{ borderTop: '1px solid #e8e8e8' }}>
         <div className="newsletter-inner" style={{ padding: '96px 60px' }}>
@@ -555,7 +665,7 @@ export default function Home() {
               Get Early Access
             </h2>
             <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7 }}>
-              New drops, exclusive offers, and styling inspiration — straight to your inbox.
+              New drops, exclusive offers, and styling inspiration, straight to your inbox.
             </p>
           </div>
           <div style={{ flex: 1, maxWidth: '480px' }}>

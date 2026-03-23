@@ -208,20 +208,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setMockOtp(String(Math.floor(100000 + Math.random() * 900000)));
-    setCurrentStep('email-confirmation');
-  };
-
-  const handleEmailConfirmation = () => {
-    setOtpSent(true);
-    setOtp('');
-    setOtpError('');
-    // OTP step is skipped — we go straight to order submission on "confirm"
-  };
-
-  const handleOtpVerification = async () => {
+  const placeOrder = async () => {
     setOrderError('');
     setOrderLoading(true);
 
@@ -273,6 +260,32 @@ export default function CheckoutPage() {
     } finally {
       setOrderLoading(false);
     }
+  };
+
+  const handlePaymentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLoggedIn) {
+      // Logged-in users skip OTP — place order immediately
+      placeOrder();
+    } else {
+      // Guest users go through OTP email verification
+      setMockOtp(String(Math.floor(100000 + Math.random() * 900000)));
+      setCurrentStep('email-confirmation');
+    }
+  };
+
+  const handleEmailConfirmation = () => {
+    setOtpSent(true);
+    setOtp('');
+    setOtpError('');
+  };
+
+  const handleOtpVerification = async () => {
+    if (otp !== mockOtp) {
+      setOtpError('Incorrect code. Please try again.');
+      return;
+    }
+    placeOrder();
   };
 
   return (
@@ -368,6 +381,7 @@ export default function CheckoutPage() {
       <PageHeader />
 
       <section
+        className="checkout-layout-section"
         style={{
           paddingTop: '100px',
           paddingBottom: '60px',
@@ -404,14 +418,15 @@ export default function CheckoutPage() {
               </a>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: currentStep === 'confirmation' ? '1fr' : '1.5fr 1fr', gap: '60px' }}>
+            <div className="checkout-grid" style={{ display: 'grid', gridTemplateColumns: currentStep === 'confirmation' ? '1fr' : '1.5fr 1fr', gap: '60px' }}>
               {/* Main Content */}
               <div>
                 {/* Progress Steps */}
-                <div style={{ display: 'flex', gap: '24px', marginBottom: '48px', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="checkout-steps" style={{ display: 'flex', gap: '24px', marginBottom: '48px', alignItems: 'center', justifyContent: 'center' }}>
                   {(['shipping', 'billing', 'payment', 'email-confirmation', 'confirmation'] as CheckoutStep[]).map((step, idx) => (
                     <div key={step} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div
+                        className="checkout-step-circle"
                         style={{
                           width: '40px',
                           height: '40px',
@@ -428,10 +443,10 @@ export default function CheckoutPage() {
                       >
                         {idx + 1}
                       </div>
-                      <span style={{ fontSize: '14px', fontWeight: 600, textTransform: 'capitalize', color: currentStep === step ? '#000000' : '#999999' }}>
+                      <span className="checkout-step-label" style={{ fontSize: '14px', fontWeight: 600, textTransform: 'capitalize', color: currentStep === step ? '#000000' : '#999999' }}>
                         {step === 'email-confirmation' ? 'Confirm Email' : step}
                       </span>
-                      {idx < 4 && <div style={{ width: '24px', height: '1px', background: '#e0e0e0' }} />}
+                      {idx < 4 && <div className="checkout-step-divider" style={{ width: '24px', height: '1px', background: '#e0e0e0' }} />}
                     </div>
                   ))}
                 </div>
@@ -768,21 +783,27 @@ export default function CheckoutPage() {
                       </button>
                       <button
                         type="submit"
+                        disabled={orderLoading}
                         style={{
                           flex: 1,
                           padding: '14px',
-                          background: '#000000',
+                          background: orderLoading ? '#666' : '#000000',
                           color: '#ffffff',
                           border: '1px solid #000000',
                           fontSize: '14px',
                           fontWeight: 600,
-                          cursor: 'pointer',
+                          cursor: orderLoading ? 'not-allowed' : 'pointer',
                           fontFamily: 'system-ui',
                         }}
                       >
-                        Place Order
+                        {orderLoading ? 'Placing Order…' : isLoggedIn ? 'Confirm Order' : 'Place Order'}
                       </button>
                     </div>
+                    {orderError && (
+                      <p style={{ color: '#cc0000', fontSize: '13px', marginTop: '12px', textAlign: 'center' }}>
+                        {orderError}
+                      </p>
+                    )}
                   </form>
                 )}
 

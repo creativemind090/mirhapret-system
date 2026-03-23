@@ -14,9 +14,18 @@ export default function ProductsPage() {
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(true);
   const [wishlist, setWishlist] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('wishlist_ids');
+      if (saved) setWishlist(JSON.parse(saved));
+    } catch {}
+  }, []);
+
   const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([{ id: 'all', name: 'All Products' }]);
+  const [activePromotions, setActivePromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -24,9 +33,10 @@ export default function ProductsPage() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const [catsRes, prodsRes] = await Promise.allSettled([
+      const [catsRes, prodsRes, promoRes] = await Promise.allSettled([
         api.get('/categories'),
         api.get('/products?take=100'),
+        api.get('/promotions/active'),
       ]);
       if (catsRes.status === 'fulfilled') {
         const cats = catsRes.value.data.data ?? [];
@@ -35,6 +45,7 @@ export default function ProductsPage() {
       if (prodsRes.status === 'fulfilled') {
         setAllProducts((prodsRes.value.data.data ?? []).map((p: any) => ({
           id: p.id,
+          slug: p.slug,
           name: p.name,
           category_id: p.category_id,
           category: p.category?.name ?? '',
@@ -43,7 +54,11 @@ export default function ProductsPage() {
           inStock: p.is_active,
           main_image: p.main_image,
           is_featured: p.is_featured,
+          created_at: p.created_at,
         })));
+      }
+      if (promoRes.status === 'fulfilled') {
+        setActivePromotions(promoRes.value.data.data ?? []);
       }
       setLoading(false);
     };
@@ -58,6 +73,19 @@ export default function ProductsPage() {
     return true;
   });
 
+  const isNew = (product: any): boolean => {
+    if (!product.created_at) return false;
+    return Date.now() - new Date(product.created_at).getTime() < 3 * 24 * 60 * 60 * 1000;
+  };
+
+  const getDiscount = (product: any): number => {
+    const global = activePromotions.find(p => p.promotion_scope === 'global' && p.discount_type === 'percentage');
+    const category = activePromotions.find(p => p.promotion_scope === 'category' && p.category_id === product.category_id && p.discount_type === 'percentage');
+    const best = [global, category].filter(Boolean).reduce((max: any, p: any) =>
+      !max || Number(p.discount_value) > Number(max.discount_value) ? p : max, null);
+    return best ? Number(best.discount_value) : 0;
+  };
+
   const handleCategoryChange = (id: string) => {
     setSelectedCategory(id);
     const params = new URLSearchParams();
@@ -65,8 +93,18 @@ export default function ProductsPage() {
     window.history.pushState(null, '', `/products${params.toString() ? '?' + params : ''}`);
   };
 
+  const collectionJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'MirhaPret Collection',
+    description: 'Browse premium Pakistani pret, Octa West, and Desire collections.',
+    url: 'https://mirhapret.com/products',
+    provider: { '@type': 'Organization', name: 'MirhaPret' },
+  };
+
   return (
     <div style={{ background: '#fff', color: '#000' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <SiteHeader />
 
       {/* ─── Page Hero ─────────────────────────────────────── */}
@@ -224,7 +262,7 @@ export default function ProductsPage() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: showFilters ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)', gap: '24px' }}>
+          <div className="products-grid" style={{ display: 'grid', gridTemplateColumns: showFilters ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)', gap: '24px' }}>
             {filteredProducts.map(product => {
               const isHovered = hoveredProduct === product.id;
               return (
@@ -232,7 +270,7 @@ export default function ProductsPage() {
                   key={product.id}
                   onMouseEnter={() => setHoveredProduct(product.id)}
                   onMouseLeave={() => setHoveredProduct(null)}
-                  onClick={() => window.location.href = `/products/${product.id}`}
+                  onClick={() => window.location.href = `/products/${product.slug || product.id}`}
                   style={{ cursor: 'pointer', opacity: product.inStock ? 1 : 0.5 }}
                 >
                   {/* Image */}
@@ -251,6 +289,20 @@ export default function ProductsPage() {
                         <span style={{ fontSize: '9px', color: '#ccc', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '6px' }}>MirhaPret</span>
                       </div>
                     )}
+
+                    {/* SALE / NEW tags */}
+                    <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: 4, zIndex: 2 }}>
+                      {getDiscount(product) > 0 && (
+                        <span style={{ background: '#c8a96e', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '4px 9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                          SALE
+                        </span>
+                      )}
+                      {isNew(product) && (
+                        <span style={{ background: '#111', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '4px 9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+                          NEW
+                        </span>
+                      )}
+                    </div>
 
                     {/* Quick view */}
                     <div style={{
@@ -297,9 +349,27 @@ export default function ProductsPage() {
                       {product.sizes.slice(0, 4).join(' · ')}{product.sizes.length > 4 ? ' +more' : ''}
                     </p>
                   )}
-                  <p style={{ fontSize: '14px', fontWeight: 700, color: '#000' }}>
-                    PKR {product.price.toLocaleString()}
-                  </p>
+                  {(() => {
+                    const disc = getDiscount(product);
+                    const salePrice = disc > 0 ? Math.round(product.price * (1 - disc / 100)) : 0;
+                    return disc > 0 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <p style={{ fontSize: '14px', fontWeight: 800, color: '#c8a96e', margin: 0 }}>
+                          PKR {salePrice.toLocaleString()}
+                        </p>
+                        <p style={{ fontSize: '12px', color: '#aaa', textDecoration: 'line-through', margin: 0 }}>
+                          PKR {product.price.toLocaleString()}
+                        </p>
+                        <span style={{ fontSize: '10px', fontWeight: 700, background: '#c8a96e', color: '#fff', padding: '2px 6px', borderRadius: 4 }}>
+                          {disc}% OFF
+                        </span>
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '14px', fontWeight: 700, color: '#000', margin: 0 }}>
+                        PKR {product.price.toLocaleString()}
+                      </p>
+                    );
+                  })()}
                 </div>
               );
             })}

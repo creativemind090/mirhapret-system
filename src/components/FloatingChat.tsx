@@ -1,101 +1,268 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { FaWhatsapp } from 'react-icons/fa';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { MdSupportAgent } from 'react-icons/md';
-import { IoClose } from 'react-icons/io5';
-import { IoChatbubbles } from 'react-icons/io5';
+import { IoClose, IoSend, IoChevronBack, IoChevronForward } from 'react-icons/io5';
+import { FaWhatsapp } from 'react-icons/fa';
 
+const CHATBOT_URL = process.env.NEXT_PUBLIC_CHATBOT_URL || 'http://localhost:3004';
+const STORAGE_KEY = 'mirhapret_chat_session';
+const MAX_STORED_MESSAGES = 40;
+
+interface Product {
+  id: string;
+  slug?: string;
+  name: string;
+  price: string | number;
+  images?: string[];
+  image_url?: string;
+}
+
+interface Message {
+  role: 'user' | 'assistant';
+  text: string;
+  products?: Product[];
+  isTyping?: boolean;
+}
+
+interface StoredSession {
+  messages: Message[];
+  history: Array<{ role: 'user' | 'assistant'; content: string }>;
+}
+
+const WELCOME: Message = {
+  role: 'assistant',
+  text: "Assalam o Alaikum! I'm Mira, your MirhaPret shopping assistant. How can I help you today?",
+};
+
+function loadSession(): StoredSession | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as StoredSession;
+  } catch {
+    return null;
+  }
+}
+
+function saveSession(messages: Message[], history: StoredSession['history']) {
+  try {
+    const session: StoredSession = {
+      messages: messages.filter(m => !m.isTyping).slice(-MAX_STORED_MESSAGES),
+      history: history.slice(-MAX_STORED_MESSAGES),
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+  } catch {}
+}
+
+// ── Product Carousel ─────────────────────────────────────────────────────────
+function ProductCarousel({ products }: { products: Product[] }) {
+  const router = useRouter();
+  const [idx, setIdx] = useState(0);
+
+  const prev = () => setIdx(i => (i - 1 + products.length) % products.length);
+  const next = () => setIdx(i => (i + 1) % products.length);
+
+  const product = products[idx];
+  const imgSrc =
+    (product.images && product.images.length > 0 ? product.images[0] : null) ||
+    product.image_url ||
+    null;
+
+  return (
+    <div style={{ marginTop: '6px', width: '100%' }}>
+      <div
+        style={{
+          position: 'relative',
+          background: '#f9f9f9',
+          border: '1px solid #e0e0e0',
+          overflow: 'hidden',
+          cursor: 'pointer',
+        }}
+        onClick={() => router.push(`/products/${product.slug || product.id}`)}
+        title={`View ${product.name}`}
+      >
+        {/* Product Image */}
+        <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden', background: '#eee', position: 'relative' }}>
+          {imgSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imgSrc}
+              alt={product.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: '13px' }}>
+              No image
+            </div>
+          )}
+        </div>
+
+        {/* Product Info */}
+        <div style={{ padding: '8px 10px' }}>
+          <p style={{ margin: 0, fontSize: '12px', fontWeight: 600, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {product.name}
+          </p>
+          <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#555' }}>
+            PKR {Number(product.price).toLocaleString()}
+          </p>
+        </div>
+      </div>
+
+      {/* Navigation (only if multiple) */}
+      {products.length > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
+          <button
+            onClick={prev}
+            style={{ background: '#000', color: '#fff', border: 'none', cursor: 'pointer', padding: '4px 8px', display: 'flex', alignItems: 'center' }}
+          >
+            <IoChevronBack size={14} />
+          </button>
+          <span style={{ fontSize: '11px', color: '#777' }}>
+            {idx + 1} / {products.length}
+          </span>
+          <button
+            onClick={next}
+            style={{ background: '#000', color: '#fff', border: 'none', cursor: 'pointer', padding: '4px 8px', display: 'flex', alignItems: 'center' }}
+          >
+            <IoChevronForward size={14} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Main Component ────────────────────────────────────────────────────────────
 export function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Array<{ type: 'user' | 'bot'; text: string; isTyping?: boolean }>>([
-    { type: 'bot', text: 'Hello! How can we help you today?' },
-  ]);
-  const [inputValue, setInputValue] = useState('');
-  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([WELCOME]);
+  const [history, setHistory] = useState<StoredSession['history']>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const sessionLoaded = useRef(false);
 
-  const typeMessage = (text: string, callback: (fullText: string) => void) => {
-    let index = 0;
-    const interval = setInterval(() => {
-      index++;
-      callback(text.substring(0, index));
-      if (index === text.length) {
-        clearInterval(interval);
+  // Load session from localStorage on first open
+  useEffect(() => {
+    if (isOpen && !sessionLoaded.current) {
+      sessionLoaded.current = true;
+      const session = loadSession();
+      if (session?.messages?.length) {
+        setMessages(session.messages);
+        setHistory(session.history ?? []);
       }
-    }, 30);
-  };
+    }
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim() || isWaitingForResponse) return;
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-    // Add user message
-    setMessages((prev) => [...prev, { type: 'user', text: inputValue }]);
-    setInputValue('');
-    setIsWaitingForResponse(true);
+  const sendMessage = useCallback(async () => {
+    const text = input.trim();
+    if (!text || isLoading) return;
 
-    // Show typing indicator for at least 2 seconds
-    setMessages((prev) => [...prev, { type: 'bot', text: '...', isTyping: true }]);
+    const newUserMsg: Message = { role: 'user', text };
+    const typingMsg: Message = { role: 'assistant', text: '', isTyping: true };
 
-    setTimeout(() => {
-      const responses = [
-        'Thanks for your message! Our team will get back to you soon.',
-        'We appreciate your inquiry. Feel free to chat with us on WhatsApp for faster response!',
-        'Is there anything else I can help you with?',
-        'You can also reach us on WhatsApp for immediate assistance.',
+    setInput('');
+    setMessages(prev => [...prev, newUserMsg, typingMsg]);
+    setIsLoading(true);
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+
+    try {
+      const res = await fetch(`${CHATBOT_URL}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, history, token }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+
+      const reply: string = data.reply;
+      const products: Product[] | undefined = data.products;
+
+      const newHistory: StoredSession['history'] = [
+        ...history,
+        { role: 'user', content: text },
+        { role: 'assistant', content: reply },
       ];
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
 
-      // Remove typing indicator and add bot message with typewriter effect
-      setMessages((prev) => {
-        const filtered = prev.filter((msg) => !msg.isTyping);
-        return [...filtered, { type: 'bot', text: '', isTyping: false }];
+      const replyMsg: Message = { role: 'assistant', text: '', products };
+
+      setMessages(prev => {
+        const withoutTyping = prev.filter(m => !m.isTyping);
+        return [...withoutTyping, replyMsg];
       });
 
       // Typewriter effect
-      typeMessage(randomResponse, (partialText) => {
-        setMessages((prev) => {
+      let i = 0;
+      const interval = setInterval(() => {
+        i++;
+        setMessages(prev => {
           const updated = [...prev];
-          const lastMsg = updated[updated.length - 1];
-          if (lastMsg && lastMsg.type === 'bot') {
-            lastMsg.text = partialText;
-          }
+          const last = updated[updated.length - 1];
+          if (last?.role === 'assistant' && !last.isTyping) last.text = reply.substring(0, i);
           return updated;
         });
-      });
+        if (i >= reply.length) {
+          clearInterval(interval);
+          // Save session after typewriter finishes
+          setMessages(prev => {
+            saveSession(prev, newHistory);
+            return prev;
+          });
+        }
+      }, 16);
 
-      // After typewriter completes, allow new messages
-      setTimeout(() => {
-        setIsWaitingForResponse(false);
-      }, randomResponse.length * 30 + 100);
-    }, 2000);
+      setHistory(newHistory);
+    } catch (err: any) {
+      const errMsg: Message = {
+        role: 'assistant',
+        text: err?.message || "Sorry, I'm having trouble connecting. Please try again or reach us on WhatsApp.",
+      };
+      setMessages(prev => [...prev.filter(m => !m.isTyping), errMsg]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [input, isLoading, history]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
   };
 
-  const whatsappLink = `https://wa.me/923215551851?text=Hi%20MirhaPret%2C%20I%20have%20a%20question`;
+  const clearChat = () => {
+    setMessages([WELCOME]);
+    setHistory([]);
+    localStorage.removeItem(STORAGE_KEY);
+  };
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen(o => !o)}
         style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          width: '56px',
-          height: '56px',
-          borderRadius: '50%',
-          background: '#000000',
-          color: '#ffffff',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 999,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          fontSize: '24px',
+          position: 'fixed', bottom: '24px', right: '24px',
+          width: '56px', height: '56px', borderRadius: '50%',
+          background: '#000', color: '#fff', border: 'none',
+          cursor: 'pointer', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 999,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
         }}
-        title="Open chat"
+        title="Chat with Mira"
       >
         {isOpen ? <IoClose size={24} /> : <MdSupportAgent size={24} />}
       </button>
@@ -104,173 +271,125 @@ export function FloatingChat() {
       {isOpen && (
         <div
           style={{
-            position: 'fixed',
-            bottom: '100px',
-            right: '24px',
-            width: '380px',
-            height: '500px',
-            background: '#ffffff',
-            border: '1px solid #e0e0e0',
-            borderRadius: '0',
-            boxShadow: '0 5px 40px rgba(0,0,0,0.16)',
-            display: 'flex',
-            flexDirection: 'column',
-            zIndex: 999,
-            fontFamily: 'system-ui',
+            position: 'fixed', bottom: '100px', right: '24px',
+            width: '340px', height: '540px',
+            background: '#fff', border: '1px solid #e0e0e0',
+            boxShadow: '0 5px 40px rgba(0,0,0,0.18)',
+            display: 'flex', flexDirection: 'column',
+            zIndex: 999, fontFamily: 'system-ui, sans-serif',
           }}
         >
           {/* Header */}
-          <div
-            style={{
-              background: '#000000',
-              color: '#ffffff',
-              padding: '16px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <MdSupportAgent size={24} />
+          <div style={{ background: '#000', color: '#fff', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <MdSupportAgent size={20} />
               <div>
-                <p style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 4px' }}>MirhaPret Support</p>
-                <p style={{ fontSize: '12px', color: '#cccccc', margin: 0 }}>We typically reply in minutes</p>
+                <p style={{ margin: 0, fontSize: '13px', fontWeight: 700 }}>Mira — MirhaPret</p>
+                <p style={{ margin: 0, fontSize: '10px', color: '#aaa' }}>AI Shopping Assistant</p>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <button
+                onClick={clearChat}
+                title="Clear chat"
+                style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: '10px', padding: 0 }}
+              >
+                Clear
+              </button>
               <a
-                href={`https://wa.me/923215551851?text=Hi%20MirhaPret%2C%20I%20have%20a%20question`}
+                href="https://wa.me/923244577066?text=Hi%20MirhaPret%2C%20I%20have%20a%20question"
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#25D366',
-                  cursor: 'pointer',
-                  padding: '0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                }}
                 title="Chat on WhatsApp"
+                style={{ color: '#25D366', display: 'flex' }}
               >
-                <FaWhatsapp size={20} />
+                <FaWhatsapp size={18} />
               </a>
               <button
                 onClick={() => setIsOpen(false)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#ffffff',
-                  fontSize: '20px',
-                  cursor: 'pointer',
-                  padding: '0',
-                  width: '24px',
-                  height: '24px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+                style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: 0 }}
               >
-                <IoClose size={20} />
+                <IoClose size={18} />
               </button>
             </div>
           </div>
 
           {/* Messages */}
-          <div
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}
-          >
+          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start',
-                }}
-              >
-                <div
-                  style={{
-                    maxWidth: '70%',
-                    padding: '10px 14px',
-                    borderRadius: '0',
-                    background: msg.type === 'user' ? '#000000' : '#f0f0f0',
-                    color: msg.type === 'user' ? '#ffffff' : '#000000',
-                    fontSize: '13px',
-                    lineHeight: 1.5,
-                    minHeight: msg.isTyping ? '20px' : 'auto',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {msg.isTyping ? (
-                    <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-                      <span style={{ animation: 'blink 1.4s infinite' }}>.</span>
-                      <span style={{ animation: 'blink 1.4s infinite 0.2s' }}>.</span>
-                      <span style={{ animation: 'blink 1.4s infinite 0.4s' }}>.</span>
-                      <style>{`
-                        @keyframes blink {
-                          0%, 20%, 50%, 80%, 100% { opacity: 1; }
-                          40% { opacity: 0.3; }
-                          60% { opacity: 0.3; }
-                        }
-                      `}</style>
-                    </span>
-                  ) : (
-                    msg.text
+              <div key={idx} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div style={{ maxWidth: '85%', display: 'flex', flexDirection: 'column' }}>
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      background: msg.role === 'user' ? '#000' : '#f2f2f2',
+                      color: msg.role === 'user' ? '#fff' : '#111',
+                      fontSize: '13px', lineHeight: 1.5,
+                      whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    }}
+                  >
+                    {msg.isTyping ? <TypingDots /> : msg.text}
+                  </div>
+                  {/* Product Carousel */}
+                  {!msg.isTyping && msg.products && msg.products.length > 0 && (
+                    <ProductCarousel products={msg.products} />
                   )}
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
-          <div style={{ padding: '12px 16px', borderTop: '1px solid #e0e0e0', display: 'flex', gap: '8px' }}>
+          <div style={{ padding: '10px 12px', borderTop: '1px solid #e0e0e0', display: 'flex', gap: '8px', alignItems: 'center' }}>
             <input
+              ref={inputRef}
               type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleSendMessage();
-                }
-              }}
-              placeholder="Type a message..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask me anything..."
+              disabled={isLoading}
               style={{
-                flex: 1,
-                padding: '10px 12px',
-                border: '1px solid #e0e0e0',
-                fontSize: '13px',
-                fontFamily: 'system-ui',
-                boxSizing: 'border-box',
+                flex: 1, padding: '8px 11px',
+                border: '1px solid #ddd', fontSize: '13px',
+                fontFamily: 'system-ui, sans-serif', outline: 'none',
+                background: isLoading ? '#f9f9f9' : '#fff',
               }}
             />
             <button
-              onClick={handleSendMessage}
+              onClick={sendMessage}
+              disabled={isLoading || !input.trim()}
               style={{
-                padding: '10px 16px',
-                background: '#000000',
-                color: '#ffffff',
-                border: 'none',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                fontFamily: 'system-ui',
+                padding: '8px 11px',
+                background: isLoading || !input.trim() ? '#888' : '#000',
+                color: '#fff', border: 'none',
+                cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center',
               }}
             >
-              Send
+              <IoSend size={15} />
             </button>
           </div>
         </div>
       )}
     </>
+  );
+}
+
+function TypingDots() {
+  return (
+    <span style={{ display: 'inline-flex', gap: '4px', alignItems: 'center', height: '16px' }}>
+      {[0, 0.2, 0.4].map((delay, i) => (
+        <span
+          key={i}
+          style={{
+            width: '6px', height: '6px', borderRadius: '50%', background: '#555',
+            animation: `chatDot 1.2s ease-in-out ${delay}s infinite`,
+          }}
+        />
+      ))}
+      <style>{`@keyframes chatDot{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}`}</style>
+    </span>
   );
 }

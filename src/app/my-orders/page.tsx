@@ -21,6 +21,7 @@ export default function MyOrdersPage() {
   const { isLoggedIn, user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [orders, setOrders] = useState<any[]>([]);
+  const [error, setError] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function MyOrdersPage() {
         })));
       } catch {
         setOrders([]);
+        setError('Failed to load your orders. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -73,10 +75,16 @@ export default function MyOrdersPage() {
       <section style={{ padding: '60px', minHeight: '50vh' }}>
         {orders.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 20px' }}>
-            <p style={{ fontSize: '1.1rem', color: '#999', marginBottom: '32px' }}>You haven't placed any orders yet.</p>
-            <a href="/products" style={{ display: 'inline-block', padding: '15px 36px', background: '#000', color: '#fff', textDecoration: 'none', fontSize: '12px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase' }}>
-              Start Shopping
-            </a>
+            {error ? (
+              <p style={{ fontSize: '1.1rem', color: '#c0392b', marginBottom: '32px' }}>{error}</p>
+            ) : (
+              <>
+                <p style={{ fontSize: '1.1rem', color: '#999', marginBottom: '32px' }}>You haven't placed any orders yet.</p>
+                <a href="/products" style={{ display: 'inline-block', padding: '15px 36px', background: '#000', color: '#fff', textDecoration: 'none', fontSize: '12px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase' }}>
+                  Start Shopping
+                </a>
+              </>
+            )}
           </div>
         ) : (
           <div style={{ maxWidth: '900px', margin: '0 auto' }}>

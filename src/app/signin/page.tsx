@@ -88,6 +88,17 @@ export default function SignInPage() {
   const [forgotSuccess, setForgotSuccess] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
 
+  const switchTab = (tab: 'login' | 'register' | 'forgot') => {
+    setActiveTab(tab);
+    // Clear login fields/errors
+    setLoginEmail(''); setLoginPassword(''); setLoginError('');
+    // Clear register fields/errors
+    setRegFirst(''); setRegLast(''); setRegEmail(''); setRegPassword(''); setRegConfirm(''); setRegError('');
+    // Clear forgot fields/errors
+    setForgotEmail(''); setForgotOtp(''); setNewPassword(''); setConfirmNewPassword('');
+    setForgotError(''); setForgotSuccess(''); setForgotStep('email');
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
@@ -137,11 +148,7 @@ export default function SignInPage() {
     try {
       await api.post('/auth/reset-password', { email: forgotEmail, token: forgotOtp, new_password: newPassword });
       setForgotSuccess('Password reset successfully! Redirecting to sign in…');
-      setTimeout(() => {
-        setActiveTab('login');
-        setForgotStep('email');
-        setForgotEmail(''); setForgotOtp(''); setNewPassword(''); setConfirmNewPassword(''); setForgotSuccess('');
-      }, 2000);
+      setTimeout(() => { switchTab('login'); }, 2000);
     } catch (err: any) {
       const msg = err?.response?.data?.message || 'Failed to reset password.';
       setForgotError(Array.isArray(msg) ? msg[0] : msg);
@@ -207,7 +214,7 @@ export default function SignInPage() {
                 {(['login', 'register'] as const).map(tab => (
                   <button
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => switchTab(tab)}
                     style={{
                       flex: 1,
                       padding: '14px',
@@ -239,7 +246,7 @@ export default function SignInPage() {
                   <label style={labelStyle}>Password</label>
                   <input type="password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} placeholder="••••••••" style={inputStyle} />
                   <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '24px' }}>
-                    <button onClick={() => setActiveTab('forgot')} type="button" style={{ background: 'none', border: 'none', fontSize: '12px', color: '#666', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
+                    <button onClick={() => switchTab('forgot')} type="button" style={{ background: 'none', border: 'none', fontSize: '12px', color: '#666', cursor: 'pointer', textDecoration: 'underline', fontFamily: 'inherit' }}>
                       Forgot password?
                     </button>
                   </div>
@@ -284,7 +291,7 @@ export default function SignInPage() {
           {/* ── Forgot Password ── */}
           {activeTab === 'forgot' && (
             <div>
-              <button onClick={() => { setActiveTab('login'); setForgotStep('email'); }} style={{ background: 'none', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px', fontFamily: 'inherit', color: '#000' }}>
+              <button onClick={() => switchTab('login')} style={{ background: 'none', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '32px', fontFamily: 'inherit', color: '#000' }}>
                 ← Back to Sign In
               </button>
 

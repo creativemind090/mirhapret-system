@@ -58,12 +58,20 @@ export default function MyWishlistPage() {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
   };
 
-  if (isLoading) {
-    return null;
+  if (!isLoggedIn) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#ffffff' }}>
+        <p style={{ fontSize: '14px', color: '#666666' }}>Redirecting to sign in…</p>
+      </div>
+    );
   }
 
-  if (!isLoggedIn) {
-    return null;
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#ffffff' }}>
+        <p style={{ fontSize: '14px', color: '#666666' }}>Loading wishlist…</p>
+      </div>
+    );
   }
 
   return (
@@ -166,7 +174,7 @@ export default function MyWishlistPage() {
 
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button
-                        onClick={() => window.location.href = `/products/${product.id}`}
+                        onClick={() => window.location.href = `/products/${product.slug || product.id}`}
                         style={{
                           flex: 1,
                           padding: '8px 12px',
