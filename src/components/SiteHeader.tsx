@@ -27,7 +27,7 @@ export function SiteHeader() {
         textTransform: 'uppercase',
         fontWeight: 500,
       }}>
-        Free Shipping on Orders Above PKR 5,000 &nbsp;·&nbsp; New: Octa West 2026 Now Live
+        New: Octa West 2026 Now Live
       </div>
       <PageHeader isScrolled={isScrolled} />
       {/* Push content below the fixed nav (60px) + announcement bar already in flow (36px) */}

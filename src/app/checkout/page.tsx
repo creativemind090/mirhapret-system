@@ -87,9 +87,9 @@ export default function CheckoutPage() {
 
   // Calculations
   const subtotal = total;
-  const tax_amount = (subtotal - promoDiscount) * 0.17;
+  const tax_amount = 0;
   const shipping_amount = subtotal > 5000 ? 0 : 300;
-  const finalTotal = subtotal - promoDiscount + tax_amount + shipping_amount;
+  const finalTotal = subtotal - promoDiscount + shipping_amount;
 
   // Promo code validation via backend
   const handleApplyPromo = async () => {
@@ -799,6 +799,11 @@ export default function CheckoutPage() {
                         {orderLoading ? 'Placing Order…' : isLoggedIn ? 'Confirm Order' : 'Place Order'}
                       </button>
                     </div>
+                    {!isLoggedIn && (
+                      <p style={{ marginTop: '14px', fontSize: '12px', color: '#888', textAlign: 'center', lineHeight: '1.5' }}>
+                        <span style={{ color: '#c8a96e', fontWeight: 600 }}>Ordering as a guest?</span> Exchange requests are only available for orders placed through a registered account. <a href="/login" style={{ color: '#c8a96e', textDecoration: 'underline' }}>Sign in</a> or <a href="/register" style={{ color: '#c8a96e', textDecoration: 'underline' }}>create an account</a> to keep your order protected.
+                      </p>
+                    )}
                     {orderError && (
                       <p style={{ color: '#cc0000', fontSize: '13px', marginTop: '12px', textAlign: 'center' }}>
                         {orderError}
@@ -992,11 +997,6 @@ export default function CheckoutPage() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.95rem' }}>
                     <span style={{ color: '#666666' }}>Subtotal</span>
                     <span style={{ fontWeight: 600 }}>PKR {subtotal.toLocaleString()}</span>
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '0.95rem' }}>
-                    <span style={{ color: '#666666' }}>Tax (17%)</span>
-                    <span style={{ fontWeight: 600 }}>PKR {Math.round(tax_amount).toLocaleString()}</span>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', fontSize: '0.95rem', paddingBottom: '24px', borderBottom: '1px solid #e0e0e0' }}>

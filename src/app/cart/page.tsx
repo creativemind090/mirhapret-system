@@ -117,13 +117,6 @@ export default function CartPage() {
                 </button>
               </div>
 
-              {shipping > 0 && (
-                <div style={{ marginTop: '16px', padding: '14px 16px', background: '#fafafa', borderLeft: '3px solid #c8a96e' }}>
-                  <p style={{ fontSize: '12px', color: '#666', margin: 0, lineHeight: 1.6 }}>
-                    Add <strong>PKR {(5000 - subtotal).toLocaleString()}</strong> more for free shipping.
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         )}

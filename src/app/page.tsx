@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { PageHeader } from '@/components/PageHeader';
@@ -150,7 +151,7 @@ export default function Home() {
         textTransform: 'uppercase',
         fontWeight: 500,
       }}>
-        Free Shipping on Orders Above PKR 5,000 &nbsp;·&nbsp; New: Octa West 2026 Now Live
+        New: Octa West 2026 Now Live
       </div>
 
       {/* ─── Header ───────────────────────────────────────── */}
@@ -299,8 +300,7 @@ export default function Home() {
       <section className="usp-strip" style={{ borderTop: '1px solid #e8e8e8', borderBottom: '1px solid #e8e8e8' }}>
         <div className="usp-grid">
           {[
-            { icon: '✦', title: 'Free Shipping', sub: 'On orders above PKR 5,000' },
-            { icon: '↩', title: 'Easy Returns', sub: '7-day hassle-free returns' },
+            { icon: '↩', title: 'Easy Exchange', sub: '7-day hassle-free exchange' },
             { icon: '◈', title: '100% Authentic', sub: 'Genuine quality guaranteed' },
             { icon: '⬡', title: 'Secure Checkout', sub: 'Your data is always protected' },
           ].map((usp, i) => (
@@ -419,11 +419,14 @@ export default function Home() {
                 {/* Image */}
                 <div style={{ aspectRatio: '3/4', overflow: 'hidden', marginBottom: '14px', position: 'relative', background: '#f4f4f4' }}>
                   {item?.main_image ? (
-                    <img
+                    <Image
                       src={item.main_image}
                       alt={item.name}
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      priority={idx < 4}
                       style={{
-                        width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+                        objectFit: 'cover',
                         transform: isHovered ? 'scale(1.06)' : 'scale(1)',
                         transition: 'transform 0.5s ease',
                       }}

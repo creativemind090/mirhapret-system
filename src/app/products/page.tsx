@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import api from '@/lib/api';
@@ -263,7 +264,7 @@ export default function ProductsPage() {
           )}
 
           <div className="products-grid" style={{ display: 'grid', gridTemplateColumns: showFilters ? 'repeat(3, 1fr)' : 'repeat(4, 1fr)', gap: '24px' }}>
-            {filteredProducts.map(product => {
+            {filteredProducts.map((product, idx) => {
               const isHovered = hoveredProduct === product.id;
               return (
                 <div
@@ -276,10 +277,13 @@ export default function ProductsPage() {
                   {/* Image */}
                   <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: '#f4f4f4', position: 'relative', marginBottom: '14px' }}>
                     {product.main_image ? (
-                      <img
+                      <Image
                         src={product.main_image}
                         alt={product.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: isHovered ? 'scale(1.06)' : 'scale(1)', transition: 'transform 0.5s ease' }}
+                        fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                        priority={idx < 4}
+                        style={{ objectFit: 'cover', transform: isHovered ? 'scale(1.06)' : 'scale(1)', transition: 'transform 0.5s ease' }}
                       />
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: isHovered ? '#ececec' : '#f4f4f4', transition: 'background 0.3s' }}>

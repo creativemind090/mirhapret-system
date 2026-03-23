@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useCartContext } from '@/context/CartContext';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -243,7 +244,14 @@ export default function ProductDetailPage() {
           >
             <div style={{ transform: isImageZoomed ? 'scale(1.5)' : 'scale(1)', transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`, transition: isImageZoomed ? 'none' : 'transform 0.3s ease' }}>
               {product.images[selectedImageIndex] ? (
-                <img src={product.images[selectedImageIndex]} alt={product.name} style={{ width: '100%', height: '600px', objectFit: 'cover', display: 'block' }} />
+                <Image
+                  src={product.images[selectedImageIndex]}
+                  alt={product.name}
+                  width={800}
+                  height={600}
+                  priority={selectedImageIndex === 0}
+                  style={{ width: '100%', height: '600px', objectFit: 'cover', display: 'block' }}
+                />
               ) : (
                 <div style={{ width: '100%', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f0f0' }}>
                   <span style={{ fontSize: '4rem', fontWeight: 800, color: '#ddd', letterSpacing: '-2px' }}>
@@ -372,8 +380,7 @@ export default function ProductDetailPage() {
           {/* Trust row */}
           <div style={{ borderTop: '1px solid #e8e8e8', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
-              { icon: '✦', text: 'Free shipping on orders above PKR 5,000' },
-              { icon: '↩', text: '7-day hassle-free returns' },
+              { icon: '↩', text: '7-day hassle-free easy exchange' },
               { icon: '◈', text: '100% authentic, quality guaranteed' },
             ].map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
