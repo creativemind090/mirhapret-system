@@ -1,0 +1,25 @@
+{
+  "name": "videos",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "preview": "remotion studio src/index.ts",
+    "render:launching": "remotion render src/index.ts LaunchingSoon out/MirhaPret-LaunchingSoon.mp4",
+    "render:eid": "remotion render src/index.ts EidLaunch out/MirhaPret-EidLaunch.mp4",
+    "render": "npm run render:launching && npm run render:eid"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@remotion/cli": "^4.0.438",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "remotion": "^4.0.438",
+    "typescript": "^5.9.3"
+  }
+}
