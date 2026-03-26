@@ -8,7 +8,7 @@ import { SiteFooter } from '@/components/SiteFooter';
 export default function CartPage() {
   const { items, total, removeItem, updateQuantity, clearCart } = useCartContext();
   const subtotal = total;
-  const shipping = subtotal > 5000 ? 0 : 300;
+  const shipping = 300;
   const finalTotal = subtotal + shipping;
 
   return (
@@ -104,8 +104,8 @@ export default function CartPage() {
                   <span style={{ fontWeight: 600 }}>PKR {subtotal.toLocaleString()}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', paddingBottom: '24px', borderBottom: '1px solid #e8e8e8', fontSize: '14px' }}>
-                  <span style={{ color: '#666' }}>Shipping {shipping === 0 ? <span style={{ fontSize: '11px', color: '#1a7a4a', fontWeight: 700 }}>(FREE)</span> : ''}</span>
-                  <span style={{ fontWeight: 600 }}>{shipping === 0 ? 'Free' : `PKR ${shipping.toLocaleString()}`}</span>
+                  <span style={{ color: '#666' }}>Shipping</span>
+                  <span style={{ fontWeight: 600 }}>PKR {shipping.toLocaleString()}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '28px', fontSize: '1.1rem', fontWeight: 800 }}>
                   <span>Total</span>

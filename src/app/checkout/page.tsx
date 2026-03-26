@@ -102,7 +102,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [orderNumber, setOrderNumber] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [mockOtp, setMockOtp] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
   const [orderLoading, setOrderLoading] = useState(false);
@@ -291,24 +291,57 @@ export default function CheckoutPage() {
       // Logged-in users skip OTP — place order immediately
       placeOrder();
     } else {
-      // Guest users go through OTP email verification
-      setMockOtp(String(Math.floor(100000 + Math.random() * 900000)));
-      setCurrentStep('email-confirmation');
+      // Guest users go through OTP email verification — send via backend
+      setOtpSending(true);
+      try {
+        await api.post('/auth/checkout-otp', {
+          email: shippingInfo.email,
+          name: shippingInfo.first_name,
+        });
+        setCurrentStep('email-confirmation');
+      } catch {
+        setOrderError('Failed to send verification code. Please try again.');
+      } finally {
+        setOtpSending(false);
+      }
     }
   };
 
-  const handleEmailConfirmation = () => {
-    setOtpSent(true);
-    setOtp('');
-    setOtpError('');
+  const handleEmailConfirmation = async () => {
+    setOtpSending(true);
+    try {
+      await api.post('/auth/checkout-otp', {
+        email: shippingInfo.email,
+        name: shippingInfo.first_name,
+      });
+      setOtpSent(true);
+      setOtp('');
+      setOtpError('');
+    } catch {
+      setOtpError('Failed to resend code. Please try again.');
+    } finally {
+      setOtpSending(false);
+    }
   };
 
   const handleOtpVerification = async () => {
-    if (otp !== mockOtp) {
-      setOtpError('Incorrect code. Please try again.');
+    if (!otp || otp.length !== 6) {
+      setOtpError('Please enter the 6-digit code.');
       return;
     }
-    placeOrder();
+    try {
+      const res = await api.post('/auth/verify-checkout-otp', {
+        email: shippingInfo.email,
+        otp,
+      });
+      if (res.data?.data?.valid || res.data?.valid) {
+        placeOrder();
+      } else {
+        setOtpError('Incorrect code. Please try again.');
+      }
+    } catch {
+      setOtpError('Verification failed. Please try again.');
+    }
   };
 
   return (
@@ -935,16 +968,13 @@ export default function CheckoutPage() {
                           {otpError && <p style={{ fontSize: '12px', color: '#c0392b', margin: '8px 0 0' }}>{otpError}</p>}
                         </div>
                         <p style={{ fontSize: '0.85rem', color: '#999999', marginBottom: '24px' }}>
-                          For demo: OTP is <strong>{mockOtp}</strong>
+                          Check your email for the 6-digit verification code.
                         </p>
                         <div style={{ display: 'flex', gap: '12px' }}>
                           <button
                             type="button"
-                            onClick={() => {
-                              setOtpSent(false);
-                              setOtp('');
-                              setOtpError('');
-                            }}
+                            onClick={handleEmailConfirmation}
+                            disabled={otpSending}
                             style={{
                               flex: 1,
                               padding: '14px',
