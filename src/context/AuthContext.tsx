@@ -16,6 +16,7 @@ interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: (idToken: string) => Promise<{ success: boolean; error?: string }>;
   register: (firstName: string, lastName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
@@ -106,6 +107,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginWithGoogle = async (idToken: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await api.post('/auth/google', { id_token: idToken });
+      const data = res.data?.data ?? res.data;
+      const { access_token, refresh_token, user: userData } = data;
+
+      localStorage.setItem('access_token', access_token);
+      if (refresh_token) localStorage.setItem('refresh_token', refresh_token);
+
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        first_name: userData.first_name,
+        last_name: userData.last_name,
+        role: userData.role,
+        phone: userData.phone,
+      });
+
+      return { success: true };
+    } catch (err: any) {
+      const message = err?.response?.data?.message || 'Google sign-in failed';
+      return { success: false, error: Array.isArray(message) ? message[0] : message };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -119,6 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isLoggedIn: user !== null,
         login,
+        loginWithGoogle,
         register,
         logout,
       }}

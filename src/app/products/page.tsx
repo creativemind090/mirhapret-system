@@ -10,11 +10,15 @@ import api from '@/lib/api';
 export default function ProductsPage() {
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [priceRange, setPriceRange] = useState([0, 50000]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(true);
   const [wishlist, setWishlist] = useState<string[]>([]);
+
+  // ?sale=true and ?collection=slug URL param support
+  const saleOnly = searchParams.get('sale') === 'true';
+  const collectionSlug = searchParams.get('collection') || '';
 
   useEffect(() => {
     try {
@@ -71,8 +75,24 @@ export default function ProductsPage() {
     if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
     if (selectedSizes.length > 0 && !selectedSizes.some(s => p.sizes.includes(s))) return false;
+    // ?sale=true — only show products that have an active discount
+    if (saleOnly && getDiscount(p) === 0) return false;
+    // ?collection=slug — filter by collection name keyword in category or product name
+    if (collectionSlug) {
+      const keyword = collectionSlug.toLowerCase().replace(/-/g, ' ');
+      const inCategory = p.category?.toLowerCase().includes(keyword);
+      const inName = p.name?.toLowerCase().includes(keyword);
+      if (!inCategory && !inName) return false;
+    }
     return true;
   });
+
+  // Derived page title for sale/collection views
+  const pageTitle = saleOnly
+    ? 'Sale'
+    : collectionSlug
+    ? collectionSlug.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())
+    : 'All Collections';
 
   const isNew = (product: any): boolean => {
     if (!product.created_at) return false;
@@ -123,7 +143,7 @@ export default function ProductsPage() {
             MirhaPret
           </p>
           <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: 800, letterSpacing: '-1.5px', color: '#fff' }}>
-            All Collections
+            {pageTitle}
           </h1>
         </div>
         {!loading && (

@@ -1,21 +1,39 @@
 import { notFound } from 'next/navigation';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { blogs as staticBlogs, BlogPost } from '@/data/blogs';
 import type { Metadata } from 'next';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
+interface BlogPost {
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  date: string;
+  readTime: string;
+  coverGradient: string;
+  coverImage: string;
+  tags: string[];
+  content: string;
+}
+
 interface Props { params: Promise<{ slug: string }> }
 
-// Allow dynamic slugs beyond the statically defined ones
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return staticBlogs.map(b => ({ slug: b.slug }));
+  try {
+    const res = await fetch(`${API}/blogs`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return (json.data ?? []).map((b: any) => ({ slug: b.slug }));
+  } catch {
+    return [];
+  }
 }
 
-/** Normalise an API blog to BlogPost shape */
 function apiToPost(b: any): BlogPost {
   return {
     slug: b.slug,
@@ -33,15 +51,11 @@ function apiToPost(b: any): BlogPost {
 }
 
 async function fetchPost(slug: string): Promise<BlogPost | null> {
-  // Try static first
-  const staticPost = staticBlogs.find(b => b.slug === slug);
-  if (staticPost) return staticPost;
-  // Then API
   try {
     const res = await fetch(`${API}/blogs/slug/${slug}`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     const json = await res.json();
-    return apiToPost(json.data);
+    return apiToPost(json.data ?? json);
   } catch {
     return null;
   }
@@ -50,15 +64,11 @@ async function fetchPost(slug: string): Promise<BlogPost | null> {
 async function fetchAllPosts(): Promise<BlogPost[]> {
   try {
     const res = await fetch(`${API}/blogs`, { next: { revalidate: 60 } });
-    if (!res.ok) return staticBlogs;
+    if (!res.ok) return [];
     const json = await res.json();
-    const apiPosts: BlogPost[] = (json.data ?? []).map(apiToPost);
-    // Merge: API posts override static ones with same slug
-    const slugSet = new Set(apiPosts.map(p => p.slug));
-    const merged = [...apiPosts, ...staticBlogs.filter(b => !slugSet.has(b.slug))];
-    return merged;
+    return (json.data ?? []).map(apiToPost);
   } catch {
-    return staticBlogs;
+    return [];
   }
 }
 
@@ -136,14 +146,12 @@ export default async function BlogDetailPage({ params }: Props) {
         justifyContent: 'flex-end',
         position: 'relative',
       }}>
-        {/* Gradient overlay */}
         <div style={{
           position: 'absolute',
           top: 0, left: 0, right: 0, bottom: 0,
           background: 'linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.65) 100%)',
           pointerEvents: 'none',
         }} />
-        {/* Title block */}
         <div style={{
           position: 'relative',
           zIndex: 2,
@@ -168,8 +176,6 @@ export default async function BlogDetailPage({ params }: Props) {
 
       {/* Article body */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: 'clamp(40px, 5vw, 72px) clamp(24px, 5vw, 40px)' }}>
-
-        {/* Lead excerpt */}
         <p style={{
           fontSize: 'clamp(16px, 2vw, 19px)', color: '#333', lineHeight: 1.8,
           fontStyle: 'italic', paddingBottom: 32, marginBottom: 32,
@@ -178,13 +184,11 @@ export default async function BlogDetailPage({ params }: Props) {
           {post.excerpt}
         </p>
 
-        {/* Content */}
         <div
           className="blog-content"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
-        {/* Tags */}
         <div style={{ marginTop: 48, paddingTop: 32, borderTop: '1px solid #e8e8e8', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <span style={{ fontSize: 11, color: '#999', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', marginRight: 4 }}>Tags</span>
           {post.tags.map(tag => (
@@ -197,7 +201,6 @@ export default async function BlogDetailPage({ params }: Props) {
           ))}
         </div>
 
-        {/* CTA */}
         <div style={{
           marginTop: 48, padding: '36px 40px',
           background: '#0f0f0f', color: '#fff',
@@ -218,7 +221,6 @@ export default async function BlogDetailPage({ params }: Props) {
         </div>
       </div>
 
-      {/* More articles */}
       {others.length > 0 && (
         <section style={{ borderTop: '1px solid #e8e8e8', padding: 'clamp(40px, 5vw, 72px) clamp(24px, 5vw, 60px)' }}>
           <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: 40, textAlign: 'center' }}>
@@ -227,7 +229,7 @@ export default async function BlogDetailPage({ params }: Props) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 1100, margin: '0 auto' }} className="blog-more-grid">
             {others.map(other => (
               <a key={other.slug} href={`/blog/${other.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ height: 160, background: other.coverGradient, borderRadius: 4, marginBottom: 18 }} />
+                <div style={{ height: 160, background: other.coverImage ? `url(${other.coverImage}) center/cover no-repeat` : other.coverGradient, borderRadius: 4, marginBottom: 18 }} />
                 <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: '#c8a96e', display: 'block', marginBottom: 8 }}>
                   {other.category}
                 </span>
