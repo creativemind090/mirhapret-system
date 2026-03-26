@@ -11,6 +11,7 @@ import { blogs } from '@/data/blogs';
 gsap.registerPlugin(ScrollTrigger);
 
 function NewsletterSection() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [msg, setMsg] = useState('');
@@ -23,15 +24,28 @@ function NewsletterSection() {
     }
     setStatus('loading');
     try {
-      await api.post('/users/newsletter-subscribe', { email: email.trim() });
+      await api.post('/users/newsletter-subscribe', { email: email.trim(), name: name.trim() || undefined });
       setStatus('success');
       setMsg('You\'re in! Welcome to the MirhaPret family.');
+      setName('');
       setEmail('');
     } catch {
       setStatus('error');
       setMsg('Something went wrong. Please try again.');
     }
   };
+
+  const inputStyle = (hasError: boolean): React.CSSProperties => ({
+    width: '100%',
+    padding: '14px 16px',
+    border: hasError ? '1.5px solid #c0392b' : '1.5px solid #000',
+    background: '#fff',
+    color: '#000',
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    outline: 'none',
+    boxSizing: 'border-box',
+  });
 
   return (
     <section style={{ borderTop: '1px solid #e8e8e8' }}>
@@ -52,46 +66,44 @@ function NewsletterSection() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); setStatus('idle'); setMsg(''); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
-                  placeholder="your@email.com"
-                  style={{
-                    flex: 1,
-                    padding: '16px 20px',
-                    border: status === 'error' ? '1.5px solid #c0392b' : '1.5px solid #000',
-                    borderRight: 'none',
-                    background: '#fff',
-                    color: '#000',
-                    fontSize: '14px',
-                    fontFamily: 'inherit',
-                    outline: 'none',
-                    minWidth: 0,
-                  }}
+                  type="text"
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); setStatus('idle'); setMsg(''); }}
+                  placeholder="Your name"
+                  style={inputStyle(false)}
                 />
-                <button
-                  onClick={handleSubscribe}
-                  disabled={status === 'loading'}
-                  style={{
-                    padding: '16px 24px',
-                    background: '#000',
-                    color: '#fff',
-                    border: 'none',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                    whiteSpace: 'nowrap',
-                    opacity: status === 'loading' ? 0.6 : 1,
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {status === 'loading' ? '...' : 'Subscribe'}
-                </button>
+                <div style={{ display: 'flex' }}>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setStatus('idle'); setMsg(''); }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
+                    placeholder="your@email.com"
+                    style={{ ...inputStyle(status === 'error'), borderRight: 'none', flex: 1, minWidth: 0 }}
+                  />
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={status === 'loading'}
+                    style={{
+                      padding: '14px 24px',
+                      background: '#000',
+                      color: '#fff',
+                      border: 'none',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      letterSpacing: '2px',
+                      textTransform: 'uppercase',
+                      cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                      whiteSpace: 'nowrap',
+                      opacity: status === 'loading' ? 0.6 : 1,
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {status === 'loading' ? '...' : 'Subscribe'}
+                  </button>
+                </div>
               </div>
               {status === 'error' && msg && (
                 <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '6px' }}>{msg}</p>
