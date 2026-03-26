@@ -295,8 +295,8 @@ export default function CheckoutPage() {
       setOtpSending(true);
       try {
         await api.post('/auth/checkout-otp', {
-          email: shippingInfo.email,
-          name: shippingInfo.first_name,
+          email: shippingData.customer_email,
+          name: shippingData.customer_first_name,
         });
         setCurrentStep('email-confirmation');
       } catch {
@@ -311,8 +311,8 @@ export default function CheckoutPage() {
     setOtpSending(true);
     try {
       await api.post('/auth/checkout-otp', {
-        email: shippingInfo.email,
-        name: shippingInfo.first_name,
+        email: shippingData.customer_email,
+        name: shippingData.customer_first_name,
       });
       setOtpSent(true);
       setOtp('');
@@ -331,7 +331,7 @@ export default function CheckoutPage() {
     }
     try {
       const res = await api.post('/auth/verify-checkout-otp', {
-        email: shippingInfo.email,
+        email: shippingData.customer_email,
         otp,
       });
       if (res.data?.data?.valid || res.data?.valid) {
