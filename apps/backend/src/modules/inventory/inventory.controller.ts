@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Post,
   Param,
   Body,
   Query,
@@ -44,6 +45,25 @@ export class InventoryController {
     );
     return {
       message: 'Inventory updated successfully',
+      data: inventory,
+    };
+  }
+
+  @Post('product/:productId/set-quantity')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'super_admin', 'store_manager')
+  @HttpCode(HttpStatus.OK)
+  async setProductQuantity(
+    @Param('productId') productId: string,
+    @Body() body: { quantity: number; sizes: string[] },
+  ) {
+    const inventory = await this.inventoryService.setProductQuantity(
+      productId,
+      body.quantity,
+      body.sizes,
+    );
+    return {
+      message: 'Product inventory set successfully',
       data: inventory,
     };
   }

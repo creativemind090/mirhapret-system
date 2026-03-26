@@ -23,6 +23,8 @@ import {
   ProductReview,
   PaymentMethod,
   POSSyncLog,
+  Blog,
+  NewsletterSubscription,
 } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -43,6 +45,10 @@ import { ProductAnalyticsModule } from './modules/product-analytics/product-anal
 import { RolesGuard } from './common/guards/roles.guard';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { EventsModule } from './modules/events/events.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { BlogsModule } from './modules/blogs/blogs.module';
+import { AppCacheModule } from './common/cache/cache.module';
+import { EmailModule } from './modules/email/email.module';
 
 @Module({
   imports: [
@@ -80,6 +86,8 @@ import { EventsModule } from './modules/events/events.module';
           ProductReview,
           PaymentMethod,
           POSSyncLog,
+          Blog,
+          NewsletterSubscription,
         ],
         synchronize: config.get('DB_SYNCHRONIZE') === 'true',
         logging: config.get('DB_LOGGING') === 'true',
@@ -128,6 +136,10 @@ import { EventsModule } from './modules/events/events.module';
     SearchModule,
     ProductAnalyticsModule,
     EventsModule,
+    NotificationsModule,
+    BlogsModule,
+    AppCacheModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [

@@ -34,8 +34,10 @@ export class CloudinaryController {
     if (!body.data) {
       throw new BadRequestException('No image data provided');
     }
-    if (!body.data.startsWith('data:image/')) {
-      throw new BadRequestException('Invalid image data. Must be a base64 data URL.');
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const mimeMatch = body.data.match(/^data:([^;]+);base64,/);
+    if (!mimeMatch || !allowedMimes.includes(mimeMatch[1])) {
+      throw new BadRequestException('Only JPEG, PNG, WebP, and GIF images are allowed');
     }
 
     const folder = body.folder || 'ecommerce';

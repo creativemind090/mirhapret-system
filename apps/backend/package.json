@@ -18,6 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "seed:admin": "npx ts-node -r tsconfig-paths/register src/seed-admin.ts",
     "seed:cashiers": "npx ts-node -r tsconfig-paths/register src/seed-cashiers.ts"
   },
   "dependencies": {
@@ -52,6 +53,7 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.3",
     "typeorm": "^0.3.28",
+    "nodemailer": "^6.9.16",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
@@ -64,6 +66,7 @@
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.0",
     "@types/helmet": "^4.0.0",
+    "@types/nodemailer": "^6.4.17",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.19.7",
     "@types/passport-jwt": "^4.0.1",

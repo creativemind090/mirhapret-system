@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  NotFoundException,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto, UpdateProductDto, TrackProductDto } from './dto';
@@ -32,6 +33,7 @@ export class ProductsController {
     @Query('max_price') max_price?: string,
     @Query('skip') skip?: string,
     @Query('take') take?: string,
+    @Query('sort_by') sort_by?: string,
   ) {
     const filters = {
       category_id,
@@ -42,6 +44,7 @@ export class ProductsController {
       max_price: max_price ? parseFloat(max_price) : undefined,
       skip: skip ? parseInt(skip) : 0,
       take: take ? parseInt(take) : 20,
+      sort_by,
     };
 
     const result = await this.productsService.findAll(filters);
@@ -53,6 +56,19 @@ export class ProductsController {
         skip: filters.skip,
         take: filters.take,
       },
+    };
+  }
+
+  @Get('slug/:slug')
+  @Public()
+  async getProductBySlug(@Param('slug') slug: string) {
+    const product = await this.productsService.findBySlug(slug);
+    if (!product) {
+      throw new NotFoundException(`Product "${slug}" not found`);
+    }
+    return {
+      message: 'Product retrieved successfully',
+      data: product,
     };
   }
 
@@ -123,6 +139,7 @@ export class ProductsController {
   }
 
   @Get(':id/analytics')
+  @UseGuards(JwtAuthGuard)
   async getProductAnalytics(@Param('id') id: string) {
     const analytics = await this.productsService.getProductAnalytics(id);
     return {

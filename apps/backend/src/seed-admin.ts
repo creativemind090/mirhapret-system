@@ -1,11 +1,15 @@
 /**
  * Run once to create the admin user:
- *   npx ts-node -r tsconfig-paths/register src/seed-admin.ts
+ *   npm run seed:admin
+ *
+ * Safe to run multiple times — skips if admin already exists.
+ * Automatically creates the users table if it doesn't exist yet.
  */
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { User } from './entities/user.entity';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
@@ -17,17 +21,18 @@ async function seed() {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_DATABASE || 'ecommerce_db',
-    synchronize: false,
+    entities: [User],
+    synchronize: true, // creates the users table if it doesn't exist
     logging: false,
   });
 
   await ds.initialize();
 
-  const email = 'admin@mirhapre.tcom';
+  const email = 'admin@mirhapret.com';
   const existing = await ds.query(`SELECT id FROM users WHERE email = $1`, [email]);
 
   if (existing.length > 0) {
-    console.log(`Admin user already exists (${email}). Nothing to do.`);
+    console.log(`✓ Admin user already exists (${email}). Nothing to do.`);
     await ds.destroy();
     return;
   }

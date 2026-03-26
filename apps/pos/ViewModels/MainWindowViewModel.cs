@@ -19,18 +19,20 @@ public class MainWindowViewModel : BaseViewModel
     private List<Product> _products = new();
 
     // ── Observable state ─────────────────────────────────────────────────────
-    public ObservableCollection<CartItem>  CartItems         { get; } = new();
-    public ObservableCollection<Product>   SearchSuggestions { get; } = new();
-    public ObservableCollection<ApiOrder>  TodaysOrders      { get; } = new();
+    public ObservableCollection<CartItem>    CartItems         { get; } = new();
+    public ObservableCollection<Product>     SearchSuggestions { get; } = new();
+    public ObservableCollection<ApiOrder>    TodaysOrders      { get; } = new();
+    public ObservableCollection<ApiCategory> Categories        { get; } = new();
 
     // ── Bindable properties ───────────────────────────────────────────────────
-    private string _searchInput    = string.Empty;
-    private decimal _discountAmount = 0;
-    private string _promoCode      = string.Empty;
-    private string _errorMessage   = string.Empty;
+    private string _searchInput        = string.Empty;
+    private decimal _discountAmount    = 0;
+    private string _promoCode          = string.Empty;
+    private string _errorMessage       = string.Empty;
     private bool   _isScannerConnected = false;
     private bool   _isLoadingProducts  = true;
     private bool   _isLoadingOrders    = false;
+    private string? _selectedCategoryId = null; // null = All
 
     public string SearchInput
     {
@@ -68,6 +70,16 @@ public class MainWindowViewModel : BaseViewModel
         set => SetProperty(ref _isLoadingOrders, value);
     }
 
+    public string? SelectedCategoryId
+    {
+        get => _selectedCategoryId;
+        set
+        {
+            if (SetProperty(ref _selectedCategoryId, value))
+                UpdateSearchSuggestions();
+        }
+    }
+
     // ── Computed totals ───────────────────────────────────────────────────────
     public decimal Subtotal  => CartItems.Sum(i => i.Subtotal);
     public decimal TaxAmount => CartItems.Sum(i => i.TaxAmount);
@@ -89,9 +101,11 @@ public class MainWindowViewModel : BaseViewModel
     public ICommand CompleteSaleCommand     { get; }
     public ICommand ClearCartCommand        { get; }
     public ICommand SelectProductCommand    { get; }
-    public ICommand ConnectScannerCommand   { get; }
-    public ICommand DisconnectScannerCommand{ get; }
-    public ICommand RefreshOrdersCommand    { get; }
+    public ICommand ConnectScannerCommand    { get; }
+    public ICommand DisconnectScannerCommand { get; }
+    public ICommand RefreshOrdersCommand     { get; }
+    public ICommand FilterByCategoryCommand  { get; }
+    public ICommand RefundOrderCommand       { get; }
 
     public MainWindowViewModel()
     {
@@ -106,6 +120,8 @@ public class MainWindowViewModel : BaseViewModel
         ConnectScannerCommand    = new RelayCommand(_ => ConnectScanner());
         DisconnectScannerCommand = new RelayCommand(_ => DisconnectScanner());
         RefreshOrdersCommand     = new RelayCommand(_ => _ = LoadOrdersAsync());
+        FilterByCategoryCommand  = new RelayCommand<string?>(id => SelectedCategoryId = id);
+        RefundOrderCommand       = new RelayCommand<ApiOrder>(order => _ = RefundOrderAsync(order));
 
         _barcodeScanner.BarcodeScanned += OnBarcodeScanned;
         _barcodeScanner.ErrorOccurred  += OnScannerError;
@@ -114,6 +130,46 @@ public class MainWindowViewModel : BaseViewModel
 
         // Load data from API asynchronously
         _ = LoadProductsAsync();
+        _ = LoadOrdersAsync();
+        _ = LoadCategoriesAsync();
+    }
+
+    // ── Category loading ──────────────────────────────────────────────────────
+
+    private async Task LoadCategoriesAsync()
+    {
+        var cats = await _apiService.GetCategoriesAsync();
+        Categories.Clear();
+        foreach (var c in cats.Where(c => c.IsActive))
+            Categories.Add(c);
+        OnPropertyChanged(nameof(Categories));
+    }
+
+    // ── Refund ────────────────────────────────────────────────────────────────
+
+    private async Task RefundOrderAsync(ApiOrder? order)
+    {
+        if (order == null) return;
+
+        var dialog = new Views.RefundDialog(order);
+        if (dialog.ShowDialog() != true) return;
+
+        ErrorMessage = "Processing refund...";
+        var error = await _apiService.ProcessRefundAsync(order.Id, dialog.RefundReason);
+
+        if (error != null)
+        {
+            ErrorMessage = error;
+            return;
+        }
+
+        ErrorMessage = string.Empty;
+        MessageBox.Show(
+            $"Refund processed for Order #{order.OrderNumber}.",
+            "Refund Complete",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+
         _ = LoadOrdersAsync();
     }
 
@@ -176,6 +232,7 @@ public class MainWindowViewModel : BaseViewModel
                 ProductName  = product.Name,
                 Barcode      = product.Barcode,
                 SelectedSize = selectedSize,
+                ImageUrl     = product.MainImage,
                 UnitPrice    = product.Price,
                 Quantity     = 1,
                 TaxRate      = product.TaxRate
@@ -349,8 +406,9 @@ public class MainWindowViewModel : BaseViewModel
         var results = _products
             .Where(p => p.IsActive &&
                 (p.Name.Contains(SearchInput, StringComparison.OrdinalIgnoreCase) ||
-                 p.Barcode.Contains(SearchInput, StringComparison.OrdinalIgnoreCase)))
-            .Take(5);
+                 p.Barcode.Contains(SearchInput, StringComparison.OrdinalIgnoreCase)) &&
+                (_selectedCategoryId == null || p.CategoryId.ToString() == _selectedCategoryId))
+            .Take(6);
 
         foreach (var p in results) SearchSuggestions.Add(p);
     }

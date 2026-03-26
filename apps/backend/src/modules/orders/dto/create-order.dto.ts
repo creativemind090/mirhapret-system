@@ -147,4 +147,8 @@ export class CreateOrderDto {
   @IsString()
   @IsOptional()
   cashier_id?: string;
+
+  @IsString()
+  @IsOptional()
+  promo_code?: string;
 }

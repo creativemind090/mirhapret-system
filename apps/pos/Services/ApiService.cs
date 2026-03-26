@@ -13,12 +13,11 @@ public class ApiService
     private static ApiService? _instance;
     public static ApiService Instance => _instance ??= new ApiService();
 
-    private const string BaseUrl = "http://localhost:8000/api/v1";
     private readonly RestClient _client;
 
     private ApiService()
     {
-        var options = new RestClientOptions(BaseUrl)
+        var options = new RestClientOptions(PosConfig.ApiBaseUrl)
         {
             ThrowOnAnyError = false,
         };
@@ -88,6 +87,53 @@ public class ApiService
         return wrapper?.Data ?? new();
     }
 
+    // ── Categories ────────────────────────────────────────────────────────────
+
+    /// <summary>Loads all active categories.</summary>
+    public async Task<List<ApiCategory>> GetCategoriesAsync()
+    {
+        var req = new RestRequest("/categories");
+        req.AddQueryParameter("is_active", "true");
+
+        var res = await _client.ExecuteAsync(req);
+        if (!res.IsSuccessful || res.Content == null) return new();
+
+        var wrapper = JsonConvert.DeserializeObject<PaginatedApiResponse<ApiCategory>>(res.Content);
+        return wrapper?.Data ?? new();
+    }
+
+    // ── Customer lookup ───────────────────────────────────────────────────────
+
+    /// <summary>Searches for a customer by phone number. Returns null if not found.</summary>
+    public async Task<ApiCustomer?> GetCustomerByPhoneAsync(string phone)
+    {
+        var req = AuthRequest("/users");
+        req.AddQueryParameter("phone", phone);
+        req.AddQueryParameter("take", "1");
+
+        var res = await _client.ExecuteAsync(req);
+        if (!res.IsSuccessful || res.Content == null) return null;
+
+        var wrapper = JsonConvert.DeserializeObject<PaginatedApiResponse<ApiCustomer>>(res.Content);
+        return wrapper?.Data?.FirstOrDefault();
+    }
+
+    // ── Refunds ───────────────────────────────────────────────────────────────
+
+    /// <summary>Marks an order as refunded. Returns null on success, error string on failure.</summary>
+    public async Task<string?> ProcessRefundAsync(string orderId, string reason)
+    {
+        var req = AuthRequest($"/orders/{orderId}/status", Method.Patch);
+        req.AddJsonBody(new { status = "refunded", refund_reason = reason });
+
+        var res = await _client.ExecuteAsync(req);
+        if (!res.IsSuccessful)
+        {
+            return TryExtractMessage(res.Content) ?? $"Refund failed ({(int?)res.StatusCode})";
+        }
+        return null;
+    }
+
     // ── Promo Codes ───────────────────────────────────────────────────────────
 
     /// <summary>Validates a promo code. Returns null if invalid or error.</summary>
@@ -125,19 +171,25 @@ public class ApiService
         return (orderNum ?? "N/A", null);
     }
 
-    /// <summary>Gets today's POS orders.</summary>
-    public async Task<List<ApiOrder>> GetPosOrdersAsync(int take = 100)
+    /// <summary>Gets today's POS orders (local date, timezone-safe).</summary>
+    public async Task<List<ApiOrder>> GetPosOrdersAsync(int take = 200)
     {
         var req = AuthRequest("/orders");
         req.AddQueryParameter("source", "pos");
         req.AddQueryParameter("take", take.ToString());
-        req.AddQueryParameter("date_from", DateTime.Today.ToString("yyyy-MM-dd"));
+
+        // Convert local midnight to UTC so the backend comparison is timezone-correct
+        var utcStart = DateTime.Today.ToUniversalTime();
+        req.AddQueryParameter("date_from", utcStart.ToString("yyyy-MM-ddTHH:mm:ss"));
 
         var res = await _client.ExecuteAsync(req);
         if (!res.IsSuccessful || res.Content == null) return new();
 
         var wrapper = JsonConvert.DeserializeObject<PaginatedApiResponse<ApiOrder>>(res.Content);
-        return wrapper?.Data ?? new();
+        var all = wrapper?.Data ?? new();
+
+        // Client-side guard: keep only orders whose local date is today
+        return all.Where(o => o.CreatedAt.ToLocalTime().Date == DateTime.Today).ToList();
     }
 
     // ── Util ─────────────────────────────────────────────────────────────────

@@ -3,6 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product, ProductAnalytic } from '../../entities';
 import { CreateProductDto, UpdateProductDto } from './dto';
+import { AppCacheService } from '../../common/cache/cache.service';
+
+const CACHE_FEATURED   = 'products:featured';
+const CACHE_ACTIVE_ALL = 'products:active';
+const PRODUCT_TTL      = 300; // 5 minutes
 
 @Injectable()
 export class ProductsService {
@@ -11,7 +16,12 @@ export class ProductsService {
     private productsRepository: Repository<Product>,
     @InjectRepository(ProductAnalytic)
     private analyticsRepository: Repository<ProductAnalytic>,
+    private readonly cache: AppCacheService,
   ) {}
+
+  private async invalidateProductCache() {
+    await this.cache.del(CACHE_FEATURED, CACHE_ACTIVE_ALL);
+  }
 
   private generateSku(): string {
     return `SKU-${Date.now()}-${Math.random().toString(36).substring(2, 11).toUpperCase()}`;
@@ -35,6 +45,31 @@ export class ProductsService {
     max_price?: number;
     skip?: number;
     take?: number;
+    sort_by?: string;
+  }): Promise<{ data: Product[]; total: number }> {
+    // Cache only the two common unfiltered queries: featured and active-all
+    const isFeaturedQuery = filters?.is_featured === true && !filters.search && !filters.category_id;
+    const isActiveAllQuery = filters?.is_active === true && !filters.search && !filters.category_id && !filters.is_featured;
+
+    const cacheKey = isFeaturedQuery ? CACHE_FEATURED : isActiveAllQuery ? CACHE_ACTIVE_ALL : null;
+
+    if (cacheKey) {
+      return this.cache.wrap(cacheKey, PRODUCT_TTL, () => this.runFindAllQuery(filters));
+    }
+
+    return this.runFindAllQuery(filters);
+  }
+
+  private async runFindAllQuery(filters?: {
+    category_id?: string;
+    search?: string;
+    is_active?: boolean;
+    is_featured?: boolean;
+    min_price?: number;
+    max_price?: number;
+    skip?: number;
+    take?: number;
+    sort_by?: string;
   }): Promise<{ data: Product[]; total: number }> {
     const query = this.productsRepository.createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category');
@@ -69,12 +104,15 @@ export class ProductsService {
     const skip = Math.max(0, filters?.skip || 0);
     const take = Math.min(100, Math.max(1, filters?.take || 20));
 
-    const data = await query
-      .orderBy('product.created_at', 'DESC')
-      .skip(skip)
-      .take(take)
-      .getMany();
+    if (filters?.sort_by === 'view_ratio') {
+      query
+        .addSelect('CAST(product.view_count AS FLOAT) / (product.purchase_count + 1)', 'view_ratio')
+        .orderBy('view_ratio', 'DESC');
+    } else {
+      query.orderBy('product.created_at', 'DESC');
+    }
 
+    const data = await query.skip(skip).take(take).getMany();
     return { data, total };
   }
 
@@ -127,9 +165,12 @@ export class ProductsService {
       sku,
       slug,
       available_sizes: createProductDto.available_sizes || ['S', 'M', 'L', 'XL'],
+      average_rating: createProductDto['average_rating'] ?? 4,
     });
 
-    return this.productsRepository.save(product);
+    const saved = await this.productsRepository.save(product);
+    await this.invalidateProductCache();
+    return saved;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
@@ -148,12 +189,14 @@ export class ProductsService {
     }
 
     await this.productsRepository.update(id, updateProductDto);
+    await this.invalidateProductCache();
     return this.findById(id);
   }
 
   async delete(id: string): Promise<void> {
     await this.findById(id);
     await this.productsRepository.delete(id);
+    await this.invalidateProductCache();
   }
 
   async trackView(

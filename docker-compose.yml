@@ -4,23 +4,37 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: ecommerce_postgres
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USER:-mirhapret}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
       POSTGRES_DB: ecommerce_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-mirhapret}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ecommerce
 
   redis:
     image: redis:7-alpine
     container_name: ecommerce_redis
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
     ports:
       - "6379:6379"
     volumes:
@@ -30,16 +44,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ecommerce
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: ecommerce_rabbitmq
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     ports:
       - "5672:5672"
       - "15672:15672"
     environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-mirhapret}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-changeme_in_production}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -47,12 +69,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - ecommerce
 
   backend:
     build:
       context: ./apps/backend
       dockerfile: ../../infrastructure/docker/Dockerfile.backend
     container_name: ecommerce_backend
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 512M
     ports:
       - "3000:3000"
     depends_on:
@@ -67,12 +97,12 @@ services:
       PORT: 3000
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
+      DB_USERNAME: ${DB_USER:-mirhapret}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme_in_production}
       DB_DATABASE: ecommerce_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-mirhapret}:${RABBITMQ_PASSWORD:-changeme_in_production}@rabbitmq:5672
     volumes:
       - ./apps/backend/src:/app/src
     networks:
@@ -83,6 +113,12 @@ services:
       context: ./apps/ecommerce
       dockerfile: ../../infrastructure/docker/Dockerfile.ecommerce
     container_name: ecommerce_store
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
     ports:
       - "3001:3000"
     depends_on:
@@ -99,6 +135,12 @@ services:
       context: ./apps/admin
       dockerfile: ../../infrastructure/docker/Dockerfile.admin
     container_name: ecommerce_admin
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
     ports:
       - "3002:3000"
     depends_on:
@@ -113,6 +155,12 @@ services:
   nginx:
     image: nginx:alpine
     container_name: ecommerce_nginx
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 64M
     ports:
       - "80:80"
       - "443:443"

@@ -49,8 +49,12 @@ public class ApiProduct
     [JsonProperty("is_active")]       public bool          IsActive       { get; set; }
     [JsonProperty("description")]     public string?       Description    { get; set; }
     [JsonProperty("available_sizes")] public List<string>  AvailableSizes { get; set; } = new();
+    [JsonProperty("image_url")]       public string?       ImageUrl       { get; set; }
+    [JsonProperty("images")]          public List<string>? Images         { get; set; }
+    [JsonProperty("category_id")]     public string?       CategoryId     { get; set; }
 
     public string EffectiveBarcode => !string.IsNullOrEmpty(Barcode) ? Barcode : Sku;
+    public string EffectiveImage   => ImageUrl ?? Images?.FirstOrDefault() ?? string.Empty;
 
     public Product ToPosProduct() => new()
     {
@@ -62,7 +66,31 @@ public class ApiProduct
         Barcode     = EffectiveBarcode,
         IsActive    = IsActive,
         Sizes       = AvailableSizes,
+        MainImage   = EffectiveImage,
+        CategoryId  = Guid.TryParse(CategoryId, out var cg) ? cg : Guid.Empty,
     };
+}
+
+// ── Category ─────────────────────────────────────────────────────────────────
+
+public class ApiCategory
+{
+    [JsonProperty("id")]        public string Id       { get; set; } = string.Empty;
+    [JsonProperty("name")]      public string Name     { get; set; } = string.Empty;
+    [JsonProperty("is_active")] public bool   IsActive { get; set; }
+}
+
+// ── Customer ──────────────────────────────────────────────────────────────────
+
+public class ApiCustomer
+{
+    [JsonProperty("id")]         public string  Id        { get; set; } = string.Empty;
+    [JsonProperty("first_name")] public string  FirstName { get; set; } = string.Empty;
+    [JsonProperty("last_name")]  public string? LastName  { get; set; }
+    [JsonProperty("phone")]      public string  Phone     { get; set; } = string.Empty;
+    [JsonProperty("email")]      public string  Email     { get; set; } = string.Empty;
+
+    public string FullName => $"{FirstName} {LastName}".Trim();
 }
 
 // ── Promo ────────────────────────────────────────────────────────────────────

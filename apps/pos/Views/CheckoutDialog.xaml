@@ -3,103 +3,261 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:pos.Utils"
         Title="Complete Sale"
-        Height="350"
-        Width="400"
-        Background="#f5f5f5"
+        Height="520"
+        Width="440"
+        Background="Transparent"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         WindowStyle="None"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize"
+        AllowsTransparency="True">
     <Window.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
         <local:PhoneBorderConverter x:Key="PhoneBorderConverter"/>
+
+        <!-- Inline TextBox style -->
+        <Style x:Key="DialogInput" TargetType="TextBox">
+            <Setter Property="Background" Value="#f9f8f6"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="BorderBrush" Value="#eae8e3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#c8a96e"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Radio button style -->
+        <Style x:Key="PaymentRadio" TargetType="RadioButton">
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#333333"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bd" Background="#f9f8f6" CornerRadius="7"
+                                BorderBrush="#eae8e3" BorderThickness="1.5"
+                                Padding="14,10">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="Dot" Width="14" Height="14" Margin="0,0,9,0"
+                                         Stroke="#cccccc" StrokeThickness="1.5" Fill="Transparent"/>
+                                <ContentPresenter VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#faf7f0"/>
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#c8a96e"/>
+                                <Setter TargetName="Dot" Property="Fill" Value="#c8a96e"/>
+                                <Setter TargetName="Dot" Property="Stroke" Value="#c8a96e"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#faf7f0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
-    
-    <Border BorderBrush="#000000" BorderThickness="1">
-        <StackPanel Background="#ffffff">
-            <!-- Header -->
-            <Border Background="#000000" Padding="16,12">
-                <TextBlock Text="Customer Information" 
-                           Foreground="#ffffff" 
-                           FontSize="14"
-                           FontWeight="Bold"/>
+
+    <!-- Outer shadow border -->
+    <Border Background="#ffffff" CornerRadius="12" BorderBrush="#eae8e3" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="4" Opacity="0.14"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── Modal Header ─────────────────────────────────── -->
+            <Border Grid.Row="0" Background="#111111" CornerRadius="12,12,0,0" Padding="20,16">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="Customer Information" Foreground="#ffffff"
+                                   FontSize="15" FontWeight="SemiBold" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Enter details to complete this sale" Foreground="#888888"
+                                   FontSize="11" FontFamily="Segoe UI" Margin="0,3,0,0"/>
+                    </StackPanel>
+                    <!-- Gold accent bar -->
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Width="4" Height="28" CornerRadius="2" Background="#c8a96e"/>
+                </Grid>
             </Border>
 
-            <!-- Content -->
-            <Border Padding="20">
-                <StackPanel>
-                    <!-- Customer Name -->
-                    <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="Customer Name" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>
-                        <TextBox Padding="10,10" 
-                                 FontSize="12"
-                                 Background="#ffffff"
-                                 BorderBrush="#e0e0e0"
-                                 BorderThickness="1"
-                                 Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
+            <!-- ── Form Body ─────────────────────────────────────── -->
+            <StackPanel Grid.Row="1" Margin="24,20,24,8">
+                <!-- Customer Name -->
+                <TextBlock Text="Customer Name" Foreground="#555555"
+                           FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI"
+                           Margin="0,0,0,6"/>
+                <TextBox Style="{StaticResource DialogInput}"
+                         Margin="0,0,0,16"
+                         Text="{Binding CustomerName, UpdateSourceTrigger=PropertyChanged}"/>
 
-                    <!-- Customer Phone -->
-                    <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="Mobile Number" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>
-                        <TextBox Padding="10,10" 
-                                 FontSize="12"
-                                 Background="#ffffff"
-                                 BorderBrush="{Binding IsPhoneValid, Converter={StaticResource PhoneBorderConverter}}"
-                                 BorderThickness="1"
-                                 Text="{Binding CustomerPhone, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Text="{Binding PhoneError}" 
-                                   Foreground="#c0392b" 
-                                   FontSize="10" 
-                                   Margin="0,4,0,0"
-                                   Visibility="{Binding PhoneError, Converter={StaticResource StringToVisibilityConverter}}"/>
-                    </StackPanel>
+                <!-- Mobile Number -->
+                <TextBlock Text="Mobile Number" Foreground="#555555"
+                           FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI"
+                           Margin="0,0,0,6"/>
+                <Grid Margin="0,0,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="0"
+                             Style="{StaticResource DialogInput}"
+                             BorderBrush="{Binding IsPhoneValid, Converter={StaticResource PhoneBorderConverter}}"
+                             Text="{Binding CustomerPhone, UpdateSourceTrigger=PropertyChanged}"/>
+                    <Button Grid.Column="2" Content="Look Up"
+                            Background="#f9f8f6" Foreground="#c8a96e"
+                            BorderBrush="#c8a96e" BorderThickness="1.5"
+                            FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI"
+                            Padding="12,10" Cursor="Hand"
+                            Command="{Binding LookupCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#faf7f0"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+                <!-- Lookup status / phone error -->
+                <TextBlock Text="{Binding PhoneError}"
+                           Foreground="#c0392b" FontSize="10" FontFamily="Segoe UI"
+                           Margin="0,0,0,4"
+                           Visibility="{Binding PhoneError, Converter={StaticResource StringToVisibilityConverter}}"/>
+                <TextBlock Text="{Binding LookupMessage}"
+                           Foreground="#2e7d32" FontSize="10" FontFamily="Segoe UI"
+                           Margin="0,0,0,12"
+                           Visibility="{Binding LookupMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
 
-                    <!-- Payment Method -->
-                    <StackPanel Margin="0,0,0,16">
-                        <TextBlock Text="Payment Method" FontSize="12" FontWeight="Bold" Margin="0,0,0,8"/>
-                        <WrapPanel Orientation="Horizontal">
-                            <RadioButton Content="Cash"
-                                         IsChecked="{Binding IsCash}"
-                                         GroupName="PaymentMethod"
-                                         FontSize="12" Margin="0,0,16,4"/>
-                            <RadioButton Content="Card"
-                                         IsChecked="{Binding IsCard}"
-                                         GroupName="PaymentMethod"
-                                         FontSize="12" Margin="0,0,0,4"/>
-                        </WrapPanel>
-                    </StackPanel>
+                <!-- Payment Method -->
+                <TextBlock Text="Payment Method" Foreground="#555555"
+                           FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI"
+                           Margin="0,4,0,10"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="8"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <RadioButton Grid.Row="0" Grid.Column="0" Content="Cash"
+                                 Style="{StaticResource PaymentRadio}"
+                                 IsChecked="{Binding IsCash}"
+                                 GroupName="PaymentMethod"/>
+                    <RadioButton Grid.Row="0" Grid.Column="2" Content="Card"
+                                 Style="{StaticResource PaymentRadio}"
+                                 IsChecked="{Binding IsCard}"
+                                 GroupName="PaymentMethod"/>
+                    <RadioButton Grid.Row="2" Grid.Column="0" Content="EasyPaisa"
+                                 Style="{StaticResource PaymentRadio}"
+                                 IsChecked="{Binding IsEasyPaisa}"
+                                 GroupName="PaymentMethod"/>
+                    <RadioButton Grid.Row="2" Grid.Column="2" Content="JazzCash"
+                                 Style="{StaticResource PaymentRadio}"
+                                 IsChecked="{Binding IsJazzCash}"
+                                 GroupName="PaymentMethod"/>
+                </Grid>
+            </StackPanel>
 
-                    <!-- Buttons -->
-                    <Grid Margin="0,8,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="8"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" 
-                                Content="Cancel" 
-                                Background="#ffffff" 
-                                Foreground="#000000"
-                                BorderBrush="#000000"
-                                BorderThickness="1"
-                                FontSize="12"
-                                FontWeight="Bold"
-                                Padding="0,10"
-                                Cursor="Hand"
-                                Command="{Binding CancelCommand}"/>
-                        <Button Grid.Column="2" 
-                                Content="Print Sale" 
-                                Background="#000000" 
-                                Foreground="#ffffff"
-                                FontSize="12"
-                                FontWeight="Bold"
-                                Padding="0,10"
-                                Cursor="Hand"
-                                Command="{Binding PrintCommand}"/>
-                    </Grid>
-                </StackPanel>
+            <!-- ── Footer Buttons ─────────────────────────────────── -->
+            <Border Grid.Row="2" Padding="24,12,24,20" BorderBrush="#eae8e3" BorderThickness="0,1,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancel"
+                            Background="#f5f4f0" Foreground="#666666"
+                            BorderBrush="#eae8e3" BorderThickness="1"
+                            FontSize="13" FontWeight="SemiBold"
+                            Padding="0,12" Cursor="Hand"
+                            Command="{Binding CancelCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#eae8e3"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Grid.Column="2" Content="Print Sale"
+                            Background="#c8a96e" Foreground="#111111"
+                            BorderBrush="#c8a96e" BorderThickness="1"
+                            FontSize="13" FontWeight="Bold"
+                            Padding="0,12" Cursor="Hand"
+                            Command="{Binding PrintCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#b8994e"/>
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="#b8994e"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#a8894e"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
             </Border>
-        </StackPanel>
+        </Grid>
     </Border>
 </Window>

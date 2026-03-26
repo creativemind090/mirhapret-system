@@ -8,17 +8,27 @@ import {
   Param,
   Body,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto, ChangePasswordDto } from './dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
+
+  @Post('newsletter-subscribe')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  async newsletterSubscribe(@Body('email') email: string) {
+    return this.usersService.newsletterSubscribe(email);
+  }
 
   @Get('profile')
   async getProfile(@CurrentUser() user: any) {
@@ -38,10 +48,29 @@ export class UsersController {
     };
   }
 
+  @Put('preferences')
+  async updatePreferences(
+    @CurrentUser() user: any,
+    @Body() body: { email_notifications?: boolean; newsletter_subscribed?: boolean },
+  ) {
+    const result = await this.usersService.updatePreferences(user.id, body);
+    return result;
+  }
+
   @Post('change-password')
   async changePassword(@CurrentUser() user: any, @Body() changePasswordDto: ChangePasswordDto) {
     const result = await this.usersService.changePassword(user.id, changePasswordDto);
     return result;
+  }
+
+  @Get('newsletter-subscribers')
+  @Roles('admin', 'super_admin')
+  async getNewsletterSubscribers() {
+    const result = await this.usersService.getNewsletterSubscribers();
+    return {
+      message: 'Newsletter subscribers retrieved successfully',
+      data: result,
+    };
   }
 
   @Get()

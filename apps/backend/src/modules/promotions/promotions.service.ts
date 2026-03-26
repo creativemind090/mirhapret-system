@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Promotion, PromoCode, PromoCodeUsage } from '../../entities';
 import { CreatePromotionDto, UpdatePromotionDto, CreatePromoCodeDto } from './dto';
+import { AppCacheService } from '../../common/cache/cache.service';
+
+const CACHE_ACTIVE_PROMOTIONS = 'promotions:active';
+const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class PromotionsService {
@@ -13,20 +17,27 @@ export class PromotionsService {
     private promoCodesRepository: Repository<PromoCode>,
     @InjectRepository(PromoCodeUsage)
     private usageRepository: Repository<PromoCodeUsage>,
+    private readonly cache: AppCacheService,
   ) {}
 
   // ─── PROMOTIONS ──────────────────────────────────────────────────────────────
 
   async getActivePromotions(): Promise<Promotion[]> {
-    const now = new Date();
-    return this.promotionsRepository.find({
-      where: {
-        is_active: true,
-        start_date: LessThanOrEqual(now),
-        end_date: MoreThanOrEqual(now),
-      },
-      order: { created_at: 'DESC' },
+    return this.cache.wrap(CACHE_ACTIVE_PROMOTIONS, CACHE_TTL, () => {
+      const now = new Date();
+      return this.promotionsRepository.find({
+        where: {
+          is_active: true,
+          start_date: LessThanOrEqual(now),
+          end_date: MoreThanOrEqual(now),
+        },
+        order: { created_at: 'DESC' },
+      });
     });
+  }
+
+  private async invalidatePromotionCache() {
+    await this.cache.del(CACHE_ACTIVE_PROMOTIONS);
   }
 
   async getAllPromotions(): Promise<Promotion[]> {
@@ -67,7 +78,9 @@ export class PromotionsService {
       created_by_id: createdById as any,
     });
 
-    return this.promotionsRepository.save(promotion);
+    const saved = await this.promotionsRepository.save(promotion);
+    await this.invalidatePromotionCache();
+    return saved;
   }
 
   async updatePromotion(id: string, updatePromotionDto: UpdatePromotionDto): Promise<Promotion> {
@@ -80,12 +93,14 @@ export class PromotionsService {
     }
 
     await this.promotionsRepository.update(id, updatePromotionDto as any);
+    await this.invalidatePromotionCache();
     return this.findPromotionById(id);
   }
 
   async deletePromotion(id: string): Promise<void> {
     await this.findPromotionById(id);
     await this.promotionsRepository.delete(id);
+    await this.invalidatePromotionCache();
   }
 
   // ─── PROMO CODES ─────────────────────────────────────────────────────────────

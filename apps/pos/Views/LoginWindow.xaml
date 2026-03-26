@@ -2,97 +2,181 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:pos.Utils"
+        xmlns:svgc="clr-namespace:SharpVectors.Converters;assembly=SharpVectors.Converters.Wpf"
         Title="MirhaPret POS — Sign In"
-        Height="460"
-        Width="420"
+        Icon="../Resources/logo-favicon.png"
+        Height="520"
+        Width="860"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Background="#f5f5f5">
+        Background="#111111"
+        WindowStyle="None"
+        AllowsTransparency="False">
     <Window.Resources>
         <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
     </Window.Resources>
-    <Grid>
-        <!-- Header -->
-        <Grid Height="60" VerticalAlignment="Top" Background="#000000">
-            <StackPanel VerticalAlignment="Center" Margin="24,0">
-                <TextBlock Text="MirhaPret" Foreground="#ffffff" FontSize="20" FontWeight="Bold"/>
-                <TextBlock Text="Point of Sale" Foreground="#aaaaaa" FontSize="11"/>
-            </StackPanel>
-        </Grid>
 
-        <!-- Form -->
-        <StackPanel Margin="32,80,32,32" VerticalAlignment="Top">
-            <TextBlock Text="Cashier Sign In" FontSize="18" FontWeight="Bold" Margin="0,0,0,24"/>
+    <Border BorderBrush="#2a2a2a" BorderThickness="1">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <!-- Left: brand panel -->
+                <ColumnDefinition Width="380"/>
+                <!-- Right: form panel -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Error -->
-            <Border Background="#ffe0e0" BorderBrush="#c0392b" BorderThickness="1" Padding="10,8" Margin="0,0,0,16"
-                    Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="#c0392b" FontSize="12" TextWrapping="Wrap"/>
-            </Border>
+            <!-- ══ LEFT: Dark Brand Panel ══════════════════════════════ -->
+            <Grid Grid.Column="0" Background="#111111">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <!-- Email -->
-            <TextBlock Text="Email" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>
-            <TextBox x:Name="EmailBox"
-                     Padding="10,10"
-                     FontSize="13"
-                     Background="#ffffff"
-                     BorderBrush="#e0e0e0"
-                     BorderThickness="1"
-                     Margin="0,0,0,16"
-                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+                <!-- Brand content (centered) -->
+                <StackPanel Grid.Row="0" VerticalAlignment="Center" Margin="44,0">
+                    <!-- Real SVG Logo -->
+                    <svgc:SvgViewbox Source="pack://application:,,,/Resources/logo-icon-white.svg"
+                                     Width="180" Height="180"
+                                     HorizontalAlignment="Left"
+                                     Margin="0,0,0,12"/>
 
-            <!-- Password -->
-            <TextBlock Text="Password" FontSize="12" FontWeight="Bold" Margin="0,0,0,6"/>
-            <Grid Margin="0,0,0,24">
-                <PasswordBox x:Name="PasswordBox"
-                             Padding="10,10"
-                             FontSize="13"
-                             Background="#ffffff"
-                             BorderBrush="#e0e0e0"
-                             BorderThickness="1"
-                             PasswordChanged="PasswordBox_PasswordChanged"/>
-                <!-- Plain TextBox shown when eye is toggled on -->
-                <TextBox x:Name="PasswordTextBox"
-                         Padding="10,10"
-                         FontSize="13"
-                         Background="#ffffff"
-                         BorderBrush="#e0e0e0"
-                         BorderThickness="1"
-                         Visibility="Collapsed"
-                         Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}"/>
-                <!-- Eye toggle button -->
-                <Button x:Name="EyeButton"
-                        Content="👁"
-                        FontSize="14"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Margin="0,0,8,0"
-                        Padding="4,2"
-                        Click="EyeButton_Click"
-                        Focusable="False"/>
+                    <TextBlock Text="Point of Sale System" Foreground="#c8a96e" FontSize="13"
+                               FontFamily="Segoe UI" Margin="0,0,0,36"/>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="#2a2a2a" Margin="0,0,0,32"/>
+
+                    <!-- Stats row -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Border Background="#1a1a1a" CornerRadius="8" Padding="14,12" BorderBrush="#2a2a2a" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="FAST" Foreground="#c8a96e" FontSize="9" FontWeight="Bold"
+                                               FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Checkout" Foreground="#ffffff" FontSize="13" FontWeight="SemiBold"
+                                               FontFamily="Segoe UI"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <Border Background="#1a1a1a" CornerRadius="8" Padding="14,12" BorderBrush="#2a2a2a" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="LIVE" Foreground="#c8a96e" FontSize="9" FontWeight="Bold"
+                                               FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Inventory" Foreground="#ffffff" FontSize="13" FontWeight="SemiBold"
+                                               FontFamily="Segoe UI"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <Border Background="#1a1a1a" CornerRadius="8" Padding="14,12" BorderBrush="#2a2a2a" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="BARCODE" Foreground="#c8a96e" FontSize="9" FontWeight="Bold"
+                                               FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Scanner" Foreground="#ffffff" FontSize="13" FontWeight="SemiBold"
+                                               FontFamily="Segoe UI"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <Border Background="#1a1a1a" CornerRadius="8" Padding="14,12" BorderBrush="#2a2a2a" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Text="PROMO" Foreground="#c8a96e" FontSize="9" FontWeight="Bold"
+                                               FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                                    <TextBlock Text="Codes" Foreground="#ffffff" FontSize="13" FontWeight="SemiBold"
+                                               FontFamily="Segoe UI"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Footer -->
+                <TextBlock Grid.Row="1" Text="© 2026 MirhaPret — All rights reserved"
+                           Foreground="#444444" FontSize="10" FontFamily="Segoe UI"
+                           HorizontalAlignment="Center" Margin="0,0,0,20"/>
             </Grid>
 
-            <!-- Sign In Button -->
-            <Button Content="{Binding LoginButtonText}"
-                    Background="#000000"
-                    Foreground="#ffffff"
-                    FontSize="13"
-                    FontWeight="Bold"
-                    Padding="0,14"
-                    Cursor="Hand"
-                    IsDefault="True"
-                    Command="{Binding LoginCommand}"/>
-        </StackPanel>
+            <!-- ══ RIGHT: Form Panel ══════════════════════════════════ -->
+            <Grid Grid.Column="1" Background="#ffffff">
+                <StackPanel VerticalAlignment="Center" Margin="52,0">
+                    <!-- Heading -->
+                    <TextBlock Text="Welcome back" Foreground="#111111" FontSize="26" FontWeight="Bold"
+                               FontFamily="Segoe UI" Margin="0,0,0,4"/>
+                    <TextBlock Text="Sign in to your cashier account" Foreground="#888888" FontSize="13"
+                               FontFamily="Segoe UI" Margin="0,0,0,32"/>
 
-        <!-- Footer -->
-        <TextBlock Text="© 2026 MirhaPret"
-                   Foreground="#999999"
-                   FontSize="10"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Bottom"
-                   Margin="0,0,0,16"/>
-    </Grid>
+                    <!-- Error banner -->
+                    <Border Background="#fff0ee" BorderBrush="#c0392b" BorderThickness="1"
+                            CornerRadius="7" Padding="12,10" Margin="0,0,0,20"
+                            Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⚠ " Foreground="#c0392b" FontSize="13" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ErrorMessage}" Foreground="#c0392b" FontSize="12"
+                                       TextWrapping="Wrap" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Email label + input -->
+                    <TextBlock Text="Email address" Foreground="#444444" FontSize="12" FontWeight="SemiBold"
+                               FontFamily="Segoe UI" Margin="0,0,0,6"/>
+                    <TextBox x:Name="EmailBox"
+                             Style="{StaticResource TextBoxDefault}"
+                             Margin="0,0,0,18"
+                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
+
+                    <!-- Password label + input -->
+                    <TextBlock Text="Password" Foreground="#444444" FontSize="12" FontWeight="SemiBold"
+                               FontFamily="Segoe UI" Margin="0,0,0,6"/>
+                    <Grid Margin="0,0,0,28">
+                        <PasswordBox x:Name="PasswordBox"
+                                     Style="{StaticResource PasswordBoxDefault}"
+                                     PasswordChanged="PasswordBox_PasswordChanged"/>
+                        <TextBox x:Name="PasswordTextBox"
+                                 Style="{StaticResource TextBoxDefault}"
+                                 Visibility="Collapsed"
+                                 Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button x:Name="EyeButton"
+                                Content="👁"
+                                FontSize="14"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Margin="0,0,10,0"
+                                Padding="4,2"
+                                Click="EyeButton_Click"
+                                Focusable="False"/>
+                    </Grid>
+
+                    <!-- Sign In Button -->
+                    <Button Content="{Binding LoginButtonText}"
+                            Style="{StaticResource ButtonPrimary}"
+                            FontSize="14"
+                            Padding="0,14"
+                            IsDefault="True"
+                            Command="{Binding LoginCommand}"/>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="#eae8e3" Margin="0,28,0,0"/>
+
+                    <TextBlock Text="Authorized cashiers only. Contact admin if you need access."
+                               Foreground="#aaaaaa" FontSize="10" FontFamily="Segoe UI"
+                               TextWrapping="Wrap" HorizontalAlignment="Center"
+                               TextAlignment="Center" Margin="0,16,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

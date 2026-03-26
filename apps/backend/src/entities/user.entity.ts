@@ -17,8 +17,11 @@ export class User {
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true, select: false })
   password: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  google_id: string;
 
   @Column({ type: 'varchar', length: 100 })
   first_name: string;
@@ -44,10 +47,10 @@ export class User {
   @Column({ type: 'jsonb', nullable: true })
   address: Record<string, any>;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true, select: false })
   refresh_token: string;
 
-  @Column({ type: 'varchar', length: 6, nullable: true })
+  @Column({ type: 'varchar', length: 6, nullable: true, select: false })
   reset_token: string;
 
   @Column({ type: 'timestamp', nullable: true })
@@ -61,4 +64,10 @@ export class User {
 
   @Column({ type: 'timestamp', nullable: true })
   last_login_at: Date;
+
+  @Column({ type: 'boolean', default: true })
+  email_notifications: boolean;
+
+  @Column({ type: 'boolean', default: false })
+  newsletter_subscribed: boolean;
 }

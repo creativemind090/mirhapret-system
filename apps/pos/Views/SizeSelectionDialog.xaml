@@ -3,34 +3,67 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Select Size"
         SizeToContent="WidthAndHeight"
-        MinWidth="320"
+        MinWidth="340"
+        MaxWidth="500"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         WindowStyle="None"
-        Background="#f5f5f5">
-    <Border BorderBrush="#000000" BorderThickness="1">
-        <StackPanel Background="#ffffff">
-            <!-- Header -->
-            <Border Background="#000000" Padding="16,12">
-                <TextBlock x:Name="HeaderText"
-                           Foreground="#ffffff" FontSize="13" FontWeight="Bold"/>
+        Background="Transparent"
+        AllowsTransparency="True">
+
+    <Border Background="#ffffff" CornerRadius="12" BorderBrush="#eae8e3" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="4" Opacity="0.14"/>
+        </Border.Effect>
+        <StackPanel>
+            <!-- ── Header ──────────────────────────────────────── -->
+            <Border Background="#111111" CornerRadius="12,12,0,0" Padding="20,16">
+                <Grid>
+                    <TextBlock x:Name="HeaderText"
+                               Foreground="#ffffff"
+                               FontSize="14" FontWeight="SemiBold"
+                               FontFamily="Segoe UI"
+                               VerticalAlignment="Center"/>
+                    <!-- Gold accent dot -->
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Width="8" Height="8" CornerRadius="4" Background="#c8a96e"/>
+                </Grid>
             </Border>
 
-            <!-- Size buttons -->
-            <StackPanel Margin="20,16,20,8">
-                <TextBlock Text="Select Size:" FontSize="12" FontWeight="Bold" Margin="0,0,0,12"/>
+            <!-- ── Size picker ─────────────────────────────────── -->
+            <StackPanel Margin="24,20,24,4">
+                <TextBlock Text="Select a size to continue:" Foreground="#666666"
+                           FontSize="12" FontFamily="Segoe UI" Margin="0,0,0,14"/>
+                <!-- Size buttons (added in code-behind) -->
                 <WrapPanel x:Name="SizePanel" Orientation="Horizontal"/>
             </StackPanel>
 
-            <!-- Cancel -->
-            <Border Padding="20,8,20,16">
+            <!-- ── Cancel ─────────────────────────────────────── -->
+            <Border Padding="24,12,24,20">
                 <Button Content="Cancel"
-                        Background="#ffffff" Foreground="#000000"
-                        BorderBrush="#000000" BorderThickness="1"
-                        FontSize="12" FontWeight="Bold"
-                        Padding="0,8" Cursor="Hand"
-                        Click="Cancel_Click"/>
+                        Background="#f5f4f0" Foreground="#666666"
+                        BorderBrush="#eae8e3" BorderThickness="1"
+                        FontSize="13" FontWeight="SemiBold"
+                        FontFamily="Segoe UI"
+                        Padding="0,10" Cursor="Hand"
+                        Click="Cancel_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#eae8e3"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
             </Border>
         </StackPanel>
     </Border>

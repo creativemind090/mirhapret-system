@@ -8,9 +8,9 @@ public class StringToVisibilityConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is string str && !string.IsNullOrWhiteSpace(str))
-            return Visibility.Visible;
-        return Visibility.Collapsed;
+        bool hasValue = value is string str && !string.IsNullOrWhiteSpace(str);
+        bool invert   = parameter is string p && p == "invert";
+        return (hasValue ^ invert) ? Visibility.Visible : Visibility.Collapsed;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

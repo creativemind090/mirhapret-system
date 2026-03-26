@@ -22,8 +22,20 @@ async function bootstrap() {
 
   // Security headers (X-Frame-Options, HSTS, CSP, XSS-Protection, no-sniff, etc.)
   app.use(helmet({
-    crossOriginResourcePolicy: { policy: 'cross-origin' }, // allow CDN images
-    contentSecurityPolicy: isProduction ? undefined : false, // disable CSP in dev to allow Swagger
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: isProduction ? {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    } : false,
   }));
 
   // Increase body size limit for base64 image uploads (~7MB for a 5MB image)

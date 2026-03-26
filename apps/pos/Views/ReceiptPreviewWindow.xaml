@@ -1,65 +1,124 @@
 <Window x:Class="pos.Views.ReceiptPreviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Receipt Preview" 
-        Height="600" 
-        Width="500"
-        Background="#f5f5f5"
+        Title="Receipt Preview"
+        Height="620"
+        Width="520"
+        Background="#f5f4f0"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
-    
-    <Border BorderBrush="#000000" BorderThickness="1">
-        <StackPanel Background="#ffffff">
-            <!-- Header -->
-            <Border Background="#000000" Padding="16,12">
-                <TextBlock Text="Receipt Preview" 
-                           Foreground="#ffffff" 
-                           FontSize="14"
-                           FontWeight="Bold"/>
+
+    <Border BorderBrush="#eae8e3" BorderThickness="1">
+        <Grid Background="#f5f4f0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── Header ─────────────────────────────────────────── -->
+            <Border Grid.Row="0" Background="#111111" Padding="20,16">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="Receipt Preview" Foreground="#ffffff"
+                                   FontSize="15" FontWeight="SemiBold" FontFamily="Segoe UI"/>
+                        <TextBlock Text="Review before printing" Foreground="#888888"
+                                   FontSize="11" FontFamily="Segoe UI" Margin="0,3,0,0"/>
+                    </StackPanel>
+                    <!-- Print icon indicator -->
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Background="#1e1e1e" CornerRadius="8" Padding="10,6"
+                            BorderBrush="#2a2a2a" BorderThickness="1">
+                        <TextBlock Text="🖨" FontSize="16" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
             </Border>
 
-            <!-- Receipt Content -->
-            <Border Padding="16" BorderBrush="#e0e0e0" BorderThickness="0,1,0,0">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <TextBlock Text="{Binding ReceiptText}" 
-                               FontFamily="Courier New"
-                               FontSize="11"
-                               Foreground="#333333"
-                               TextWrapping="Wrap"
-                               LineHeight="1.6"/>
-                </ScrollViewer>
+            <!-- ── Receipt paper ─────────────────────────────────── -->
+            <Border Grid.Row="1" Margin="20,16,20,0" CornerRadius="8"
+                    Background="#ffffff" BorderBrush="#eae8e3" BorderThickness="1">
+                <Grid>
+                    <!-- Top perforated edge hint -->
+                    <Border Height="8" VerticalAlignment="Top" Background="#faf9f7"
+                            BorderBrush="#eae8e3" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0"/>
+                    <!-- Receipt content -->
+                    <ScrollViewer Margin="0,8,0,0" VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding ReceiptText}"
+                                   FontFamily="Consolas, Courier New, monospace"
+                                   FontSize="12"
+                                   Foreground="#222222"
+                                   TextWrapping="Wrap"
+                                   Padding="24,16,24,24"
+                                   LineHeight="20"/>
+                    </ScrollViewer>
+                </Grid>
             </Border>
 
-            <!-- Buttons -->
-            <Border Padding="16" BorderBrush="#e0e0e0" BorderThickness="0,1,0,0">
+            <!-- ── Footer Buttons ─────────────────────────────────── -->
+            <Border Grid.Row="2" Padding="20,14,20,20" BorderBrush="#eae8e3" BorderThickness="0,1,0,0"
+                    Background="#ffffff">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" 
-                            Content="Close" 
-                            Background="#ffffff" 
-                            Foreground="#000000"
-                            BorderBrush="#000000"
-                            BorderThickness="1"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            Padding="0,10"
-                            Cursor="Hand"
-                            Command="{Binding CloseCommand}"/>
-                    <Button Grid.Column="2" 
-                            Content="Print Slip" 
-                            Background="#000000" 
-                            Foreground="#ffffff"
-                            FontSize="12"
-                            FontWeight="Bold"
-                            Padding="0,10"
-                            Cursor="Hand"
-                            Command="{Binding PrintCommand}"/>
+
+                    <!-- Close -->
+                    <Button Grid.Column="0" Content="Close"
+                            Background="#f5f4f0" Foreground="#666666"
+                            BorderBrush="#eae8e3" BorderThickness="1"
+                            FontSize="13" FontWeight="SemiBold"
+                            FontFamily="Segoe UI"
+                            Padding="0,12" Cursor="Hand"
+                            Command="{Binding CloseCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#eae8e3"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+
+                    <!-- Print Slip (gold) -->
+                    <Button Grid.Column="2" Content="🖨  Print Slip"
+                            Background="#c8a96e" Foreground="#111111"
+                            BorderBrush="#c8a96e" BorderThickness="1"
+                            FontSize="13" FontWeight="Bold"
+                            FontFamily="Segoe UI"
+                            Padding="0,12" Cursor="Hand"
+                            Command="{Binding PrintCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#b8994e"/>
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="#b8994e"/>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#a8894e"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                 </Grid>
             </Border>
-        </StackPanel>
+        </Grid>
     </Border>
 </Window>

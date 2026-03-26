@@ -2,56 +2,89 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-    <!-- Color Palette - Black & White Minimalist -->
-    <Color x:Key="ColorBlack">#000000</Color>
+    <!-- ══════════════════════════════════════════════════════════
+         COLOR PALETTE
+    ══════════════════════════════════════════════════════════ -->
+    <!-- Neutrals -->
+    <Color x:Key="ColorBlack">#111111</Color>
     <Color x:Key="ColorDark">#1a1a1a</Color>
     <Color x:Key="ColorCharcoal">#333333</Color>
     <Color x:Key="ColorMidGray">#666666</Color>
     <Color x:Key="ColorLightGray">#999999</Color>
-    <Color x:Key="ColorBorder">#e0e0e0</Color>
-    <Color x:Key="ColorOffWhite">#f5f5f5</Color>
+    <Color x:Key="ColorBorder">#eae8e3</Color>
+    <Color x:Key="ColorOffWhite">#f5f4f0</Color>
     <Color x:Key="ColorWhite">#ffffff</Color>
+    <Color x:Key="ColorBackground">#f5f4f0</Color>
+    <Color x:Key="ColorBorderSoft">#eae8e3</Color>
+    <Color x:Key="ColorSurface">#faf9f7</Color>
+
+    <!-- Gold Accent -->
+    <Color x:Key="ColorGold">#c8a96e</Color>
+    <Color x:Key="ColorGoldDark">#a8894e</Color>
+    <Color x:Key="ColorGoldLight">#f5f0e8</Color>
+    <Color x:Key="ColorGoldFocus">#c8a96e</Color>
+
+    <!-- Semantic -->
+    <Color x:Key="ColorError">#c0392b</Color>
+    <Color x:Key="ColorErrorBg">#fff0ee</Color>
+    <Color x:Key="ColorSuccess">#1a7a4a</Color>
 
     <!-- Status Colors -->
-    <Color x:Key="StatusPending">#999999</Color>
+    <Color x:Key="StatusPending">#888888</Color>
     <Color x:Key="StatusConfirmed">#1a56db</Color>
-    <Color x:Key="StatusProcessing">#f5a623</Color>
+    <Color x:Key="StatusProcessing">#d4820a</Color>
     <Color x:Key="StatusShipped">#1a7a4a</Color>
-    <Color x:Key="StatusDelivered">#000000</Color>
+    <Color x:Key="StatusDelivered">#111111</Color>
     <Color x:Key="StatusCancelled">#c0392b</Color>
 
-    <!-- Brushes -->
-    <SolidColorBrush x:Key="BrushBlack" Color="{StaticResource ColorBlack}"/>
-    <SolidColorBrush x:Key="BrushDark" Color="{StaticResource ColorDark}"/>
-    <SolidColorBrush x:Key="BrushCharcoal" Color="{StaticResource ColorCharcoal}"/>
-    <SolidColorBrush x:Key="BrushMidGray" Color="{StaticResource ColorMidGray}"/>
-    <SolidColorBrush x:Key="BrushLightGray" Color="{StaticResource ColorLightGray}"/>
-    <SolidColorBrush x:Key="BrushBorder" Color="{StaticResource ColorBorder}"/>
-    <SolidColorBrush x:Key="BrushOffWhite" Color="{StaticResource ColorOffWhite}"/>
-    <SolidColorBrush x:Key="BrushWhite" Color="{StaticResource ColorWhite}"/>
+    <!-- ══════════════════════════════════════════════════════════
+         BRUSHES
+    ══════════════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="BrushBlack"        Color="{StaticResource ColorBlack}"/>
+    <SolidColorBrush x:Key="BrushDark"         Color="{StaticResource ColorDark}"/>
+    <SolidColorBrush x:Key="BrushCharcoal"     Color="{StaticResource ColorCharcoal}"/>
+    <SolidColorBrush x:Key="BrushMidGray"      Color="{StaticResource ColorMidGray}"/>
+    <SolidColorBrush x:Key="BrushLightGray"    Color="{StaticResource ColorLightGray}"/>
+    <SolidColorBrush x:Key="BrushBorder"       Color="{StaticResource ColorBorder}"/>
+    <SolidColorBrush x:Key="BrushOffWhite"     Color="{StaticResource ColorOffWhite}"/>
+    <SolidColorBrush x:Key="BrushWhite"        Color="{StaticResource ColorWhite}"/>
+    <SolidColorBrush x:Key="BrushBackground"   Color="{StaticResource ColorBackground}"/>
+    <SolidColorBrush x:Key="BrushBorderSoft"   Color="{StaticResource ColorBorderSoft}"/>
+    <SolidColorBrush x:Key="BrushSurface"      Color="{StaticResource ColorSurface}"/>
+
+    <SolidColorBrush x:Key="BrushGold"         Color="{StaticResource ColorGold}"/>
+    <SolidColorBrush x:Key="BrushGoldDark"     Color="{StaticResource ColorGoldDark}"/>
+    <SolidColorBrush x:Key="BrushGoldLight"    Color="{StaticResource ColorGoldLight}"/>
+
+    <SolidColorBrush x:Key="BrushError"        Color="{StaticResource ColorError}"/>
+    <SolidColorBrush x:Key="BrushErrorBg"      Color="{StaticResource ColorErrorBg}"/>
+    <SolidColorBrush x:Key="BrushSuccess"      Color="{StaticResource ColorSuccess}"/>
 
     <!-- Status Brushes -->
-    <SolidColorBrush x:Key="BrushStatusPending" Color="{StaticResource StatusPending}"/>
-    <SolidColorBrush x:Key="BrushStatusConfirmed" Color="{StaticResource StatusConfirmed}"/>
+    <SolidColorBrush x:Key="BrushStatusPending"    Color="{StaticResource StatusPending}"/>
+    <SolidColorBrush x:Key="BrushStatusConfirmed"  Color="{StaticResource StatusConfirmed}"/>
     <SolidColorBrush x:Key="BrushStatusProcessing" Color="{StaticResource StatusProcessing}"/>
-    <SolidColorBrush x:Key="BrushStatusShipped" Color="{StaticResource StatusShipped}"/>
-    <SolidColorBrush x:Key="BrushStatusDelivered" Color="{StaticResource StatusDelivered}"/>
-    <SolidColorBrush x:Key="BrushStatusCancelled" Color="{StaticResource StatusCancelled}"/>
+    <SolidColorBrush x:Key="BrushStatusShipped"    Color="{StaticResource StatusShipped}"/>
+    <SolidColorBrush x:Key="BrushStatusDelivered"  Color="{StaticResource StatusDelivered}"/>
+    <SolidColorBrush x:Key="BrushStatusCancelled"  Color="{StaticResource StatusCancelled}"/>
 
-    <!-- Typography -->
+    <!-- ══════════════════════════════════════════════════════════
+         TYPOGRAPHY
+    ══════════════════════════════════════════════════════════ -->
     <FontFamily x:Key="FontFamilyDefault">Segoe UI, Arial, sans-serif</FontFamily>
     <FontFamily x:Key="FontFamilyMono">Consolas, Courier New, monospace</FontFamily>
 
-    <!-- Font Sizes -->
-    <sys:Double x:Key="FontSizeXS">12</sys:Double>
-    <sys:Double x:Key="FontSizeSM">13</sys:Double>
-    <sys:Double x:Key="FontSizeBase">14</sys:Double>
-    <sys:Double x:Key="FontSizeLG">16</sys:Double>
-    <sys:Double x:Key="FontSizeXL">20</sys:Double>
-    <sys:Double x:Key="FontSize2XL">24</sys:Double>
+    <sys:Double x:Key="FontSizeXS">11</sys:Double>
+    <sys:Double x:Key="FontSizeSM">12</sys:Double>
+    <sys:Double x:Key="FontSizeBase">13</sys:Double>
+    <sys:Double x:Key="FontSizeLG">15</sys:Double>
+    <sys:Double x:Key="FontSizeXL">18</sys:Double>
+    <sys:Double x:Key="FontSize2XL">22</sys:Double>
     <sys:Double x:Key="FontSize4XL">32</sys:Double>
 
-    <!-- Spacing -->
+    <!-- ══════════════════════════════════════════════════════════
+         SPACING
+    ══════════════════════════════════════════════════════════ -->
     <sys:Double x:Key="Spacing4">4</sys:Double>
     <sys:Double x:Key="Spacing8">8</sys:Double>
     <sys:Double x:Key="Spacing12">12</sys:Double>
@@ -61,86 +94,184 @@
     <sys:Double x:Key="Spacing32">32</sys:Double>
     <sys:Double x:Key="Spacing48">48</sys:Double>
 
-    <!-- Button Styles -->
+    <!-- ══════════════════════════════════════════════════════════
+         CORNER RADIUS
+    ══════════════════════════════════════════════════════════ -->
+    <CornerRadius x:Key="RadiusSM">4</CornerRadius>
+    <CornerRadius x:Key="RadiusMD">7</CornerRadius>
+    <CornerRadius x:Key="RadiusLG">10</CornerRadius>
+    <CornerRadius x:Key="RadiusXL">14</CornerRadius>
+    <CornerRadius x:Key="RadiusFull">999</CornerRadius>
+
+    <!-- ══════════════════════════════════════════════════════════
+         BUTTON STYLES
+    ══════════════════════════════════════════════════════════ -->
+
+    <!-- Primary: dark/black -->
     <Style x:Key="ButtonPrimary" TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource BrushBlack}"/>
-        <Setter Property="Foreground" Value="{StaticResource BrushWhite}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BrushBlack}"/>
+        <Setter Property="Background" Value="#111111"/>
+        <Setter Property="Foreground" Value="#ffffff"/>
+        <Setter Property="BorderBrush" Value="#111111"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="16,10"/>
+        <Setter Property="Padding" Value="18,10"/>
         <Setter Property="FontFamily" Value="{StaticResource FontFamilyDefault}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeSM}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBase}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" 
-                            BorderBrush="{TemplateBinding BorderBrush}" 
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="7"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#2a2a2a"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#1a1a1a"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Background" Value="#d0cdc8"/>
+                            <Setter Property="Foreground" Value="#999999"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#d0cdc8"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Gold: brand accent -->
+    <Style x:Key="ButtonGold" TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
+        <Setter Property="Background" Value="#c8a96e"/>
+        <Setter Property="Foreground" Value="#111111"/>
+        <Setter Property="BorderBrush" Value="#c8a96e"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource BrushCharcoal}"/>
+                <Setter Property="Background" Value="#b8994e"/>
+                <Setter Property="BorderBrush" Value="#b8994e"/>
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="{StaticResource BrushDark}"/>
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Background" Value="{StaticResource BrushBorder}"/>
-                <Setter Property="Foreground" Value="{StaticResource BrushLightGray}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}"/>
+                <Setter Property="Background" Value="#a8894e"/>
+                <Setter Property="BorderBrush" Value="#a8894e"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
+    <!-- Secondary: outlined -->
     <Style x:Key="ButtonSecondary" TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
-        <Setter Property="Background" Value="{StaticResource BrushWhite}"/>
-        <Setter Property="Foreground" Value="{StaticResource BrushBlack}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BrushBlack}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#111111"/>
+        <Setter Property="BorderBrush" Value="#eae8e3"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource BrushOffWhite}"/>
+                <Setter Property="Background" Value="#f5f4f0"/>
+                <Setter Property="BorderBrush" Value="#c8a96e"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
+    <!-- Danger: red -->
     <Style x:Key="ButtonDanger" TargetType="Button" BasedOn="{StaticResource ButtonPrimary}">
-        <Setter Property="Background" Value="{StaticResource BrushStatusCancelled}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BrushStatusCancelled}"/>
+        <Setter Property="Background" Value="#c0392b"/>
+        <Setter Property="BorderBrush" Value="#c0392b"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#a02d23"/>
+                <Setter Property="BorderBrush" Value="#a02d23"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <!-- TextBox Style -->
+    <!-- Ghost: no background, small -->
+    <Style x:Key="ButtonGhost" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="#666666"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="8,6"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyDefault}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSM}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#f5f4f0"/>
+                            <Setter Property="Foreground" Value="#111111"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#eae8e3"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ══════════════════════════════════════════════════════════
+         INPUT STYLES
+    ══════════════════════════════════════════════════════════ -->
     <Style x:Key="TextBoxDefault" TargetType="TextBox">
-        <Setter Property="Background" Value="{StaticResource BrushWhite}"/>
-        <Setter Property="Foreground" Value="{StaticResource BrushCharcoal}"/>
-        <Setter Property="BorderBrush" Value="{StaticResource BrushBorder}"/>
+        <Setter Property="Background" Value="#ffffff"/>
+        <Setter Property="Foreground" Value="#111111"/>
+        <Setter Property="BorderBrush" Value="#eae8e3"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Padding" Value="12,9"/>
+        <Setter Property="Padding" Value="12,10"/>
         <Setter Property="FontFamily" Value="{StaticResource FontFamilyDefault}"/>
         <Setter Property="FontSize" Value="{StaticResource FontSizeBase}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Border Background="{TemplateBinding Background}" 
-                            BorderBrush="{TemplateBinding BorderBrush}" 
-                            BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="7">
                         <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter Property="BorderBrush" Value="{StaticResource BrushBlack}"/>
-                            <Setter Property="BorderThickness" Value="2"/>
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#c8a96e"/>
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="1.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="PasswordBoxDefault" TargetType="PasswordBox">
+        <Setter Property="Background" Value="#ffffff"/>
+        <Setter Property="Foreground" Value="#111111"/>
+        <Setter Property="BorderBrush" Value="#eae8e3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="FontFamily" Value="{StaticResource FontFamilyDefault}"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeBase}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="7">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="#c8a96e"/>
+                            <Setter TargetName="Bd" Property="BorderThickness" Value="1.5"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -150,11 +281,72 @@
 
     <!-- Label Style -->
     <Style x:Key="LabelDefault" TargetType="Label">
-        <Setter Property="Foreground" Value="{StaticResource BrushCharcoal}"/>
+        <Setter Property="Foreground" Value="#444444"/>
         <Setter Property="FontFamily" Value="{StaticResource FontFamilyDefault}"/>
-        <Setter Property="FontSize" Value="{StaticResource FontSizeXS}"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Padding" Value="0,0,0,6"/>
+        <Setter Property="FontSize" Value="{StaticResource FontSizeSM}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Padding" Value="0,0,0,5"/>
+    </Style>
+
+    <!-- ══════════════════════════════════════════════════════════
+         SCROLLBAR STYLE (slim, modern)
+    ══════════════════════════════════════════════════════════ -->
+    <Style x:Key="ScrollBarTrack" TargetType="Track"/>
+
+    <Style x:Key="ScrollThumbStyle" TargetType="Thumb">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border Background="#d0cdc8" CornerRadius="3"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ScrollBarStyle" TargetType="ScrollBar">
+        <Setter Property="Width" Value="6"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid>
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" Height="0"/>
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource ScrollThumbStyle}" Margin="1,0"/>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" Height="0"/>
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ScrollViewerStyle" TargetType="ScrollViewer">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollViewer">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ScrollContentPresenter Grid.Column="0"/>
+                        <ScrollBar Grid.Column="1"
+                                   Style="{StaticResource ScrollBarStyle}"
+                                   Value="{TemplateBinding VerticalOffset}"
+                                   Maximum="{TemplateBinding ScrollableHeight}"
+                                   ViewportSize="{TemplateBinding ViewportHeight}"
+                                   Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

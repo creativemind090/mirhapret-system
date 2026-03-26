@@ -11,6 +11,7 @@ public class CartItem : INotifyPropertyChanged
     public string ProductName { get; set; } = string.Empty;
     public string Barcode { get; set; } = string.Empty;
     public string SelectedSize { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }
     public decimal TaxRate { get; set; }
 

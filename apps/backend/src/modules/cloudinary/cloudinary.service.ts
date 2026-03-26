@@ -12,11 +12,15 @@ export class CloudinaryService implements OnModuleInit {
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
-    cloudinary.config({
-      cloud_name: this.configService.get('CLOUDINARY_CLOUD_NAME'),
-      api_key: this.configService.get('CLOUDINARY_API_KEY'),
-      api_secret: this.configService.get('CLOUDINARY_API_SECRET'),
-    });
+    if (process.env.CLOUDINARY_URL) {
+      cloudinary.config({ cloudinary_url: process.env.CLOUDINARY_URL });
+    } else {
+      cloudinary.config({
+        cloud_name: this.configService.get('CLOUDINARY_CLOUD_NAME'),
+        api_key: this.configService.get('CLOUDINARY_API_KEY'),
+        api_secret: this.configService.get('CLOUDINARY_API_SECRET'),
+      });
+    }
   }
 
   async uploadBase64(dataUrl: string, folder = 'ecommerce'): Promise<any> {
@@ -34,9 +38,6 @@ export class CloudinaryService implements OnModuleInit {
       const result: any = await cloudinary.uploader.upload(dataUrl, {
         folder,
         resource_type: 'auto',
-        quality: 'auto',
-        fetch_format: 'auto',
-        transformation: [{ width: 1000, crop: 'scale' }],
       });
 
       return {

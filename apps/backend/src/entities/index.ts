@@ -14,3 +14,5 @@ export { ProductAnalytic } from './product-analytic.entity';
 export { ProductReview } from './product-review.entity';
 export { PaymentMethod } from './payment-method.entity';
 export { POSSyncLog } from './pos-sync-log.entity';
+export { Blog } from './blog.entity';
+export { NewsletterSubscription } from './newsletter-subscription.entity';

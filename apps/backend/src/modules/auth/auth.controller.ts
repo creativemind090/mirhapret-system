@@ -42,6 +42,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Public()
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
@@ -59,6 +60,21 @@ export class AuthController {
     await this.authService.logout(req.user.id);
     return {
       message: 'Logout successful',
+    };
+  }
+
+  @Post('google')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ short: { limit: 10, ttl: 60000 }, long: { limit: 50, ttl: 3600000 } })
+  async googleLogin(@Body() body: { id_token: string }) {
+    if (!body.id_token) {
+      throw new (await import('@nestjs/common').then(m => m.BadRequestException))('id_token is required');
+    }
+    const result = await this.authService.googleLogin(body.id_token);
+    return {
+      message: 'Login successful',
+      data: result,
     };
   }
 
