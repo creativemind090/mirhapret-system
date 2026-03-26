@@ -285,7 +285,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoggedIn) {
       // Logged-in users skip OTP — place order immediately
