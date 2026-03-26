@@ -15,7 +15,8 @@ export default function MyProfilePage() {
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [emailNotif, setEmailNotif] = useState(true);
-  const [smsNotif, setSmsNotif] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
+  const [prefSaving, setPrefSaving] = useState(false);
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -44,6 +45,8 @@ export default function MyProfilePage() {
           email: profile.email ?? '',
           phone: profile.phone ?? '',
         });
+        setEmailNotif(profile.email_notifications ?? true);
+        setNewsletter(profile.newsletter_subscribed ?? false);
       } catch {
         // fallback to auth context user
         if (user) {
@@ -91,6 +94,21 @@ export default function MyProfilePage() {
       setSaveError(err.response?.data?.message ?? 'Failed to save changes');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePrefToggle = async (key: 'email_notifications' | 'newsletter_subscribed', value: boolean) => {
+    if (key === 'email_notifications') setEmailNotif(value);
+    else setNewsletter(value);
+    setPrefSaving(true);
+    try {
+      await api.put('/users/preferences', { [key]: value });
+    } catch {
+      // revert on failure
+      if (key === 'email_notifications') setEmailNotif(!value);
+      else setNewsletter(!value);
+    } finally {
+      setPrefSaving(false);
     }
   };
 
@@ -299,80 +317,31 @@ export default function MyProfilePage() {
               <div style={{ flex: 1, height: '1px', background: '#e0e0e0' }} />
             </div>
 
+            {prefSaving && (
+              <p style={{ fontSize: '11px', color: '#999', marginBottom: '8px' }}>Saving preference…</p>
+            )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '24px', borderBottom: '1px solid #e0e0e0' }}>
-                <div>
-                  <p style={{ fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Receive Notifications via Email</p>
-                  <p style={{ fontSize: '12px', color: '#666666', margin: 0 }}>Get updates about your orders and promotions</p>
+              {[
+                { key: 'email_notifications' as const, label: 'Receive Notifications via Email', desc: 'Get updates about your orders and promotions', value: emailNotif },
+                { key: 'newsletter_subscribed' as const, label: 'Subscribe to Newsletter', desc: 'Stay updated with latest collections and offers', value: newsletter },
+              ].map(({ key, label, desc, value }) => (
+                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '24px', borderBottom: '1px solid #e0e0e0' }}>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>{label}</p>
+                    <p style={{ fontSize: '12px', color: '#666666', margin: 0 }}>{desc}</p>
+                  </div>
+                  <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', width: '50px', height: '28px' }}>
+                    <input
+                      type="checkbox"
+                      checked={value}
+                      onChange={(e) => handlePrefToggle(key, e.target.checked)}
+                      disabled={prefSaving}
+                      style={{ appearance: 'none', width: '100%', height: '100%', background: value ? '#000000' : '#e0e0e0', border: 'none', borderRadius: '14px', cursor: prefSaving ? 'not-allowed' : 'pointer', position: 'relative' }}
+                    />
+                    <div style={{ position: 'absolute', width: '24px', height: '24px', background: '#ffffff', borderRadius: '50%', right: value ? '2px' : undefined, left: value ? undefined : '2px', top: '2px', pointerEvents: 'none' }} />
+                  </label>
                 </div>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', width: '50px', height: '28px' }}>
-                  <input
-                    type="checkbox"
-                    checked={emailNotif}
-                    onChange={(e) => setEmailNotif(e.target.checked)}
-                    style={{
-                      appearance: 'none',
-                      width: '100%',
-                      height: '100%',
-                      background: emailNotif ? '#000000' : '#e0e0e0',
-                      border: 'none',
-                      borderRadius: '14px',
-                      cursor: 'pointer',
-                      position: 'relative',
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      width: '24px',
-                      height: '24px',
-                      background: '#ffffff',
-                      borderRadius: '50%',
-                      right: emailNotif ? '2px' : undefined,
-                      left: emailNotif ? undefined : '2px',
-                      top: '2px',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                </label>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <p style={{ fontSize: '14px', fontWeight: 600, margin: '0 0 4px' }}>Subscribe to Newsletter</p>
-                  <p style={{ fontSize: '12px', color: '#666666', margin: 0 }}>Stay updated with latest collections and offers</p>
-                </div>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', position: 'relative', width: '50px', height: '28px' }}>
-                  <input
-                    type="checkbox"
-                    checked={smsNotif}
-                    onChange={(e) => setSmsNotif(e.target.checked)}
-                    style={{
-                      appearance: 'none',
-                      width: '100%',
-                      height: '100%',
-                      background: smsNotif ? '#000000' : '#e0e0e0',
-                      border: 'none',
-                      borderRadius: '14px',
-                      cursor: 'pointer',
-                      position: 'relative',
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      width: '24px',
-                      height: '24px',
-                      background: '#ffffff',
-                      borderRadius: '50%',
-                      right: smsNotif ? '2px' : undefined,
-                      left: smsNotif ? undefined : '2px',
-                      top: '2px',
-                      pointerEvents: 'none',
-                    }}
-                  />
-                </label>
-              </div>
+              ))}
             </div>
           </div>
         </div>

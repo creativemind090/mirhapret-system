@@ -10,6 +10,103 @@ import { blogs } from '@/data/blogs';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function NewsletterSection() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [msg, setMsg] = useState('');
+
+  const handleSubscribe = async () => {
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setStatus('error');
+      setMsg('Please enter a valid email address.');
+      return;
+    }
+    setStatus('loading');
+    try {
+      await api.post('/users/newsletter-subscribe', { email: email.trim() });
+      setStatus('success');
+      setMsg('You\'re in! Welcome to the MirhaPret family.');
+      setEmail('');
+    } catch {
+      setStatus('error');
+      setMsg('Something went wrong. Please try again.');
+    }
+  };
+
+  return (
+    <section style={{ borderTop: '1px solid #e8e8e8' }}>
+      <div className="newsletter-inner" style={{ padding: '96px 60px' }}>
+        <div style={{ flex: '0 0 42%' }}>
+          <div style={{ width: '40px', height: '2px', background: '#000', marginBottom: '24px' }} />
+          <h2 style={{ fontSize: 'clamp(1.6rem, 2.5vw, 2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000', marginBottom: '12px', lineHeight: 1.2 }}>
+            Get Early Access
+          </h2>
+          <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7 }}>
+            New drops, exclusive offers, and styling inspiration, straight to your inbox.
+          </p>
+        </div>
+        <div style={{ flex: 1, maxWidth: '480px' }}>
+          {status === 'success' ? (
+            <div style={{ padding: '20px', background: '#f0fdf4', border: '1.5px solid #bbf7d0', color: '#166534', fontSize: '14px', fontWeight: 600 }}>
+              {msg}
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'flex' }}>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setStatus('idle'); setMsg(''); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
+                  placeholder="your@email.com"
+                  style={{
+                    flex: 1,
+                    padding: '16px 20px',
+                    border: status === 'error' ? '1.5px solid #c0392b' : '1.5px solid #000',
+                    borderRight: 'none',
+                    background: '#fff',
+                    color: '#000',
+                    fontSize: '14px',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                    minWidth: 0,
+                  }}
+                />
+                <button
+                  onClick={handleSubscribe}
+                  disabled={status === 'loading'}
+                  style={{
+                    padding: '16px 24px',
+                    background: '#000',
+                    color: '#fff',
+                    border: 'none',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '2px',
+                    textTransform: 'uppercase',
+                    cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                    whiteSpace: 'nowrap',
+                    opacity: status === 'loading' ? 0.6 : 1,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {status === 'loading' ? '...' : 'Subscribe'}
+                </button>
+              </div>
+              {status === 'error' && msg && (
+                <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '6px' }}>{msg}</p>
+              )}
+              {status !== 'error' && (
+                <p style={{ fontSize: '11px', color: '#bbb', marginTop: '10px' }}>No spam, ever. Unsubscribe anytime.</p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -660,56 +757,7 @@ export default function Home() {
       </section>
 
       {/* ─── Newsletter ───────────────────────────────────── */}
-      <section style={{ borderTop: '1px solid #e8e8e8' }}>
-        <div className="newsletter-inner" style={{ padding: '96px 60px' }}>
-          <div style={{ flex: '0 0 42%' }}>
-            <div style={{ width: '40px', height: '2px', background: '#000', marginBottom: '24px' }} />
-            <h2 style={{ fontSize: 'clamp(1.6rem, 2.5vw, 2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000', marginBottom: '12px', lineHeight: 1.2 }}>
-              Get Early Access
-            </h2>
-            <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7 }}>
-              New drops, exclusive offers, and styling inspiration, straight to your inbox.
-            </p>
-          </div>
-          <div style={{ flex: 1, maxWidth: '480px' }}>
-            <div style={{ display: 'flex' }}>
-              <input
-                type="email"
-                placeholder="your@email.com"
-                style={{
-                  flex: 1,
-                  padding: '16px 20px',
-                  border: '1.5px solid #000',
-                  borderRight: 'none',
-                  background: '#fff',
-                  color: '#000',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                  outline: 'none',
-                  minWidth: 0,
-                }}
-              />
-              <button style={{
-                padding: '16px 24px',
-                background: '#000',
-                color: '#fff',
-                border: 'none',
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}>
-                Subscribe
-              </button>
-            </div>
-            <p style={{ fontSize: '11px', color: '#bbb', marginTop: '10px' }}>
-              No spam, ever. Unsubscribe anytime.
-            </p>
-          </div>
-        </div>
-      </section>
+      <NewsletterSection />
 
       {/* ─── Footer ───────────────────────────────────────── */}
       <footer style={{ background: '#0e0e0e', color: '#fff', padding: '64px 60px 40px' }}>

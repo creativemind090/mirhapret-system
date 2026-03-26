@@ -64,6 +64,29 @@ export default function CheckoutPage() {
     }
   }, [isLoggedIn, user]);
 
+  // Saved addresses for logged-in users
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    api.get('/addresses').then((res) => {
+      const list: any[] = res.data.data ?? res.data ?? [];
+      setSavedAddresses(list);
+      // Auto-fill default address if present
+      const def = list.find((a) => a.is_default) || list[0];
+      if (def) applyAddress(def);
+    }).catch(() => {});
+  }, [isLoggedIn]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const applyAddress = (addr: any) => {
+    setShippingData((prev) => ({
+      ...prev,
+      street_address: addr.street_address || addr.address_line1 || '',
+      city: addr.city || '',
+      province: addr.state || addr.province || '',
+      postal_code: addr.postal_code || '',
+    }));
+  };
+
   const [shippingErrors, setShippingErrors] = useState<Record<string, boolean>>({});
 
   const [billingData, setBillingData] = useState({
@@ -88,7 +111,7 @@ export default function CheckoutPage() {
   // Calculations
   const subtotal = total;
   const tax_amount = 0;
-  const shipping_amount = subtotal > 5000 ? 0 : 300;
+  const shipping_amount = 300;
   const finalTotal = subtotal - promoDiscount + shipping_amount;
 
   // Promo code validation via backend
@@ -455,6 +478,31 @@ export default function CheckoutPage() {
                 {currentStep === 'shipping' && (
                   <form onSubmit={handleShippingSubmit}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '24px' }}>Shipping Address</h2>
+
+                    {/* Saved address picker */}
+                    {savedAddresses.length > 0 && (
+                      <div style={{ marginBottom: '24px' }}>
+                        <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#999', marginBottom: '8px' }}>
+                          Saved Addresses
+                        </label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          {savedAddresses.map((addr) => (
+                            <button
+                              key={addr.id}
+                              type="button"
+                              onClick={() => applyAddress(addr)}
+                              style={{ textAlign: 'left', padding: '12px 14px', border: '1px solid #e0e0e0', background: '#fafafa', cursor: 'pointer', fontSize: '13px', fontFamily: 'system-ui' }}
+                            >
+                              <span style={{ fontWeight: 600 }}>{addr.label || 'Saved Address'}</span>
+                              {addr.is_default && <span style={{ marginLeft: '8px', fontSize: '10px', background: '#000', color: '#fff', padding: '2px 6px', letterSpacing: '0.5px' }}>DEFAULT</span>}
+                              <br />
+                              <span style={{ color: '#666' }}>{[addr.street_address || addr.address_line1, addr.city, addr.state || addr.province].filter(Boolean).join(', ')}</span>
+                            </button>
+                          ))}
+                        </div>
+                        <div style={{ height: '1px', background: '#e0e0e0', margin: '20px 0' }} />
+                      </div>
+                    )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                       <div>
                         <input
@@ -1000,7 +1048,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px', fontSize: '0.95rem', paddingBottom: '24px', borderBottom: '1px solid #e0e0e0' }}>
-                    <span style={{ color: '#666666' }}>Shipping {shipping_amount === 0 ? '(Free)' : ''}</span>
+                    <span style={{ color: '#666666' }}>Shipping</span>
                     <span style={{ fontWeight: 600 }}>PKR {shipping_amount.toLocaleString()}</span>
                   </div>
 
