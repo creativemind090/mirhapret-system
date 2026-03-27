@@ -33,7 +33,7 @@ export function SiteFooter() {
           <h4 style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '1px', color: '#fff', marginBottom: '16px' }}>
             MirhaPret
           </h4>
-          <p style={{ fontSize: '13px', color: '#555', lineHeight: 1.9, maxWidth: '260px', marginBottom: '24px' }}>
+          <p style={{ fontSize: '13px', color: '#aaa', fontWeight: 400, lineHeight: 1.9, maxWidth: '260px', marginBottom: '24px' }}>
             Premium Pakistani fashion for the modern woman. Celebrating craftsmanship, elegance, and identity.
           </p>
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -56,7 +56,7 @@ export function SiteFooter() {
                   width: '34px', height: '34px',
                   border: '1px solid rgba(255,255,255,0.1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#555', textDecoration: 'none',
+                  color: '#999', textDecoration: 'none',
                   transition: 'background 0.2s, border-color 0.2s, color 0.2s',
                 }}
                 onMouseEnter={e => {
@@ -67,7 +67,7 @@ export function SiteFooter() {
                 onMouseLeave={e => {
                   (e.currentTarget as HTMLElement).style.background = 'transparent';
                   (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)';
-                  (e.currentTarget as HTMLElement).style.color = '#555';
+                  (e.currentTarget as HTMLElement).style.color = '#999';
                 }}
               >
                 {icon}
@@ -94,9 +94,9 @@ export function SiteFooter() {
                       href={href}
                       target={isExternal ? '_blank' : undefined}
                       rel={isExternal ? 'noopener noreferrer' : undefined}
-                      style={{ fontSize: '13px', color: '#555', textDecoration: 'none', transition: 'color 0.2s' }}
+                      style={{ fontSize: '13px', color: '#ccc', textDecoration: 'none', transition: 'color 0.2s' }}
                       onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                      onMouseLeave={e => (e.currentTarget.style.color = '#555')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#ccc')}
                     >
                       {label}
                     </a>
@@ -109,16 +109,16 @@ export function SiteFooter() {
       </div>
 
       <div className="footer-bottom" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '28px' }}>
-        <p style={{ fontSize: '12px', color: '#333' }}>
+        <p style={{ fontSize: '12px', color: '#ccc' }}>
           © 2026 MirhaPret. All rights reserved. Celebrating the modern Pakistani woman.
         </p>
         <div style={{ display: 'flex', gap: '24px' }}>
-          <a href="/privacy" style={{ fontSize: '12px', color: '#333', textDecoration: 'none', transition: 'color 0.2s' }}
+          <a href="/privacy" style={{ fontSize: '12px', color: '#ccc', textDecoration: 'none', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
             onMouseLeave={e => (e.currentTarget.style.color = '#333')}>
             Privacy Policy
           </a>
-          <a href="/terms" style={{ fontSize: '12px', color: '#333', textDecoration: 'none', transition: 'color 0.2s' }}
+          <a href="/terms" style={{ fontSize: '12px', color: '#ccc', textDecoration: 'none', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
             onMouseLeave={e => (e.currentTarget.style.color = '#333')}>
             Terms of Service

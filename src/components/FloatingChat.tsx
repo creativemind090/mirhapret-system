@@ -141,9 +141,17 @@ export function FloatingChat() {
   const [history, setHistory] = useState<StoredSession['history']>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const sessionLoaded = useRef(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 520);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Load session from localStorage on first open
   useEffect(() => {
@@ -255,11 +263,13 @@ export function FloatingChat() {
       <button
         onClick={() => setIsOpen(o => !o)}
         style={{
-          position: 'fixed', bottom: '24px', right: '24px',
-          width: '56px', height: '56px', borderRadius: '50%',
+          position: 'fixed',
+          bottom: isMobile ? '16px' : '24px',
+          right: isMobile ? '16px' : '24px',
+          width: '52px', height: '52px', borderRadius: '50%',
           background: '#000', color: '#fff', border: 'none',
           cursor: 'pointer', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', zIndex: 999,
+          justifyContent: 'center', zIndex: 1000,
           boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
         }}
         title="Chat with Mira"
@@ -271,10 +281,16 @@ export function FloatingChat() {
       {isOpen && (
         <div
           style={{
-            position: 'fixed', bottom: '100px', right: '24px',
-            width: '340px', height: '540px',
-            background: '#fff', border: '1px solid #e0e0e0',
-            boxShadow: '0 5px 40px rgba(0,0,0,0.18)',
+            position: 'fixed',
+            bottom: isMobile ? '12px' : '88px',
+            right: isMobile ? '12px' : '24px',
+            left: isMobile ? '12px' : 'auto',
+            width: isMobile ? 'auto' : '340px',
+            height: isMobile ? '82dvh' : '540px',
+            background: '#fff',
+            border: '1px solid #e0e0e0',
+            borderRadius: isMobile ? '12px' : '0',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
             display: 'flex', flexDirection: 'column',
             zIndex: 999, fontFamily: 'system-ui, sans-serif',
           }}

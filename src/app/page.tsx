@@ -5,112 +5,128 @@ import Image from 'next/image';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { PageHeader } from '@/components/PageHeader';
+import { SiteFooter } from '@/components/SiteFooter';
 import api from '@/lib/api';
 import { blogs } from '@/data/blogs';
 
 gsap.registerPlugin(ScrollTrigger);
 
+const GOLD = '#c8a96e';
+const DARK = '#080808';
+
+// ─── SVG Icons (no emojis) ───────────────────────────────
+const IconExchange = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
+    <polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
+  </svg>
+);
+const IconShield = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <polyline points="9 12 11 14 15 10" />
+  </svg>
+);
+const IconLock = () => (
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
+// ─── Shared style helpers ────────────────────────────────
+const label = (color = '#999'): React.CSSProperties => ({
+  fontFamily: "'Montserrat', sans-serif",
+  fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase',
+  color, fontWeight: 600, marginBottom: '16px',
+});
+const heading = (color = '#0a0a0a'): React.CSSProperties => ({
+  fontFamily: "'Cormorant', serif",
+  fontSize: 'clamp(2rem, 3.5vw, 3rem)', fontWeight: 600,
+  fontStyle: 'italic', letterSpacing: '-0.5px', color, lineHeight: 1.1,
+});
+
+// ─── Newsletter ──────────────────────────────────────────
 function NewsletterSection() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [msg, setMsg] = useState('');
+  const [nameError, setNameError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
 
   const handleSubscribe = async () => {
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const nameEmpty = !name.trim();
+    const emailInvalid = !email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    setNameError(nameEmpty);
+    setEmailError(emailInvalid);
+    if (nameEmpty || emailInvalid) {
       setStatus('error');
-      setMsg('Please enter a valid email address.');
+      setMsg(nameEmpty && emailInvalid ? 'Please fill in your name and email.' : nameEmpty ? 'Please enter your name.' : 'Please enter a valid email address.');
       return;
     }
     setStatus('loading');
     try {
       await api.post('/users/newsletter-subscribe', { email: email.trim(), name: name.trim() || undefined });
       setStatus('success');
-      setMsg('You\'re in! Welcome to the MirhaPret family.');
-      setName('');
-      setEmail('');
+      setMsg("You're in! Welcome to the MirhaPret family.");
+      setName(''); setEmail('');
     } catch {
       setStatus('error');
       setMsg('Something went wrong. Please try again.');
     }
   };
 
-  const inputStyle = (hasError: boolean): React.CSSProperties => ({
-    width: '100%',
-    padding: '14px 16px',
-    border: hasError ? '1.5px solid #c0392b' : '1.5px solid #000',
-    background: '#fff',
-    color: '#000',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    outline: 'none',
-    boxSizing: 'border-box',
+  const darkInput = (hasError: boolean): React.CSSProperties => ({
+    width: '100%', padding: '14px 18px',
+    background: 'rgba(255,255,255,0.04)',
+    border: hasError ? '1px solid #c0392b' : '1px solid rgba(255,255,255,0.1)',
+    color: '#fff', fontSize: '14px',
+    fontFamily: "'Montserrat', sans-serif",
+    outline: 'none', boxSizing: 'border-box',
   });
 
   return (
-    <section style={{ borderTop: '1px solid #e8e8e8' }}>
+    <section style={{ background: DARK }}>
       <div className="newsletter-inner" style={{ padding: '96px 60px' }}>
-        <div style={{ flex: '0 0 42%' }}>
-          <div style={{ width: '40px', height: '2px', background: '#000', marginBottom: '24px' }} />
-          <h2 style={{ fontSize: 'clamp(1.6rem, 2.5vw, 2.2rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000', marginBottom: '12px', lineHeight: 1.2 }}>
+        <div style={{ flex: '0 0 44%' }}>
+          <div style={{ width: '48px', height: '1px', background: GOLD, marginBottom: '32px' }} />
+          <p style={label(GOLD)}>Members First</p>
+          <h2 style={{ ...heading('#fff'), marginBottom: '16px' }}>
             Get Early Access
           </h2>
-          <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7 }}>
-            New drops, exclusive offers, and styling inspiration, straight to your inbox.
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: '#666', lineHeight: 1.85, maxWidth: '320px', fontWeight: 300 }}>
+            New drops, exclusive offers, and styling inspiration — straight to your inbox.
           </p>
         </div>
         <div style={{ flex: 1, maxWidth: '480px' }}>
           {status === 'success' ? (
-            <div style={{ padding: '20px', background: '#f0fdf4', border: '1.5px solid #bbf7d0', color: '#166534', fontSize: '14px', fontWeight: 600 }}>
+            <div style={{ padding: '24px', border: `1px solid rgba(200,169,110,0.3)`, color: GOLD, fontSize: '14px', fontFamily: "'Montserrat', sans-serif" }}>
               {msg}
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => { setName(e.target.value); setStatus('idle'); setMsg(''); }}
-                  placeholder="Your name"
-                  style={inputStyle(false)}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <input type="text" value={name}
+                  onChange={e => { setName(e.target.value); setNameError(false); setStatus('idle'); setMsg(''); }}
+                  placeholder="Your name *"
+                  style={darkInput(nameError)}
                 />
                 <div style={{ display: 'flex' }}>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setStatus('idle'); setMsg(''); }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
-                    placeholder="your@email.com"
-                    style={{ ...inputStyle(status === 'error'), borderRight: 'none', flex: 1, minWidth: 0 }}
+                  <input type="email" value={email}
+                    onChange={e => { setEmail(e.target.value); setEmailError(false); setStatus('idle'); setMsg(''); }}
+                    onKeyDown={e => e.key === 'Enter' && handleSubscribe()}
+                    placeholder="your@email.com *"
+                    style={{ ...darkInput(emailError), flex: 1, minWidth: 0, borderRight: 'none' }}
                   />
-                  <button
-                    onClick={handleSubscribe}
-                    disabled={status === 'loading'}
-                    style={{
-                      padding: '14px 24px',
-                      background: '#000',
-                      color: '#fff',
-                      border: 'none',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      letterSpacing: '2px',
-                      textTransform: 'uppercase',
-                      cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                      whiteSpace: 'nowrap',
-                      opacity: status === 'loading' ? 0.6 : 1,
-                      fontFamily: 'inherit',
-                    }}
-                  >
+                  <button onClick={handleSubscribe} disabled={status === 'loading'}
+                    style={{ padding: '14px 28px', background: GOLD, color: '#000', border: 'none', fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', cursor: status === 'loading' ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: status === 'loading' ? 0.6 : 1, fontFamily: "'Montserrat', sans-serif" }}>
                     {status === 'loading' ? '...' : 'Subscribe'}
                   </button>
                 </div>
               </div>
-              {status === 'error' && msg && (
-                <p style={{ fontSize: '12px', color: '#c0392b', marginTop: '6px' }}>{msg}</p>
-              )}
-              {status !== 'error' && (
-                <p style={{ fontSize: '11px', color: '#bbb', marginTop: '10px' }}>No spam, ever. Unsubscribe anytime.</p>
-              )}
+              {status === 'error' && msg && <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#c0392b', marginTop: '8px' }}>{msg}</p>}
+              {status !== 'error' && <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#444', marginTop: '12px', fontWeight: 300 }}>No spam, ever. Unsubscribe anytime.</p>}
             </>
           )}
         </div>
@@ -119,6 +135,7 @@ function NewsletterSection() {
   );
 }
 
+// ─── Main Page ───────────────────────────────────────────
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -132,8 +149,7 @@ export default function Home() {
     const fetchHomeData = async () => {
       setProductsLoading(true);
       const [prodsRes, catsRes, promoRes] = await Promise.allSettled([
-        api.get('/products?is_active=true&sort_by=view_ratio&take=8')
-          .catch(() => api.get('/products?is_active=true&take=8')),
+        api.get('/products?is_active=true&sort_by=view_ratio&take=8').catch(() => api.get('/products?is_active=true&take=8')),
         api.get('/categories'),
         api.get('/promotions/active'),
       ]);
@@ -160,37 +176,18 @@ export default function Home() {
   };
 
   const heroSlides = [
-    {
-      tag: 'New Season · 2026',
-      title: 'Dressed to\nBe Remembered',
-      subtitle: 'Premium Pret & Haute Couture for the modern Pakistani woman.',
-      cta: 'Shop Collection',
-      ctaLink: '/products',
-    },
-    {
-      tag: 'Now Available',
-      title: 'Octa West\n2026',
-      subtitle: 'Where tradition meets avant-garde, bold, artistic, unapologetically modern.',
-      cta: 'Explore Octa West',
-      ctaLink: '/products',
-    },
-    {
-      tag: 'Exclusive Collection',
-      title: 'The Desire\nEdit',
-      subtitle: 'Our most coveted pieces, luxury redefined, one stitch at a time.',
-      cta: 'View Desire',
-      ctaLink: '/products',
-    },
+    { tag: 'New Season · 2026', title: 'Dressed to\nBe Remembered', subtitle: 'Premium Pret & Haute Couture for the modern Pakistani woman.', cta: 'Shop Collection', ctaLink: '/products' },
+    { tag: 'Now Available', title: 'Octa West\n2026', subtitle: 'Where tradition meets avant-garde. Bold, artistic, unapologetically modern.', cta: 'Explore Octa West', ctaLink: '/products' },
+    { tag: 'Exclusive Collection', title: 'The Desire\nEdit', subtitle: 'Our most coveted pieces. Luxury redefined, one stitch at a time.', cta: 'View Desire Edit', ctaLink: '/products' },
   ];
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % heroSlides.length);
-    }, 6000);
+    const interval = setInterval(() => setCurrentSlide(prev => (prev + 1) % heroSlides.length), 6000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const ctx = gsap.context(() => {
       gsap.from('.hero-tag', { opacity: 0, y: 12, duration: 0.5, ease: 'power2.out' });
       gsap.from('.hero-title', { opacity: 0, y: 28, duration: 0.7, delay: 0.1, ease: 'power3.out' });
@@ -201,31 +198,14 @@ export default function Home() {
   }, [currentSlide]);
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const ctx = gsap.context(() => {
-      gsap.from('.usp-item', {
-        opacity: 0, y: 20, stagger: 0.1, duration: 0.6,
-        scrollTrigger: { trigger: '.usp-strip', start: 'top 85%' },
-      });
-      gsap.from('.collection-card', {
-        opacity: 0, y: 50, stagger: 0.12, duration: 0.7,
-        scrollTrigger: { trigger: '.collections-grid', start: 'top 80%' },
-      });
-      gsap.from('.product-card', {
-        opacity: 0, y: 30, stagger: 0.08, duration: 0.6,
-        scrollTrigger: { trigger: '.products-grid', start: 'top 80%' },
-      });
-      gsap.from('.brand-content', {
-        opacity: 0, x: -40, duration: 0.8,
-        scrollTrigger: { trigger: '.brand-section', start: 'top 75%' },
-      });
-      gsap.from('.brand-stats', {
-        opacity: 0, x: 40, duration: 0.8,
-        scrollTrigger: { trigger: '.brand-section', start: 'top 75%' },
-      });
-      gsap.from('.testimonial-card', {
-        opacity: 0, y: 30, stagger: 0.12, duration: 0.6,
-        scrollTrigger: { trigger: '.testimonials-section', start: 'top 80%' },
-      });
+      gsap.from('.usp-item', { opacity: 0, y: 20, stagger: 0.1, duration: 0.6, scrollTrigger: { trigger: '.usp-strip', start: 'top 85%' } });
+      gsap.from('.collection-card', { opacity: 0, y: 50, stagger: 0.12, duration: 0.7, scrollTrigger: { trigger: '.collections-grid', start: 'top 80%' } });
+      gsap.from('.product-card', { opacity: 0, y: 30, stagger: 0.08, duration: 0.6, scrollTrigger: { trigger: '.products-grid', start: 'top 80%' } });
+      gsap.from('.brand-content', { opacity: 0, x: -40, duration: 0.8, scrollTrigger: { trigger: '.brand-section', start: 'top 75%' } });
+      gsap.from('.brand-stats', { opacity: 0, x: 40, duration: 0.8, scrollTrigger: { trigger: '.brand-section', start: 'top 75%' } });
+      gsap.from('.testimonial-card', { opacity: 0, y: 30, stagger: 0.12, duration: 0.6, scrollTrigger: { trigger: '.testimonials-section', start: 'top 80%' } });
     });
     return () => ctx.revert();
   }, []);
@@ -236,31 +216,25 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const collections = apiCategories.length > 0
-    ? apiCategories.slice(0, 3)
-    : [
-        { id: 'pret', name: 'Premium Pret', description: 'Ready-to-wear elegance', image_url: null },
-        { id: 'octa-west', name: 'Octa West 2026', description: 'Contemporary luxury', image_url: null },
-        { id: 'desire', name: 'The Desire Edit', description: 'Haute couture pieces', image_url: null },
-      ];
+  const collections = apiCategories.length > 0 ? apiCategories.slice(0, 3) : [
+    { id: 'pret', name: 'Premium Pret', description: 'Ready-to-wear elegance', image_url: null },
+    { id: 'octa-west', name: 'Octa West 2026', description: 'Contemporary luxury', image_url: null },
+    { id: 'desire', name: 'The Desire Edit', description: 'Haute couture pieces', image_url: null },
+  ];
+  const collectionBgs = ['#141414', '#16120c', '#0f1116'];
 
-  const collectionBgs = ['#1c1c1c', '#2a2018', '#1a1f2e'];
+  const marqueeItems = ['Premium Pret', 'Octa West 2026', 'The Desire Edit', 'New Season 2026', 'Pakistani Luxury Fashion', 'Crafted with Intention'];
 
   return (
-    <div style={{ background: '#fff', color: '#000', overflowX: 'hidden' }}>
+    <div style={{ background: '#fff', color: '#0a0a0a', overflowX: 'hidden', fontFamily: "'Montserrat', sans-serif" }}>
 
       {/* ─── Announcement Bar ─────────────────────────────── */}
-      <div style={{
-        background: '#000',
-        color: '#fff',
-        textAlign: 'center',
-        padding: '10px 20px',
-        fontSize: '12px',
-        letterSpacing: '1.5px',
-        textTransform: 'uppercase',
-        fontWeight: 500,
-      }}>
+      <div style={{ background: DARK, color: '#fff', textAlign: 'center', padding: '11px 20px', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 500, fontFamily: "'Montserrat', sans-serif" }}>
+        Free Shipping above PKR 5,000
+        <span style={{ color: GOLD, margin: '0 16px', fontSize: '8px', verticalAlign: 'middle' }}>◆</span>
         New: Octa West 2026 Now Live
+        <span style={{ color: GOLD, margin: '0 16px', fontSize: '8px', verticalAlign: 'middle' }}>◆</span>
+        7-Day Easy Exchange
       </div>
 
       {/* ─── Header ───────────────────────────────────────── */}
@@ -269,216 +243,145 @@ export default function Home() {
       {/* ─── Hero ─────────────────────────────────────────── */}
       <section className="hero-section">
         {heroSlides.map((slide, idx) => (
-          <div
-            key={idx}
-            className="hero-slide"
-            style={{
-              opacity: currentSlide === idx ? 1 : 0,
-              pointerEvents: currentSlide === idx ? 'auto' : 'none',
-            }}
-          >
-            {/* Left — text */}
-            <div className="hero-left">
-              <p className="hero-tag" style={{
-                fontSize: '11px',
-                letterSpacing: '3px',
-                textTransform: 'uppercase',
-                color: '#999',
-                marginBottom: '20px',
-                fontWeight: 600,
-              }}>
+          <div key={idx} className="hero-slide"
+            style={{ opacity: currentSlide === idx ? 1 : 0, pointerEvents: currentSlide === idx ? 'auto' : 'none' }}>
+
+            {/* Left — editorial text panel */}
+            <div className="hero-left" style={{ borderLeft: `3px solid ${GOLD}` }}>
+              <p className="hero-tag" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, marginBottom: '24px', fontWeight: 600 }}>
                 {slide.tag}
               </p>
-              <h1 className="hero-title" style={{
-                fontSize: 'clamp(2.4rem, 4.5vw, 5rem)',
-                fontWeight: 800,
-                lineHeight: 1.05,
-                letterSpacing: '-2px',
-                marginBottom: '24px',
-                whiteSpace: 'pre-line',
-                color: '#000',
-              }}>
+              <h1 className="hero-title" style={{ fontFamily: "'Cormorant', serif", fontSize: 'clamp(3rem, 6vw, 7rem)', fontWeight: 600, fontStyle: 'italic', lineHeight: 1.0, letterSpacing: '-3px', marginBottom: '28px', whiteSpace: 'pre-line', color: '#0a0a0a' }}>
                 {slide.title}
               </h1>
-              <p className="hero-sub" style={{
-                fontSize: '1rem',
-                color: '#666',
-                lineHeight: 1.8,
-                marginBottom: '40px',
-                maxWidth: '380px',
-              }}>
+              <p className="hero-sub" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: '#888', lineHeight: 1.9, marginBottom: '48px', maxWidth: '360px', fontWeight: 300 }}>
                 {slide.subtitle}
               </p>
-              <div className="hero-ctas" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <a href={slide.ctaLink} className="hero-cta-primary" style={{
-                  display: 'inline-block',
-                  padding: '14px 32px',
-                  background: '#000',
-                  color: '#fff',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  letterSpacing: '1.5px',
-                  textTransform: 'uppercase',
-                  textDecoration: 'none',
-                }}>
+              <div className="hero-ctas" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <a href={slide.ctaLink} className="hero-cta-primary" style={{ display: 'inline-block', padding: '15px 40px', background: '#0a0a0a', color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', textDecoration: 'none', fontFamily: "'Montserrat', sans-serif" }}>
                   {slide.cta}
                 </a>
-                <a href="/about" className="hero-cta-secondary" style={{
-                  display: 'inline-block',
-                  padding: '14px 32px',
-                  background: 'transparent',
-                  color: '#000',
-                  border: '1.5px solid #000',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  letterSpacing: '1.5px',
-                  textTransform: 'uppercase',
-                  textDecoration: 'none',
-                }}>
-                  Our Story
+                <a href="/about" className="hero-cta-secondary" style={{ display: 'inline-block', padding: '15px 0', color: '#0a0a0a', fontSize: '10px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', textDecoration: 'none', fontFamily: "'Montserrat', sans-serif", borderBottom: '1px solid #0a0a0a' }}>
+                  Our Story →
                 </a>
               </div>
-
               {/* Slide indicators */}
-              <div className="hero-indicators" style={{ display: 'flex', gap: '8px', marginTop: '56px', alignItems: 'center' }}>
+              <div className="hero-indicators" style={{ display: 'flex', gap: '10px', marginTop: '64px', alignItems: 'center' }}>
                 {heroSlides.map((_, i) => (
-                  <button
-                    key={i}
+                  <button key={i} onClick={() => setCurrentSlide(i)} aria-label={`Go to slide ${i + 1}`}
                     className={`hero-indicator${currentSlide === i ? ' hero-indicator-active' : ''}`}
-                    onClick={() => setCurrentSlide(i)}
-                    style={{
-                      width: currentSlide === i ? '36px' : '8px',
-                      height: '3px',
-                      background: currentSlide === i ? '#000' : '#ddd',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      padding: 0,
-                    }}
+                    style={{ width: currentSlide === i ? '40px' : '8px', height: '2px', background: currentSlide === i ? GOLD : '#ddd', border: 'none', cursor: 'pointer', transition: 'all 0.4s ease', padding: 0 }}
                   />
                 ))}
-                <span className="hero-counter" style={{ fontSize: '11px', color: '#bbb', marginLeft: '8px', letterSpacing: '1px' }}>
+                <span className="hero-counter" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#ccc', marginLeft: '8px', letterSpacing: '2px', fontWeight: 300 }}>
                   {String(currentSlide + 1).padStart(2, '0')} / {String(heroSlides.length).padStart(2, '0')}
                 </span>
               </div>
             </div>
 
-            {/* Right — editorial dark panel (hidden on mobile via CSS) */}
-            <div className="hero-right" style={{
-              background: '#111',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
-              overflow: 'hidden',
-            }}>
-              <div style={{
-                position: 'absolute',
-                fontSize: '22vw',
-                fontWeight: 900,
-                color: 'rgba(255,255,255,0.03)',
-                letterSpacing: '-6px',
-                userSelect: 'none',
-                lineHeight: 1,
-                right: '-2vw',
-              }}>
+            {/* Right — dark editorial panel */}
+            <div className="hero-right" style={{ background: '#080808', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+              {/* Subtle gold grid */}
+              <div style={{ position: 'absolute', inset: 0, backgroundImage: `linear-gradient(rgba(200,169,110,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,0.04) 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
+              {/* MP watermark */}
+              <div style={{ position: 'absolute', fontFamily: "'Cormorant', serif", fontSize: '30vw', fontWeight: 700, fontStyle: 'italic', color: 'rgba(255,255,255,0.025)', letterSpacing: '-8px', userSelect: 'none', lineHeight: 1 }}>
                 MP
               </div>
-              <div style={{ width: '1px', height: '70px', background: 'linear-gradient(to bottom, transparent, #c8a96e, transparent)', marginBottom: '24px', zIndex: 1 }} />
-              <p style={{
-                fontSize: '11px',
-                color: 'rgba(255,255,255,0.2)',
-                letterSpacing: '4px',
-                textTransform: 'uppercase',
-                fontWeight: 500,
-                zIndex: 1,
-                textAlign: 'center',
-                lineHeight: 2,
-              }}>
-                MirhaPret · 2026<br />
-                <span style={{ color: '#c8a96e', letterSpacing: '2px' }}>{slide.tag}</span>
-              </p>
-              <div style={{ width: '1px', height: '70px', background: 'linear-gradient(to bottom, transparent, #c8a96e, transparent)', marginTop: '24px', zIndex: 1 }} />
+              {/* Editorial content */}
+              <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 40px' }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', letterSpacing: '5px', textTransform: 'uppercase', color: 'rgba(200,169,110,0.5)', marginBottom: '20px', fontWeight: 500 }}>
+                  MirhaPret · 2026
+                </p>
+                <div style={{ width: '1px', height: '70px', background: `linear-gradient(to bottom, transparent, ${GOLD})`, margin: '0 auto 24px' }} />
+                <p style={{ fontFamily: "'Cormorant', serif", fontSize: 'clamp(1.2rem, 1.8vw, 2rem)', fontWeight: 500, fontStyle: 'italic', color: GOLD, letterSpacing: '2px', lineHeight: 1.4 }}>
+                  {slide.tag}
+                </p>
+                <div style={{ width: '1px', height: '70px', background: `linear-gradient(to bottom, ${GOLD}, transparent)`, margin: '24px auto 0' }} />
+              </div>
             </div>
           </div>
         ))}
       </section>
 
       {/* ─── USP Strip ────────────────────────────────────── */}
-      <section className="usp-strip" style={{ borderTop: '1px solid #e8e8e8', borderBottom: '1px solid #e8e8e8' }}>
+      <section className="usp-strip" style={{ borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', background: '#FAFAF8' }}>
         <div className="usp-grid">
           {[
-            { icon: '↩', title: 'Easy Exchange', sub: '7-day hassle-free exchange' },
-            { icon: '◈', title: '100% Authentic', sub: 'Genuine quality guaranteed' },
-            { icon: '⬡', title: 'Secure Checkout', sub: 'Your data is always protected' },
+            { icon: <IconExchange />, title: 'Easy Exchange', sub: '7-day hassle-free exchange' },
+            { icon: <IconShield />, title: '100% Authentic', sub: 'Genuine quality guaranteed' },
+            { icon: <IconLock />, title: 'Secure Checkout', sub: 'Your data is always protected' },
           ].map((usp, i) => (
-            <div
-              key={i}
-              className={`usp-item${i < 3 ? ' usp-item-border' : ''}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '24px 28px' }}
-            >
-              <span style={{ fontSize: '18px', color: '#c8a96e', flexShrink: 0 }}>{usp.icon}</span>
+            <div key={i} className={`usp-item${i < 2 ? ' usp-item-border' : ''}`}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '18px', padding: '28px 32px' }}>
+              <div style={{ flexShrink: 0 }}>{usp.icon}</div>
               <div>
-                <p style={{ fontSize: '13px', fontWeight: 700, color: '#000', marginBottom: '2px' }}>{usp.title}</p>
-                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{usp.sub}</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', fontWeight: 700, color: '#0a0a0a', marginBottom: '4px', letterSpacing: '0.2px' }}>{usp.title}</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#aaa', margin: 0, fontWeight: 300 }}>{usp.sub}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
+      {/* ─── Marquee Strip ────────────────────────────────── */}
+      <div style={{ background: DARK, overflow: 'hidden', padding: '16px 0', borderBottom: `1px solid rgba(200,169,110,0.12)` }}>
+        <div className="marquee-track" style={{ display: 'flex', whiteSpace: 'nowrap', animation: 'marquee 24s linear infinite' }}>
+          {[...Array(2)].map((_, r) => (
+            <div key={r} style={{ display: 'flex', flexShrink: 0 }}>
+              {marqueeItems.map((text, i) => (
+                <span key={i} style={{ fontFamily: "'Cormorant', serif", fontSize: '1.05rem', fontStyle: 'italic', color: i % 2 === 0 ? 'rgba(255,255,255,0.45)' : GOLD, padding: '0 28px', letterSpacing: '1px', fontWeight: 400 }}>
+                  {text}
+                  <span style={{ color: GOLD, fontSize: '7px', verticalAlign: 'middle', margin: '0 6px' }}>◆</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ─── Collections ──────────────────────────────────── */}
       <section className="home-section">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: '10px' }}>
-              Shop By Collection
-            </p>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
-              Our Collections
-            </h2>
+            <p style={label()}>Shop By Collection</p>
+            <h2 style={heading()}>Our Collections</h2>
           </div>
-          <a href="/products" style={{ fontSize: '12px', fontWeight: 700, color: '#000', textDecoration: 'none', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1.5px solid #000', paddingBottom: '3px' }}>
+          <a href="/products" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', fontWeight: 700, color: '#0a0a0a', textDecoration: 'none', letterSpacing: '3px', textTransform: 'uppercase', borderBottom: `1px solid ${GOLD}`, paddingBottom: '3px' }}>
             View All →
           </a>
         </div>
 
         <div className="collections-grid">
           {collections.map((col: any, idx: number) => (
-            <div
-              key={idx}
-              className="collection-card"
-              onClick={() => (window.location.href = `/products?category=${col.id}`)}
-              style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer', background: collectionBgs[idx], minHeight: '320px' }}
-            >
+            <div key={idx} className="collection-card"
+              onClick={() => window.location.href = `/products?category=${col.id}`}
+              style={{ position: 'relative', overflow: 'hidden', cursor: 'pointer', background: collectionBgs[idx], minHeight: '380px' }}>
               {col.image_url && (
-                <img src={col.image_url} alt={col.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+                <img src={col.image_url} alt={col.name} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }} />
               )}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)' }} />
-              <div style={{ position: 'absolute', top: '24px', left: '24px' }}>
-                <span style={{ fontSize: '10px', letterSpacing: '3px', textTransform: 'uppercase', color: '#c8a96e', fontWeight: 700 }}>
-                  {`0${idx + 1}`}
-                </span>
+              {/* Subtle grid overlay */}
+              <div style={{ position: 'absolute', inset: 0, backgroundImage: `linear-gradient(rgba(200,169,110,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,0.03) 1px, transparent 1px)`, backgroundSize: '36px 36px' }} />
+              {/* Gradient */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.15) 60%, transparent 100%)' }} />
+              {/* Top accent line */}
+              <div style={{ position: 'absolute', top: 0, left: '24px', right: '24px', height: '1px', background: `linear-gradient(to right, ${GOLD}, transparent)`, opacity: 0.35 }} />
+              {/* Number */}
+              <div style={{ position: 'absolute', top: '24px', left: '28px', zIndex: 2 }}>
+                <span style={{ fontFamily: "'Cormorant', serif", fontSize: '2.8rem', fontWeight: 400, fontStyle: 'italic', color: GOLD, opacity: 0.6, lineHeight: 1 }}>0{idx + 1}</span>
               </div>
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '28px 24px' }}>
-                <h3 style={{ fontSize: idx === 0 ? '1.8rem' : '1.3rem', fontWeight: 800, color: '#fff', marginBottom: '8px', letterSpacing: '-0.5px' }}>
+              {/* Content */}
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '32px 28px', zIndex: 2 }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, marginBottom: '10px', fontWeight: 600 }}>
+                  Collection
+                </p>
+                <h3 style={{ fontFamily: "'Cormorant', serif", fontSize: idx === 0 ? '2.4rem' : '1.9rem', fontWeight: 600, fontStyle: 'italic', color: '#fff', marginBottom: '10px', lineHeight: 1.1, letterSpacing: '-0.5px' }}>
                   {col.name}
                 </h3>
-                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.45)', marginBottom: '18px' }}>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '22px', fontWeight: 300 }}>
                   {col.description ?? ''}
                 </p>
-                <span style={{
-                  display: 'inline-block',
-                  padding: '8px 20px',
-                  border: '1px solid rgba(200,169,110,0.5)',
-                  color: '#c8a96e',
-                  fontSize: '11px',
-                  fontWeight: 700,
-                  letterSpacing: '1.5px',
-                  textTransform: 'uppercase',
-                }}>
-                  Shop Now
+                <span style={{ fontFamily: "'Montserrat', sans-serif", display: 'inline-block', padding: '9px 22px', border: `1px solid rgba(200,169,110,0.35)`, color: GOLD, fontSize: '9px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase' }}>
+                  Explore →
                 </span>
               </div>
             </div>
@@ -488,174 +391,133 @@ export default function Home() {
 
       {/* ─── Featured Products ────────────────────────────── */}
       {(productsLoading || featuredProducts.length > 0) && (
-      <section className="home-section-sm">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: '10px' }}>
-              Handpicked
-            </p>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
-              Featured Pieces
-            </h2>
+        <section className="home-section" style={{ background: '#FAFAF8' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
+            <div>
+              <p style={label()}>Handpicked for You</p>
+              <h2 style={heading()}>Featured Pieces</h2>
+            </div>
+            <a href="/products" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', fontWeight: 700, color: '#0a0a0a', textDecoration: 'none', letterSpacing: '3px', textTransform: 'uppercase', borderBottom: `1px solid ${GOLD}`, paddingBottom: '3px' }}>
+              View All →
+            </a>
           </div>
-          <a href="/products" style={{ fontSize: '12px', fontWeight: 700, color: '#000', textDecoration: 'none', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1.5px solid #000', paddingBottom: '3px' }}>
-            View All →
-          </a>
-        </div>
 
-        <div className="products-grid">
-          {productsLoading
-            ? Array.from({ length: 4 }).map((_, idx) => (
-                <div key={idx} className="product-card">
-                  <div style={{ aspectRatio: '3/4', background: 'linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite', marginBottom: '14px' }} />
-                  <div style={{ height: '10px', width: '60%', background: '#f0f0f0', borderRadius: 2, marginBottom: '8px' }} />
-                  <div style={{ height: '14px', width: '80%', background: '#ebebeb', borderRadius: 2, marginBottom: '8px' }} />
-                  <div style={{ height: '14px', width: '40%', background: '#f0f0f0', borderRadius: 2 }} />
-                </div>
-              ))
-            : featuredProducts.slice(0, 8).map((item: any, idx) => {
-            const pid = item?.id ?? `p${idx}`;
-            const isHovered = hoveredProduct === pid;
-            return (
-              <div
-                key={pid}
-                className="product-card"
-                onMouseEnter={() => setHoveredProduct(pid)}
-                onMouseLeave={() => setHoveredProduct(null)}
-                onClick={() => item && (window.location.href = `/products/${item.slug || item.id}`)}
-                style={{ cursor: item ? 'pointer' : 'default' }}
-              >
-                {/* Image */}
-                <div style={{ aspectRatio: '3/4', overflow: 'hidden', marginBottom: '14px', position: 'relative', background: '#f4f4f4' }}>
-                  {item?.main_image ? (
-                    <Image
-                      src={item.main_image}
-                      alt={item.name}
-                      fill
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                      priority={idx < 4}
-                      style={{
-                        objectFit: 'cover',
-                        transform: isHovered ? 'scale(1.06)' : 'scale(1)',
-                        transition: 'transform 0.5s ease',
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: '100%', height: '100%',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                      background: isHovered ? '#ececec' : '#f4f4f4', transition: 'background 0.3s ease',
-                    }}>
-                      <span style={{ fontSize: '2rem', color: '#ddd', fontWeight: 800, letterSpacing: '-2px' }}>
-                        {item?.name ? item.name.slice(0, 2).toUpperCase() : 'MP'}
-                      </span>
-                      <span style={{ fontSize: '9px', color: '#ccc', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '6px' }}>
-                        MirhaPret
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Quick view overlay */}
-                  <div style={{
-                    position: 'absolute', bottom: 0, left: 0, right: 0,
-                    background: 'rgba(0,0,0,0.82)',
-                    padding: '13px', textAlign: 'center',
-                    color: '#fff', fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
-                    opacity: isHovered && item ? 1 : 0,
-                    transform: isHovered ? 'translateY(0)' : 'translateY(8px)',
-                    transition: 'all 0.3s ease',
-                  }}>
-                    Quick View
+          <div className="products-grid">
+            {productsLoading
+              ? Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="product-card">
+                    <div style={{ aspectRatio: '3/4', background: 'linear-gradient(90deg, #efefef 25%, #e8e8e8 50%, #efefef 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite', marginBottom: '16px' }} />
+                    <div style={{ height: '8px', width: '40%', background: '#ebebeb', marginBottom: '10px' }} />
+                    <div style={{ height: '18px', width: '75%', background: '#e8e8e8', marginBottom: '8px' }} />
+                    <div style={{ height: '14px', width: '35%', background: '#efefef' }} />
                   </div>
-
-                  {/* SALE / NEW tags */}
-                  <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: 4, zIndex: 2 }}>
-                    {getHomeDiscount(item) > 0 && (
-                      <span style={{ background: '#c8a96e', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '4px 9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-                        SALE
-                      </span>
-                    )}
-                    {isNewProduct(item) && (
-                      <span style={{ background: '#111', color: '#fff', fontSize: '9px', fontWeight: 800, padding: '4px 9px', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-                        NEW
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Info */}
-                <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', color: '#bbb', marginBottom: '4px', fontWeight: 600 }}>
-                  {item?.category?.name ?? 'MirhaPret'}
-                </p>
-                <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#000', marginBottom: '5px', lineHeight: 1.3 }}>
-                  {item?.name ?? `Piece ${idx + 1}`}
-                </h4>
-                {item?.available_sizes?.length > 0 && (
-                  <p style={{ fontSize: '11px', color: '#ccc', marginBottom: '7px' }}>
-                    {item.available_sizes.slice(0, 4).join(' · ')}{item.available_sizes.length > 4 ? ' +more' : ''}
-                  </p>
-                )}
-                {(() => {
-                  if (!item) return <p style={{ fontSize: '14px', fontWeight: 700, color: '#000' }}>—</p>;
-                  const disc = getHomeDiscount(item);
-                  const salePrice = disc > 0 ? Math.round(Number(item.price) * (1 - disc / 100)) : 0;
-                  return disc > 0 ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <p style={{ fontSize: '14px', fontWeight: 800, color: '#c8a96e', margin: 0 }}>PKR {salePrice.toLocaleString()}</p>
-                      <p style={{ fontSize: '12px', color: '#aaa', textDecoration: 'line-through', margin: 0 }}>PKR {Number(item.price).toLocaleString()}</p>
-                      <span style={{ fontSize: '9px', fontWeight: 800, background: '#c8a96e', color: '#fff', padding: '2px 6px', borderRadius: 3 }}>{disc}% OFF</span>
+                ))
+              : featuredProducts.slice(0, 8).map((item: any, idx) => {
+                  const pid = item?.id ?? `p${idx}`;
+                  const isHovered = hoveredProduct === pid;
+                  return (
+                    <div key={pid} className="product-card"
+                      onMouseEnter={() => setHoveredProduct(pid)}
+                      onMouseLeave={() => setHoveredProduct(null)}
+                      onClick={() => item && (window.location.href = `/products/${item.slug || item.id}`)}
+                      style={{ cursor: item ? 'pointer' : 'default' }}>
+                      {/* Image */}
+                      <div style={{ aspectRatio: '3/4', overflow: 'hidden', marginBottom: '16px', position: 'relative', background: '#f2f2ee' }}>
+                        {item?.main_image ? (
+                          <Image src={item.main_image} alt={item.name} fill sizes="(max-width: 768px) 50vw, 25vw" priority={idx < 4}
+                            style={{ objectFit: 'cover', transform: isHovered ? 'scale(1.05)' : 'scale(1)', transition: 'transform 0.6s ease' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: isHovered ? '#eaeae4' : '#f2f2ee', transition: 'background 0.3s' }}>
+                            <span style={{ fontFamily: "'Cormorant', serif", fontSize: '3.5rem', fontStyle: 'italic', color: '#ddd', fontWeight: 400, lineHeight: 1 }}>
+                              {item?.name ? item.name.slice(0, 2).toUpperCase() : 'MP'}
+                            </span>
+                            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '8px', color: '#ccc', letterSpacing: '3px', textTransform: 'uppercase', marginTop: '10px', fontWeight: 300 }}>
+                              MirhaPret
+                            </span>
+                          </div>
+                        )}
+                        {/* Quick view */}
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(8,8,8,0.88)', padding: '13px', textAlign: 'center', color: '#fff', fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', opacity: isHovered && item ? 1 : 0, transform: isHovered ? 'translateY(0)' : 'translateY(6px)', transition: 'all 0.3s ease' }}>
+                          Quick View
+                        </div>
+                        {/* Badges */}
+                        <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: 4, zIndex: 2 }}>
+                          {getHomeDiscount(item) > 0 && <span style={{ background: GOLD, color: '#fff', fontFamily: "'Montserrat', sans-serif", fontSize: '8px', fontWeight: 800, padding: '4px 8px', letterSpacing: '2px', textTransform: 'uppercase' }}>SALE</span>}
+                          {isNewProduct(item) && <span style={{ background: '#0a0a0a', color: '#fff', fontFamily: "'Montserrat', sans-serif", fontSize: '8px', fontWeight: 800, padding: '4px 8px', letterSpacing: '2px', textTransform: 'uppercase' }}>NEW</span>}
+                        </div>
+                      </div>
+                      {/* Info */}
+                      <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', letterSpacing: '3px', textTransform: 'uppercase', color: '#bbb', marginBottom: '6px', fontWeight: 500 }}>
+                        {item?.category?.name ?? 'MirhaPret'}
+                      </p>
+                      <h4 style={{ fontFamily: "'Cormorant', serif", fontSize: '1.15rem', fontWeight: 500, fontStyle: 'italic', color: '#0a0a0a', marginBottom: '6px', lineHeight: 1.3 }}>
+                        {item?.name ?? `Piece ${idx + 1}`}
+                      </h4>
+                      {item?.available_sizes?.length > 0 && (
+                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#ccc', marginBottom: '8px', fontWeight: 300 }}>
+                          {item.available_sizes.slice(0, 4).join(' · ')}{item.available_sizes.length > 4 ? ' +more' : ''}
+                        </p>
+                      )}
+                      {(() => {
+                        if (!item) return <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', fontWeight: 600, color: '#0a0a0a' }}>—</p>;
+                        const disc = getHomeDiscount(item);
+                        const salePrice = disc > 0 ? Math.round(Number(item.price) * (1 - disc / 100)) : 0;
+                        return disc > 0 ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', fontWeight: 700, color: GOLD, margin: 0 }}>PKR {salePrice.toLocaleString()}</p>
+                            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#bbb', textDecoration: 'line-through', margin: 0 }}>PKR {Number(item.price).toLocaleString()}</p>
+                            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '8px', fontWeight: 800, background: GOLD, color: '#fff', padding: '2px 6px' }}>{disc}% OFF</span>
+                          </div>
+                        ) : (
+                          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', fontWeight: 600, color: '#0a0a0a', margin: 0 }}>PKR {Number(item.price).toLocaleString()}</p>
+                        );
+                      })()}
                     </div>
-                  ) : (
-                    <p style={{ fontSize: '14px', fontWeight: 700, color: '#000', margin: 0 }}>PKR {Number(item.price).toLocaleString()}</p>
                   );
-                })()}
-              </div>
-            );
-          })}
-        </div>
-      </section>
+                })}
+          </div>
+        </section>
       )}
 
       {/* ─── Brand Story ──────────────────────────────────── */}
-      <section className="brand-section" style={{ background: '#0e0e0e', color: '#fff' }}>
+      <section className="brand-section" style={{ background: DARK, color: '#fff' }}>
+        {/* Full-width editorial quote */}
+        <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '72px 60px', textAlign: 'center' }}>
+          <p style={{ fontFamily: "'Cormorant', serif", fontSize: 'clamp(1.6rem, 3vw, 3rem)', fontStyle: 'italic', fontWeight: 400, color: 'rgba(255,255,255,0.8)', maxWidth: '860px', margin: '0 auto', lineHeight: 1.5, letterSpacing: '-0.3px' }}>
+            "Every stitch is a conversation between craft and culture — we dress the women who write Pakistan's future."
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '20px', marginTop: '36px' }}>
+            <div style={{ width: '48px', height: '1px', background: GOLD }} />
+            <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, fontWeight: 500 }}>MirhaPret Philosophy</span>
+            <div style={{ width: '48px', height: '1px', background: GOLD }} />
+          </div>
+        </div>
+
         <div className="brand-inner" style={{ padding: '96px 60px' }}>
-          <div className="brand-content" style={{ flex: '0 0 50%', maxWidth: '520px' }}>
-            <div style={{ width: '40px', height: '2px', background: '#c8a96e', marginBottom: '28px' }} />
-            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#555', fontWeight: 600, marginBottom: '20px' }}>
-              Our Philosophy
-            </p>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 3.2rem)', fontWeight: 800, letterSpacing: '-1px', lineHeight: 1.15, marginBottom: '24px', color: '#fff' }}>
+          <div className="brand-content" style={{ flex: '0 0 48%', maxWidth: '520px' }}>
+            <div style={{ width: '48px', height: '1px', background: GOLD, marginBottom: '32px' }} />
+            <p style={label('#555')}>Our Philosophy</p>
+            <h2 style={{ ...heading('#fff'), fontSize: 'clamp(2rem, 3.5vw, 3.2rem)', marginBottom: '28px' }}>
               Crafted with Intention.<br />Worn with Pride.
             </h2>
-            <p style={{ fontSize: '15px', color: '#666', lineHeight: 1.9, marginBottom: '36px' }}>
-              MirhaPret was born from a deep love for Pakistani craftsmanship. Every stitch, every fabric, every silhouette is chosen to celebrate the modern Pakistani woman, bold, elegant, and unapologetically herself.
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: '#777', lineHeight: 2, marginBottom: '40px', fontWeight: 300 }}>
+              MirhaPret was born from a deep love for Pakistani craftsmanship. Every stitch, every fabric, every silhouette is chosen to celebrate the modern Pakistani woman — bold, elegant, and unapologetically herself.
             </p>
-            <a href="/about" style={{
-              display: 'inline-block',
-              padding: '14px 32px',
-              border: '1px solid rgba(200,169,110,0.4)',
-              color: '#c8a96e',
-              fontSize: '11px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', textDecoration: 'none',
-            }}>
+            <a href="/about" style={{ fontFamily: "'Montserrat', sans-serif", display: 'inline-block', padding: '13px 32px', border: `1px solid rgba(200,169,110,0.3)`, color: GOLD, fontSize: '9px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', textDecoration: 'none' }}>
               Read Our Story →
             </a>
           </div>
 
-          <div className="brand-stats brand-stats-grid" style={{ flex: '0 0 42%', gap: '1px', background: 'rgba(255,255,255,0.05)' }}>
+          <div className="brand-stats brand-stats-grid" style={{ flex: '0 0 44%', gap: '1px', background: 'rgba(200,169,110,0.08)' }}>
             {[
               { num: '300+', label: 'Products' },
               { num: '10K+', label: 'Happy Customers' },
               { num: '3', label: 'Collections' },
-              { num: '2016', label: 'Est.' },
+              { num: '2016', label: 'Established' },
             ].map((stat, i) => (
-              <div key={i} style={{
-                padding: '40px 32px',
-                background: '#0e0e0e',
-                borderTop: i < 2 ? 'none' : '1px solid rgba(255,255,255,0.06)',
-                borderRight: i % 2 === 0 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-              }}>
-                <p style={{ fontSize: '2.5rem', fontWeight: 800, color: '#c8a96e', letterSpacing: '-1px', marginBottom: '6px' }}>{stat.num}</p>
-                <p style={{ fontSize: '11px', color: '#555', letterSpacing: '2px', textTransform: 'uppercase' }}>{stat.label}</p>
+              <div key={i} style={{ padding: '44px 36px', background: DARK, borderTop: i < 2 ? 'none' : '1px solid rgba(255,255,255,0.04)', borderRight: i % 2 === 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                <p style={{ fontFamily: "'Cormorant', serif", fontSize: '3.2rem', fontWeight: 600, fontStyle: 'italic', color: GOLD, letterSpacing: '-1px', marginBottom: '8px', lineHeight: 1 }}>{stat.num}</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', color: '#555', letterSpacing: '3px', textTransform: 'uppercase', fontWeight: 500 }}>{stat.label}</p>
               </div>
             ))}
           </div>
@@ -663,14 +525,10 @@ export default function Home() {
       </section>
 
       {/* ─── Testimonials ─────────────────────────────────── */}
-      <section className="testimonials-section home-section" style={{ background: '#fafafa' }}>
-        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-          <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: '12px' }}>
-            Customer Love
-          </p>
-          <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
-            What They're Saying
-          </h2>
+      <section className="testimonials-section home-section" style={{ background: '#FAFAF8' }}>
+        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
+          <p style={label()}>Customer Love</p>
+          <h2 style={heading()}>What They're Saying</h2>
         </div>
 
         <div className="testimonials-grid">
@@ -679,26 +537,27 @@ export default function Home() {
             { name: 'Zainab A.', city: 'Lahore', text: 'Each piece feels intentional. The attention to detail is incredible, worth every rupee spent.', rating: 5 },
             { name: 'Hira M.', city: 'Islamabad', text: 'Finally a brand that understands modern Pakistani fashion. Absolutely obsessed with my purchases!', rating: 5 },
           ].map((t, i) => (
-            <div key={i} className="testimonial-card" style={{ background: '#fff', padding: '36px 32px', borderTop: '3px solid #000', boxShadow: '0 2px 20px rgba(0,0,0,0.04)' }}>
-              <div style={{ marginBottom: '18px' }}>
+            <div key={i} className="testimonial-card" style={{ background: '#fff', padding: '40px 36px', borderLeft: `2px solid ${GOLD}`, boxShadow: '0 2px 40px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column' }}>
+              {/* Large opening quote */}
+              <p style={{ fontFamily: "'Cormorant', serif", fontSize: '5rem', fontWeight: 400, fontStyle: 'italic', color: GOLD, lineHeight: 0.8, marginBottom: '16px', opacity: 0.55 }}>"</p>
+              {/* Stars */}
+              <div style={{ display: 'flex', gap: '3px', marginBottom: '20px' }}>
                 {Array.from({ length: t.rating }).map((_, j) => (
-                  <span key={j} style={{ color: '#c8a96e', fontSize: '14px' }}>★</span>
+                  <svg key={j} width="12" height="12" viewBox="0 0 24 24" fill={GOLD} aria-hidden="true">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg>
                 ))}
               </div>
-              <p style={{ fontSize: '15px', color: '#333', lineHeight: 1.85, marginBottom: '24px', fontStyle: 'italic' }}>
-                "{t.text}"
+              <p style={{ fontFamily: "'Cormorant', serif", fontSize: '1.2rem', fontStyle: 'italic', color: '#2a2a2a', lineHeight: 1.8, marginBottom: '28px', flex: 1, fontWeight: 400 }}>
+                {t.text}
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '34px', height: '34px', borderRadius: '50%',
-                  background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#fff', fontSize: '12px', fontWeight: 700, flexShrink: 0,
-                }}>
+              <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: '20px', display: 'flex', alignItems: 'center', gap: '14px', marginTop: 'auto' }}>
+                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: "'Montserrat', sans-serif", fontSize: '13px', fontWeight: 700, flexShrink: 0 }}>
                   {t.name.charAt(0)}
                 </div>
                 <div>
-                  <p style={{ fontSize: '13px', fontWeight: 700, color: '#000' }}>{t.name}</p>
-                  <p style={{ fontSize: '11px', color: '#999', marginTop: '1px' }}>{t.city}</p>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', fontWeight: 700, color: '#0a0a0a', marginBottom: '2px' }}>{t.name}</p>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#bbb', fontWeight: 300, letterSpacing: '1px' }}>{t.city}</p>
                 </div>
               </div>
             </div>
@@ -706,121 +565,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Journal / Blog ───────────────────────────────── */}
-      <section style={{ borderTop: '1px solid #e8e8e8', padding: 'clamp(56px, 6vw, 96px) clamp(24px, 5vw, 60px)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 48, flexWrap: 'wrap', gap: 16 }}>
+      {/* ─── Journal ──────────────────────────────────────── */}
+      <section style={{ borderTop: '1px solid #f0f0f0', padding: 'clamp(56px, 6vw, 96px) clamp(24px, 5vw, 60px)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 56, flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#999', fontWeight: 600, marginBottom: 10 }}>
-              The MirhaPret Journal
-            </p>
-            <h2 style={{ fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 800, letterSpacing: '-1px', color: '#000' }}>
-              Style, Craft & Culture
-            </h2>
+            <p style={label()}>The MirhaPret Journal</p>
+            <h2 style={heading()}>Style, Craft & Culture</h2>
           </div>
-          <a href="/blog" style={{
-            fontSize: '11px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
-            color: '#000', textDecoration: 'none', borderBottom: '1.5px solid #000', paddingBottom: 2, whiteSpace: 'nowrap',
-          }}>
+          <a href="/blog" style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', color: '#0a0a0a', textDecoration: 'none', borderBottom: `1px solid ${GOLD}`, paddingBottom: 2, whiteSpace: 'nowrap' }}>
             All Articles →
           </a>
         </div>
-
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32 }} className="home-blog-grid">
           {blogs.slice(0, 3).map(post => (
-            <a key={post.slug} href={`/blog/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
-              onMouseEnter={e => { (e.currentTarget.querySelector('.blog-title') as HTMLElement).style.color = '#c8a96e'; }}
-              onMouseLeave={e => { (e.currentTarget.querySelector('.blog-title') as HTMLElement).style.color = '#000'; }}
-            >
-              {/* Cover */}
-              <div style={{
-                height: 220, background: post.coverGradient,
-                marginBottom: 22, overflow: 'hidden', position: 'relative',
-              }}>
-                <div style={{
-                  position: 'absolute', bottom: 12, left: 16,
-                  fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase',
-                  color: '#c8a96e', background: 'rgba(0,0,0,0.55)', padding: '4px 10px',
-                }}>
+            <a key={post.slug} href={`/blog/${post.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block', cursor: 'pointer' }}
+              onMouseEnter={e => { const el = e.currentTarget.querySelector('.blog-title') as HTMLElement; if (el) el.style.color = GOLD; }}
+              onMouseLeave={e => { const el = e.currentTarget.querySelector('.blog-title') as HTMLElement; if (el) el.style.color = '#0a0a0a'; }}>
+              <div style={{ height: 240, background: post.coverGradient, marginBottom: 24, overflow: 'hidden', position: 'relative' }}>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)' }} />
+                <div style={{ position: 'absolute', bottom: 14, left: 16, fontFamily: "'Montserrat', sans-serif", fontSize: '8px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', color: GOLD, background: 'rgba(0,0,0,0.5)', padding: '5px 10px' }}>
                   {post.category}
                 </div>
               </div>
-              {/* Meta */}
-              <p style={{ fontSize: 11, color: '#aaa', marginBottom: 10 }}>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#bbb', marginBottom: 12, fontWeight: 300, letterSpacing: '0.3px' }}>
                 {post.date} · {post.readTime}
               </p>
-              <h3 className="blog-title" style={{
-                fontSize: 16, fontWeight: 700, letterSpacing: '-0.2px', lineHeight: 1.4,
-                color: '#000', marginBottom: 10, transition: 'color 0.2s',
-              }}>
+              <h3 className="blog-title" style={{ fontFamily: "'Cormorant', serif", fontSize: '1.4rem', fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.2px', lineHeight: 1.3, color: '#0a0a0a', marginBottom: 10, transition: 'color 0.2s' }}>
                 {post.title}
               </h3>
-              <p style={{ fontSize: 13, color: '#666', lineHeight: 1.7 }}>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#999', lineHeight: 1.75, fontWeight: 300 }}>
                 {post.excerpt.slice(0, 110)}…
               </p>
             </a>
           ))}
         </div>
-
-        <style>{`
-          @media (max-width: 768px) {
-            .home-blog-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
-          }
-        `}</style>
+        <style>{`@media (max-width: 768px) { .home-blog-grid { grid-template-columns: 1fr !important; gap: 40px !important; } }`}</style>
       </section>
 
       {/* ─── Newsletter ───────────────────────────────────── */}
       <NewsletterSection />
 
       {/* ─── Footer ───────────────────────────────────────── */}
-      <footer style={{ background: '#0e0e0e', color: '#fff', padding: '64px 60px 40px' }}>
-        <div className="footer-grid" style={{ marginBottom: '48px' }}>
-          <div>
-            <h4 style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '1px', color: '#fff', marginBottom: '16px' }}>MirhaPret</h4>
-            <p style={{ fontSize: '13px', color: '#555', lineHeight: 1.9, maxWidth: '260px', marginBottom: '24px' }}>
-              Premium Pakistani fashion for the modern woman. Celebrating craftsmanship, elegance, and identity.
-            </p>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              {['IG', 'FB', 'TT'].map(s => (
-                <a key={s} href="#" style={{
-                  width: '34px', height: '34px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '10px', fontWeight: 700, color: '#555', textDecoration: 'none',
-                }}>
-                  {s}
-                </a>
-              ))}
-            </div>
-          </div>
+      <SiteFooter />
 
-          {[
-            { title: 'Shop', links: [['All Products', '/products'], ['Premium Pret', '/products'], ['Octa West 2026', '/products'], ['The Desire Edit', '/products'], ['Sale', '/products']] },
-            { title: 'Help', links: [['Contact Us', '/contact'], ['Shipping Info', '#'], ['Returns', '#'], ['Size Guide', '#'], ['FAQ', '#']] },
-            { title: 'Company', links: [['About Us', '/about'], ['Our Story', '/about'], ['Careers', '#'], ['Instagram', '#'], ['WhatsApp', '#']] },
-          ].map((section, i) => (
-            <div key={i}>
-              <h5 style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#fff', marginBottom: '20px' }}>
-                {section.title}
-              </h5>
-              <ul style={{ listStyle: 'none' }}>
-                {section.links.map(([label, href], j) => (
-                  <li key={j} style={{ marginBottom: '10px' }}>
-                    <a href={href} style={{ fontSize: '13px', color: '#555', textDecoration: 'none' }}>{label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div className="footer-bottom" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '28px' }}>
-          <p style={{ fontSize: '12px', color: '#333' }}>© 2026 MirhaPret. All rights reserved.</p>
-          <div style={{ display: 'flex', gap: '24px' }}>
-            <a href="#" style={{ fontSize: '12px', color: '#333', textDecoration: 'none' }}>Privacy Policy</a>
-            <a href="#" style={{ fontSize: '12px', color: '#333', textDecoration: 'none' }}>Terms</a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -17,7 +17,7 @@ interface AuthContextType {
   isLoggedIn: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   loginWithGoogle: (idToken: string) => Promise<{ success: boolean; error?: string }>;
-  register: (firstName: string, lastName: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  register: (firstName: string, lastName: string, email: string, password: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -77,7 +77,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
+    phone?: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
       const res = await api.post('/auth/register', {
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         last_name: lastName,
         email,
         password,
+        ...(phone ? { phone } : {}),
       });
       const { access_token, refresh_token, user: userData } = res.data;
 
