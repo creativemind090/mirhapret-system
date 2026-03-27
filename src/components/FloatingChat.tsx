@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { MdSupportAgent } from 'react-icons/md';
 import { IoClose, IoSend, IoChevronBack, IoChevronForward } from 'react-icons/io5';
 import { FaWhatsapp } from 'react-icons/fa';
+import { MdSupportAgent } from 'react-icons/md';
 
 const CHATBOT_URL = process.env.NEXT_PUBLIC_CHATBOT_URL || 'http://localhost:3004';
 const STORAGE_KEY = 'mirhapret_chat_session';
 const MAX_STORED_MESSAGES = 40;
+const GOLD = '#c8a96e';
+const DARK = '#080808';
 
 interface Product {
   id: string;
@@ -56,7 +58,7 @@ function saveSession(messages: Message[], history: StoredSession['history']) {
   } catch {}
 }
 
-// ── Product Carousel ─────────────────────────────────────────────────────────
+// ── Product Carousel ──────────────────────────────────────────────────────────
 function ProductCarousel({ products }: { products: Product[] }) {
   const router = useRouter();
   const [idx, setIdx] = useState(0);
@@ -71,20 +73,19 @@ function ProductCarousel({ products }: { products: Product[] }) {
     null;
 
   return (
-    <div style={{ marginTop: '6px', width: '100%' }}>
+    <div style={{ marginTop: '8px', width: '100%' }}>
       <div
         style={{
           position: 'relative',
-          background: '#f9f9f9',
-          border: '1px solid #e0e0e0',
+          background: '#f9f7f4',
+          border: '1px solid rgba(200,169,110,0.2)',
           overflow: 'hidden',
           cursor: 'pointer',
         }}
         onClick={() => router.push(`/products/${product.slug || product.id}`)}
         title={`View ${product.name}`}
       >
-        {/* Product Image */}
-        <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden', background: '#eee', position: 'relative' }}>
+        <div style={{ width: '100%', aspectRatio: '4/3', overflow: 'hidden', background: '#ece8e3', position: 'relative' }}>
           {imgSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -93,40 +94,31 @@ function ProductCarousel({ products }: { products: Product[] }) {
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           ) : (
-            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: '13px' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontFamily: "'Montserrat', sans-serif", fontSize: '11px' }}>
               No image
             </div>
           )}
         </div>
-
-        {/* Product Info */}
-        <div style={{ padding: '8px 10px' }}>
-          <p style={{ margin: 0, fontSize: '12px', fontWeight: 600, color: '#111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ padding: '10px 12px' }}>
+          <p style={{ margin: 0, fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, color: DARK, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {product.name}
           </p>
-          <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#555' }}>
+          <p style={{ margin: '4px 0 0', fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: GOLD, fontWeight: 600 }}>
             PKR {Number(product.price).toLocaleString()}
           </p>
         </div>
       </div>
 
-      {/* Navigation (only if multiple) */}
       {products.length > 1 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '6px' }}>
-          <button
-            onClick={prev}
-            style={{ background: '#000', color: '#fff', border: 'none', cursor: 'pointer', padding: '4px 8px', display: 'flex', alignItems: 'center' }}
-          >
-            <IoChevronBack size={14} />
+          <button onClick={prev} style={{ background: DARK, color: '#fff', border: 'none', cursor: 'pointer', padding: '4px 10px', display: 'flex', alignItems: 'center' }}>
+            <IoChevronBack size={12} />
           </button>
-          <span style={{ fontSize: '11px', color: '#777' }}>
+          <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#999', letterSpacing: '1px' }}>
             {idx + 1} / {products.length}
           </span>
-          <button
-            onClick={next}
-            style={{ background: '#000', color: '#fff', border: 'none', cursor: 'pointer', padding: '4px 8px', display: 'flex', alignItems: 'center' }}
-          >
-            <IoChevronForward size={14} />
+          <button onClick={next} style={{ background: DARK, color: '#fff', border: 'none', cursor: 'pointer', padding: '4px 10px', display: 'flex', alignItems: 'center' }}>
+            <IoChevronForward size={12} />
           </button>
         </div>
       )}
@@ -153,7 +145,6 @@ export function FloatingChat() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Load session from localStorage on first open
   useEffect(() => {
     if (isOpen && !sessionLoaded.current) {
       sessionLoaded.current = true;
@@ -163,12 +154,9 @@ export function FloatingChat() {
         setHistory(session.history ?? []);
       }
     }
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 100);
   }, [isOpen]);
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -212,7 +200,6 @@ export function FloatingChat() {
         return [...withoutTyping, replyMsg];
       });
 
-      // Typewriter effect
       let i = 0;
       const interval = setInterval(() => {
         i++;
@@ -224,7 +211,6 @@ export function FloatingChat() {
         });
         if (i >= reply.length) {
           clearInterval(interval);
-          // Save session after typewriter finishes
           setMessages(prev => {
             saveSession(prev, newHistory);
             return prev;
@@ -262,53 +248,69 @@ export function FloatingChat() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(o => !o)}
+        aria-label="Chat with Mira"
         style={{
           position: 'fixed',
           bottom: isMobile ? '16px' : '24px',
           right: isMobile ? '16px' : '24px',
-          width: '52px', height: '52px', borderRadius: '50%',
-          background: '#000', color: '#fff', border: 'none',
+          width: '52px', height: '52px',
+          background: isOpen ? DARK : GOLD,
+          color: '#fff', border: 'none',
           cursor: 'pointer', display: 'flex', alignItems: 'center',
           justifyContent: 'center', zIndex: 1000,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+          transition: 'background 0.2s',
         }}
-        title="Chat with Mira"
       >
-        {isOpen ? <IoClose size={24} /> : <MdSupportAgent size={24} />}
+        {isOpen ? <IoClose size={22} /> : <MdSupportAgent size={26} />}
       </button>
 
       {/* Chat Widget */}
       {isOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: isMobile ? '12px' : '88px',
-            right: isMobile ? '12px' : '24px',
-            left: isMobile ? '12px' : 'auto',
-            width: isMobile ? 'auto' : '340px',
-            height: isMobile ? '82dvh' : '540px',
-            background: '#fff',
-            border: '1px solid #e0e0e0',
-            borderRadius: isMobile ? '12px' : '0',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
-            display: 'flex', flexDirection: 'column',
-            zIndex: 999, fontFamily: 'system-ui, sans-serif',
-          }}
-        >
+        <div style={{
+          position: 'fixed',
+          bottom: isMobile ? '12px' : '88px',
+          right: isMobile ? '12px' : '24px',
+          left: isMobile ? '12px' : 'auto',
+          width: isMobile ? 'auto' : '340px',
+          height: isMobile ? '82dvh' : '540px',
+          background: '#fff',
+          border: '1px solid #ece8e3',
+          boxShadow: '0 12px 48px rgba(0,0,0,0.14)',
+          display: 'flex', flexDirection: 'column',
+          zIndex: 999,
+        }}>
           {/* Header */}
-          <div style={{ background: '#000', color: '#fff', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <MdSupportAgent size={20} />
+          <div style={{
+            background: DARK, color: '#fff',
+            padding: '14px 16px',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute', inset: 0, opacity: 0.04,
+              backgroundImage: 'linear-gradient(rgba(200,169,110,1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,1) 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
+            }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', zIndex: 1 }}>
+              <div style={{ width: '32px', height: '32px', background: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontFamily: "'Cormorant', serif", fontSize: '18px', fontWeight: 600, fontStyle: 'italic', color: '#fff', lineHeight: 1 }}>M</span>
+              </div>
               <div>
-                <p style={{ margin: 0, fontSize: '13px', fontWeight: 700 }}>Mira — MirhaPret</p>
-                <p style={{ margin: 0, fontSize: '10px', color: '#aaa' }}>AI Shopping Assistant</p>
+                <p style={{ margin: 0, fontFamily: "'Cormorant', serif", fontSize: '15px', fontWeight: 600, fontStyle: 'italic', letterSpacing: '0.3px' }}>Mira</p>
+                <p style={{ margin: 0, fontFamily: "'Montserrat', sans-serif", fontSize: '9px', color: '#555', letterSpacing: '1.5px', textTransform: 'uppercase', fontWeight: 600 }}>MirhaPret Assistant</p>
               </div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative', zIndex: 1 }}>
               <button
                 onClick={clearChat}
                 title="Clear chat"
-                style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', fontSize: '10px', padding: 0 }}
+                style={{
+                  background: 'transparent', border: 'none', color: '#444',
+                  cursor: 'pointer', fontFamily: "'Montserrat', sans-serif",
+                  fontSize: '9px', fontWeight: 600, letterSpacing: '1.5px',
+                  textTransform: 'uppercase', padding: 0,
+                }}
               >
                 Clear
               </button>
@@ -319,34 +321,37 @@ export function FloatingChat() {
                 title="Chat on WhatsApp"
                 style={{ color: '#25D366', display: 'flex' }}
               >
-                <FaWhatsapp size={18} />
+                <FaWhatsapp size={16} />
               </a>
               <button
                 onClick={() => setIsOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: 0 }}
+                style={{ background: 'transparent', border: 'none', color: '#777', cursor: 'pointer', display: 'flex', padding: 0 }}
               >
-                <IoClose size={18} />
+                <IoClose size={16} />
               </button>
             </div>
           </div>
 
           {/* Messages */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {messages.map((msg, idx) => (
-              <div key={idx} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+          <div style={{
+            flex: 1, overflowY: 'auto', padding: '14px 12px',
+            display: 'flex', flexDirection: 'column', gap: '10px',
+            background: '#FAFAF8',
+          }}>
+            {messages.map((msg, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
                 <div style={{ maxWidth: '85%', display: 'flex', flexDirection: 'column' }}>
-                  <div
-                    style={{
-                      padding: '8px 12px',
-                      background: msg.role === 'user' ? '#000' : '#f2f2f2',
-                      color: msg.role === 'user' ? '#fff' : '#111',
-                      fontSize: '13px', lineHeight: 1.5,
-                      whiteSpace: 'pre-wrap', wordBreak: 'break-word',
-                    }}
-                  >
+                  <div style={{
+                    padding: '9px 13px',
+                    background: msg.role === 'user' ? DARK : '#fff',
+                    color: msg.role === 'user' ? '#fff' : '#333',
+                    border: msg.role === 'user' ? 'none' : '1px solid #ece8e3',
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: '12px', lineHeight: 1.6, fontWeight: 300,
+                    whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                  }}>
                     {msg.isTyping ? <TypingDots /> : msg.text}
                   </div>
-                  {/* Product Carousel */}
                   {!msg.isTyping && msg.products && msg.products.length > 0 && (
                     <ProductCarousel products={msg.products} />
                   )}
@@ -357,34 +362,42 @@ export function FloatingChat() {
           </div>
 
           {/* Input */}
-          <div style={{ padding: '10px 12px', borderTop: '1px solid #e0e0e0', display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{
+            padding: '10px 12px',
+            borderTop: '1px solid #ece8e3',
+            display: 'flex', gap: '8px', alignItems: 'center',
+            background: '#fff',
+          }}>
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask me anything..."
+              placeholder="Ask me anything…"
               disabled={isLoading}
               style={{
-                flex: 1, padding: '8px 11px',
-                border: '1px solid #ddd', fontSize: '13px',
-                fontFamily: 'system-ui, sans-serif', outline: 'none',
-                background: isLoading ? '#f9f9f9' : '#fff',
+                flex: 1, padding: '9px 12px',
+                border: '1px solid #ece8e3',
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: '12px', outline: 'none',
+                background: isLoading ? '#fafaf8' : '#fff',
+                color: DARK, fontWeight: 300,
               }}
             />
             <button
               onClick={sendMessage}
               disabled={isLoading || !input.trim()}
               style={{
-                padding: '8px 11px',
-                background: isLoading || !input.trim() ? '#888' : '#000',
+                padding: '9px 12px',
+                background: isLoading || !input.trim() ? '#d0ccc8' : GOLD,
                 color: '#fff', border: 'none',
                 cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
                 display: 'flex', alignItems: 'center',
+                transition: 'background 0.2s',
               }}
             >
-              <IoSend size={15} />
+              <IoSend size={14} />
             </button>
           </div>
         </div>
@@ -400,12 +413,12 @@ function TypingDots() {
         <span
           key={i}
           style={{
-            width: '6px', height: '6px', borderRadius: '50%', background: '#555',
+            width: '5px', height: '5px', background: GOLD,
             animation: `chatDot 1.2s ease-in-out ${delay}s infinite`,
           }}
         />
       ))}
-      <style>{`@keyframes chatDot{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1);opacity:1}}`}</style>
+      <style>{`@keyframes chatDot{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}`}</style>
     </span>
   );
 }

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { PageHeader } from './PageHeader';
 
+const GOLD = '#c8a96e';
+
 /** Drop-in header for all pages except home.
  *  Manages its own scroll state — pages don't need to. */
 export function SiteHeader() {
@@ -18,16 +20,23 @@ export function SiteHeader() {
     <>
       {/* Announcement bar */}
       <div className="site-announcement" style={{
-        background: '#000',
-        color: '#fff',
+        background: '#080808',
+        color: GOLD,
         textAlign: 'center',
-        padding: '10px 20px',
-        fontSize: '12px',
-        letterSpacing: '1.5px',
+        padding: '9px 20px',
+        fontSize: '10px',
+        letterSpacing: '3px',
         textTransform: 'uppercase',
-        fontWeight: 500,
+        fontWeight: 600,
+        fontFamily: "'Montserrat', sans-serif",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '16px',
       }}>
+        <span style={{ width: '4px', height: '4px', background: GOLD, transform: 'rotate(45deg)', display: 'inline-block', flexShrink: 0 }} />
         New: Octa West 2026 Now Live
+        <span style={{ width: '4px', height: '4px', background: GOLD, transform: 'rotate(45deg)', display: 'inline-block', flexShrink: 0 }} />
       </div>
       <PageHeader isScrolled={isScrolled} />
       {/* Push content below the fixed nav (60px) + announcement bar already in flow (36px) */}

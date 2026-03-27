@@ -5,6 +5,26 @@ import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 import { FaInstagram, FaFacebookF, FaTiktok, FaWhatsapp, FaYoutube, FaPinterestP } from 'react-icons/fa';
 
+const GOLD = '#c8a96e';
+const DARK = '#080808';
+const CREAM = '#FAFAF8';
+
+const fieldLabel: React.CSSProperties = {
+  display: 'block',
+  fontFamily: "'Montserrat', sans-serif",
+  fontSize: '9px', fontWeight: 700,
+  letterSpacing: '2.5px', textTransform: 'uppercase',
+  color: '#aaa', marginBottom: '10px',
+};
+
+const inp: React.CSSProperties = {
+  width: '100%', padding: '12px 0',
+  border: 'none', borderBottom: `1px solid #d0ccc8`,
+  background: 'transparent', color: '#0a0a0a',
+  fontSize: '14px', fontFamily: "'Montserrat', sans-serif",
+  outline: 'none', boxSizing: 'border-box',
+};
+
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -19,98 +39,94 @@ export default function ContactPage() {
     setSubmitted(true);
   };
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: '14px 16px',
-    border: '1.5px solid #e8e8e8',
-    background: '#fff',
-    color: '#000',
-    fontSize: '14px',
-    fontFamily: 'inherit',
-    outline: 'none',
-    boxSizing: 'border-box',
-  };
+  const infoItems = [
+    {
+      title: 'Email Us',
+      lines: ['hello@mirhapret.com', 'support@mirhapret.com'],
+      sub: 'We respond within 24 hours',
+    },
+    {
+      title: 'Call Us',
+      lines: ['+92 321 000 0000'],
+      sub: 'Mon – Sat, 10am – 7pm PKT',
+    },
+    {
+      title: 'Visit Us',
+      lines: ['123 Fashion Street', 'DHA Phase 6, Lahore'],
+      sub: 'By appointment preferred',
+    },
+    {
+      title: 'WhatsApp',
+      lines: ['+92 321 000 0000'],
+      sub: 'Fastest response guaranteed',
+    },
+  ];
 
   return (
-    <div style={{ background: '#fff', color: '#000' }}>
+    <div style={{ background: CREAM, color: '#0a0a0a' }}>
       <SiteHeader />
 
-      {/* ─── Page Hero ─────────────────────────────────────── */}
+      {/* ─── Hero ─── */}
       <section style={{
-        background: '#0e0e0e',
-        color: '#fff',
-        padding: '80px 60px',
-        minHeight: '280px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
+        background: DARK, color: '#fff',
+        padding: 'clamp(80px,10vw,120px) clamp(24px,6vw,80px) clamp(60px,8vw,96px)',
+        minHeight: '320px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+        position: 'relative', overflow: 'hidden',
       }}>
-        <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: '#c8a96e', fontWeight: 600, marginBottom: '20px' }}>
-          We'd Love to Hear From You
-        </p>
-        <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: 800, letterSpacing: '-2px', lineHeight: 1.05, color: '#fff' }}>
-          Get in Touch
-        </h1>
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.03,
+          backgroundImage: 'linear-gradient(rgba(200,169,110,1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,1) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '24px' }} />
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, fontWeight: 600, marginBottom: '16px' }}>
+            We'd Love to Hear From You
+          </p>
+          <h1 style={{
+            fontFamily: "'Cormorant', serif",
+            fontSize: 'clamp(2.8rem, 5.5vw, 5rem)',
+            fontWeight: 600, fontStyle: 'italic',
+            letterSpacing: '-1px', lineHeight: 1.05, color: '#fff', margin: 0,
+          }}>
+            Get in Touch
+          </h1>
+        </div>
       </section>
 
-      {/* ─── Contact Body ──────────────────────────────────── */}
-      <section className="home-section">
+      {/* ─── Contact Body ─── */}
+      <section className="home-section" style={{ background: '#fff' }}>
         <div className="contact-grid">
 
           {/* Left — info */}
           <div>
-            <div style={{ width: '40px', height: '2px', background: '#c8a96e', marginBottom: '32px' }} />
+            <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '36px' }} />
 
-            {[
-              {
-                icon: '✉',
-                title: 'Email Us',
-                lines: ['hello@mirhapret.com', 'support@mirhapret.com'],
-                sub: 'We respond within 24 hours',
-              },
-              {
-                icon: '☎',
-                title: 'Call Us',
-                lines: ['+92 321 000 0000'],
-                sub: 'Mon – Sat, 10am – 7pm PKT',
-              },
-              {
-                icon: '◎',
-                title: 'Visit Us',
-                lines: ['123 Fashion Street', 'DHA Phase 6, Lahore'],
-                sub: 'By appointment preferred',
-              },
-              {
-                icon: '◈',
-                title: 'WhatsApp',
-                lines: ['+92 321 000 0000'],
-                sub: 'Fastest response guaranteed',
-              },
-            ].map((info, i) => (
-              <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '36px' }}>
-                <span style={{ fontSize: '20px', color: '#c8a96e', marginTop: '2px', flexShrink: 0 }}>{info.icon}</span>
+            {infoItems.map((info, i) => (
+              <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '36px', alignItems: 'flex-start' }}>
+                <div style={{ width: '6px', height: '6px', background: GOLD, transform: 'rotate(45deg)', marginTop: '6px', flexShrink: 0 }} />
                 <div>
-                  <p style={{ fontSize: '13px', fontWeight: 700, color: '#000', marginBottom: '6px', letterSpacing: '0.3px' }}>{info.title}</p>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: '#888', marginBottom: '8px' }}>{info.title}</p>
                   {info.lines.map((l, j) => (
-                    <p key={j} style={{ fontSize: '14px', color: '#333', marginBottom: '2px' }}>{l}</p>
+                    <p key={j} style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: DARK, marginBottom: '2px', fontWeight: 400 }}>{l}</p>
                   ))}
-                  <p style={{ fontSize: '11px', color: '#bbb', marginTop: '4px' }}>{info.sub}</p>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#bbb', marginTop: '4px', fontWeight: 300 }}>{info.sub}</p>
                 </div>
               </div>
             ))}
 
-            <div style={{ borderTop: '1px solid #e8e8e8', paddingTop: '32px', marginTop: '12px' }}>
-              <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: '#000', marginBottom: '16px' }}>
+            <div style={{ borderTop: '1px solid #ece8e3', paddingTop: '32px', marginTop: '8px' }}>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', color: '#aaa', marginBottom: '16px' }}>
                 Follow Us
               </p>
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {[
-                  { icon: <FaInstagram size={18} />, href: 'https://www.instagram.com/mirhapret_official', label: 'Instagram', hoverColor: '#E1306C' },
-                  { icon: <FaFacebookF size={18} />, href: 'https://www.facebook.com/mirhapret', label: 'Facebook', hoverColor: '#1877F2' },
-                  { icon: <FaTiktok size={18} />, href: 'https://www.tiktok.com/@mirhapret', label: 'TikTok', hoverColor: '#010101' },
-                  { icon: <FaYoutube size={18} />, href: 'https://www.youtube.com/@mirhapret', label: 'YouTube', hoverColor: '#FF0000' },
-                  { icon: <FaPinterestP size={18} />, href: 'https://www.pinterest.com/mirhapret', label: 'Pinterest', hoverColor: '#E60023' },
-                  { icon: <FaWhatsapp size={18} />, href: 'https://wa.me/923244577066', label: 'WhatsApp', hoverColor: '#25D366' },
+                  { icon: <FaInstagram size={14} />, href: 'https://www.instagram.com/mirhapret_official', label: 'Instagram', hoverColor: '#E1306C' },
+                  { icon: <FaFacebookF size={14} />, href: 'https://www.facebook.com/mirhapret', label: 'Facebook', hoverColor: '#1877F2' },
+                  { icon: <FaTiktok size={14} />, href: 'https://www.tiktok.com/@mirhapret', label: 'TikTok', hoverColor: '#010101' },
+                  { icon: <FaYoutube size={14} />, href: 'https://www.youtube.com/@mirhapret', label: 'YouTube', hoverColor: '#FF0000' },
+                  { icon: <FaPinterestP size={14} />, href: 'https://www.pinterest.com/mirhapret', label: 'Pinterest', hoverColor: '#E60023' },
+                  { icon: <FaWhatsapp size={14} />, href: 'https://wa.me/923244577066', label: 'WhatsApp', hoverColor: '#25D366' },
                 ].map(({ icon, href, label, hoverColor }) => (
                   <a
                     key={label}
@@ -126,15 +142,16 @@ export default function ContactPage() {
                     }}
                     onMouseLeave={e => {
                       (e.currentTarget as HTMLElement).style.background = 'transparent';
-                      (e.currentTarget as HTMLElement).style.borderColor = '#000';
-                      (e.currentTarget as HTMLElement).style.color = '#000';
+                      (e.currentTarget as HTMLElement).style.borderColor = '#d0ccc8';
+                      (e.currentTarget as HTMLElement).style.color = '#888';
                     }}
                     style={{
-                      width: '40px', height: '40px',
-                      border: '1.5px solid #000',
+                      width: '38px', height: '38px',
+                      border: '1px solid #d0ccc8',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: '#000', textDecoration: 'none',
+                      color: '#888', textDecoration: 'none',
                       transition: 'background 0.2s, border-color 0.2s, color 0.2s',
+                      cursor: 'pointer',
                     }}
                   >
                     {icon}
@@ -147,54 +164,39 @@ export default function ContactPage() {
           {/* Right — form */}
           <div>
             {submitted ? (
-              <div style={{ padding: '60px 40px', background: '#fafafa', textAlign: 'center', borderTop: '3px solid #c8a96e' }}>
-                <span style={{ fontSize: '32px', color: '#c8a96e', display: 'block', marginBottom: '16px' }}>✦</span>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '12px' }}>Message Received</h3>
-                <p style={{ fontSize: '14px', color: '#666', lineHeight: 1.7 }}>
+              <div style={{ padding: '60px 40px', background: CREAM, textAlign: 'center', borderTop: `3px solid ${GOLD}` }}>
+                <div style={{ width: '36px', height: '1px', background: GOLD, margin: '0 auto 28px' }} />
+                <h3 style={{
+                  fontFamily: "'Cormorant', serif",
+                  fontSize: '2rem', fontWeight: 600, fontStyle: 'italic',
+                  letterSpacing: '-0.3px', marginBottom: '12px', color: DARK,
+                }}>Message Received</h3>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#888', lineHeight: 1.8, fontWeight: 300 }}>
                   Thank you for reaching out. Our team will get back to you within 24 hours.
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
                 <div className="contact-name-row">
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                      Your Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={form.name}
+                    <label style={fieldLabel}>Your Name *</label>
+                    <input type="text" required value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
-                      placeholder="Ayesha Khan"
-                      style={inputStyle}
-                    />
+                      placeholder="Ayesha Khan" style={inp} />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={form.email}
+                    <label style={fieldLabel}>Email Address *</label>
+                    <input type="email" required value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
-                      placeholder="your@email.com"
-                      style={inputStyle}
-                    />
+                      placeholder="your@email.com" style={inp} />
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '16px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    Subject *
-                  </label>
-                  <select
-                    required
-                    value={form.subject}
+                <div>
+                  <label style={fieldLabel}>Subject *</label>
+                  <select required value={form.subject}
                     onChange={e => setForm({ ...form, subject: e.target.value })}
-                    style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}
-                  >
+                    style={{ ...inp, cursor: 'pointer', appearance: 'none' }}>
                     <option value="">Select a topic…</option>
                     <option>Order Enquiry</option>
                     <option>Returns & Exchanges</option>
@@ -204,37 +206,28 @@ export default function ContactPage() {
                   </select>
                 </div>
 
-                <div style={{ marginBottom: '28px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '8px' }}>
-                    Message *
-                  </label>
-                  <textarea
-                    required
-                    rows={6}
-                    value={form.message}
+                <div>
+                  <label style={fieldLabel}>Message *</label>
+                  <textarea required rows={5} value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
                     placeholder="Tell us how we can help…"
-                    style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.7 }}
-                  />
+                    style={{ ...inp, resize: 'vertical', lineHeight: 1.7 }} />
                 </div>
 
-                <button type="submit" style={{
-                  width: '100%',
-                  padding: '16px',
-                  background: '#000',
-                  color: '#fff',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                }}>
-                  Send Message
-                </button>
-                <p style={{ fontSize: '11px', color: '#bbb', marginTop: '12px', textAlign: 'center' }}>
-                  We'll respond within 24 hours.
-                </p>
+                <div>
+                  <button type="submit" style={{
+                    width: '100%', padding: '15px',
+                    background: DARK, color: '#fff', border: 'none',
+                    fontFamily: "'Montserrat', sans-serif",
+                    fontSize: '10px', fontWeight: 700,
+                    letterSpacing: '3px', textTransform: 'uppercase', cursor: 'pointer',
+                  }}>
+                    Send Message
+                  </button>
+                  <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#bbb', marginTop: '12px', textAlign: 'center', fontWeight: 300 }}>
+                    We'll respond within 24 hours.
+                  </p>
+                </div>
               </form>
             )}
           </div>
