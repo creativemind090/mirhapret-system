@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 declare global {
   interface Window {
@@ -15,14 +16,15 @@ const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '7390605736
 const GOLD = '#c8a96e';
 const DARK = '#080808';
 
-export default function SignInPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { loginWithGoogle, isLoggedIn } = useAuth();
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
-  const sessionExpired = searchParams.get('session') === 'expired';
+  const [phone, setPhone] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (isLoggedIn) router.push('/');
@@ -32,10 +34,13 @@ export default function SignInPage() {
     setError('');
     setLoading(true);
     const result = await loginWithGoogle(response.credential);
+    const trimmedPhone = phone.replace(/\s+/g, '').replace(/^0/, '');
+    if (result.success && trimmedPhone) {
+      try { await api.put('/users/profile', { phone: `+92${trimmedPhone}` }); } catch { /* non-critical */ }
+    }
     setLoading(false);
     if (result.success) {
-      const redirect = searchParams.get('redirect') || '/';
-      router.push(redirect);
+      router.push(searchParams.get('redirect') || '/');
     } else {
       setError(result.error || 'Sign-in failed. Please try again.');
     }
@@ -48,8 +53,7 @@ export default function SignInPage() {
       window.google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: window.handleGoogleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true,
+        auto_select: false, cancel_on_tap_outside: true,
       });
       if (buttonRef.current) {
         window.google.accounts.id.renderButton(buttonRef.current, {
@@ -79,15 +83,12 @@ export default function SignInPage() {
         justifyContent: 'space-between', padding: '56px 52px',
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* Giant watermark */}
         <div style={{
           position: 'absolute', bottom: '-60px', right: '-30px',
           fontFamily: "'Cormorant', serif", fontSize: '22vw', fontWeight: 700,
           color: 'rgba(255,255,255,0.025)', lineHeight: 1,
           userSelect: 'none', letterSpacing: '-4px',
         }}>MP</div>
-
-        {/* Gold grid overlay */}
         <div style={{
           position: 'absolute', inset: 0, opacity: 0.035,
           backgroundImage: 'linear-gradient(rgba(200,169,110,1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,1) 1px, transparent 1px)',
@@ -108,16 +109,16 @@ export default function SignInPage() {
             fontWeight: 600, fontStyle: 'italic',
             color: '#fff', lineHeight: 1.15, marginBottom: '20px', letterSpacing: '-0.5px',
           }}>
-            Dressed to<br />Be Remembered.
+            Your Style,<br />Your Story.
           </h2>
           <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#666', lineHeight: 1.9, maxWidth: '300px', fontWeight: 300 }}>
-            Sign in to access your orders, wishlist, and exclusive member offers.
+            Create an account to track orders, save your wishlist, and unlock exclusive member offers.
           </p>
-          <div style={{ display: 'flex', gap: '32px', marginTop: '36px' }}>
-            {[{ num: '5K+', label: 'Customers' }, { num: '500+', label: 'Pieces' }, { num: '3', label: 'Collections' }].map((s, i) => (
-              <div key={i}>
-                <p style={{ fontFamily: "'Cormorant', serif", fontSize: '2rem', fontWeight: 600, fontStyle: 'italic', color: GOLD, lineHeight: 1 }}>{s.num}</p>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', color: '#555', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '36px' }}>
+            {['Early access to new drops', 'Order tracking & history', 'Exclusive member offers'].map((benefit, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '4px', height: '4px', background: GOLD, borderRadius: '50%', flexShrink: 0 }} />
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#666', fontWeight: 300 }}>{benefit}</p>
               </div>
             ))}
           </div>
@@ -133,25 +134,21 @@ export default function SignInPage() {
           <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '28px' }} />
 
           <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: '#999', marginBottom: '12px', fontWeight: 600 }}>
-            Welcome Back
+            New Member
           </p>
           <h1 style={{
-            fontFamily: "'Cormorant', serif", fontSize: 'clamp(2rem, 3vw, 2.8rem)',
+            fontFamily: "'Cormorant', serif",
+            fontSize: 'clamp(2rem, 3vw, 2.8rem)',
             fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.5px',
             color: '#0a0a0a', marginBottom: '8px', lineHeight: 1.1,
           }}>
-            Sign In
+            Join MirhaPret
           </h1>
           <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#888', marginBottom: '40px', fontWeight: 300 }}>
-            New here?{' '}
-            <a href="/register" style={{ color: '#0a0a0a', fontWeight: 500, textDecoration: 'underline', textUnderlineOffset: '3px' }}>Create an account</a>
+            Already have an account?{' '}
+            <a href="/signin" style={{ color: '#0a0a0a', fontWeight: 500, textDecoration: 'underline', textUnderlineOffset: '3px' }}>Sign in</a>
           </p>
 
-          {sessionExpired && (
-            <div style={{ padding: '14px 18px', borderLeft: `3px solid ${GOLD}`, background: '#fffbf2', fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#7a5c1a', marginBottom: '24px', fontWeight: 400 }}>
-              Your session has expired. Please sign in again.
-            </div>
-          )}
           {error && (
             <div style={{ padding: '14px 18px', borderLeft: '3px solid #c0392b', background: '#fff5f5', fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#c0392b', marginBottom: '24px' }}>
               {error}
@@ -159,10 +156,34 @@ export default function SignInPage() {
           )}
           {loading && (
             <div style={{ padding: '14px 18px', background: '#fafafa', fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#888', marginBottom: '24px', textAlign: 'center', letterSpacing: '1px' }}>
-              Signing you in…
+              Setting up your account…
             </div>
           )}
 
+          {/* Phone field */}
+          <div style={{ marginBottom: '28px' }}>
+            <label style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', color: '#888', display: 'block', marginBottom: '10px' }}>
+              Phone Number <span style={{ color: '#bbb', fontWeight: 400 }}>(optional)</span>
+            </label>
+            <div style={{ display: 'flex', border: phoneError ? '1.5px solid #c0392b' : '1.5px solid #e0e0e0', background: '#fff', transition: 'border-color 0.2s' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '0 14px', borderRight: '1px solid #f0f0f0', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                <img src="https://flagcdn.com/w20/pk.png" srcSet="https://flagcdn.com/w40/pk.png 2x" width="20" height="14" alt="Pakistan" style={{ display: 'block', objectFit: 'cover' }} />
+                <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: '#444', fontWeight: 500 }}>+92</span>
+              </div>
+              <input
+                type="tel" value={phone}
+                onChange={e => { setPhone(e.target.value.replace(/\D/g, '')); setPhoneError(''); }}
+                placeholder="3001234567" maxLength={10}
+                style={{ flex: 1, padding: '14px', border: 'none', outline: 'none', fontSize: '14px', fontFamily: "'Montserrat', sans-serif", background: 'transparent', color: '#000' }}
+              />
+            </div>
+            {phoneError && <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#c0392b', marginTop: '6px' }}>{phoneError}</p>}
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#bbb', marginTop: '8px', fontWeight: 300, lineHeight: 1.6 }}>
+              Used for order updates and delivery coordination.
+            </p>
+          </div>
+
+          {/* Google button */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'stretch', gap: '16px' }}>
             <div ref={buttonRef} style={{ width: '100%' }} />
             <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#bbb', textAlign: 'center', lineHeight: 1.8, fontWeight: 300 }}>
