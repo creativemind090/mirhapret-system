@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
 
-const gold = '#c8a96e';
+const GOLD = '#c8a96e';
+const DARK = '#080808';
+const CREAM = '#FAFAF8';
 
 const faqs = [
   {
@@ -74,30 +76,52 @@ export default function FAQPage() {
   const toggle = (key: string) => setOpen(prev => prev === key ? null : key);
 
   return (
-    <div style={{ background: '#fff', color: '#000' }}>
+    <div style={{ background: CREAM, color: '#0a0a0a' }}>
       <SiteHeader />
 
-      {/* Hero */}
-      <section style={{ background: '#0e0e0e', color: '#fff', padding: '80px 60px', minHeight: '260px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-        <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: gold, fontWeight: 600, marginBottom: '16px' }}>
-          We Have Answers
-        </p>
-        <h1 style={{ fontSize: 'clamp(2.2rem, 4vw, 4rem)', fontWeight: 800, letterSpacing: '-2px', lineHeight: 1.05 }}>
-          Frequently Asked Questions
-        </h1>
+      {/* ─── Hero ─── */}
+      <section style={{
+        background: DARK, color: '#fff',
+        padding: 'clamp(80px,10vw,120px) clamp(24px,6vw,80px) clamp(60px,8vw,96px)',
+        minHeight: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.03,
+          backgroundImage: 'linear-gradient(rgba(200,169,110,1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,1) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '24px' }} />
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, fontWeight: 600, marginBottom: '16px' }}>
+            We Have Answers
+          </p>
+          <h1 style={{
+            fontFamily: "'Cormorant', serif",
+            fontSize: 'clamp(2.8rem, 5.5vw, 5rem)',
+            fontWeight: 600, fontStyle: 'italic',
+            letterSpacing: '-1px', lineHeight: 1.05, color: '#fff', margin: 0,
+          }}>
+            Frequently Asked<br />Questions
+          </h1>
+        </div>
       </section>
 
-      <section style={{ padding: '80px 60px' }}>
+      <section style={{ padding: 'clamp(60px,8vw,100px) clamp(24px,6vw,80px)', background: '#fff' }}>
 
-        <p style={{ fontSize: '17px', color: '#444', lineHeight: 1.9, marginBottom: '64px', fontWeight: 300 }}>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: '#888', lineHeight: 1.9, marginBottom: '64px', fontWeight: 300, maxWidth: '600px' }}>
           Everything you need to know about ordering from MirhaPret. If you cannot find your answer here, our team is always just a message away.
         </p>
 
         {faqs.map(({ category, items }) => (
           <div key={category} style={{ marginBottom: '56px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-              <div style={{ width: '40px', height: '1px', background: gold }} />
-              <h2 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', color: gold }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '28px' }}>
+              <div style={{ width: '28px', height: '1px', background: GOLD, flexShrink: 0 }} />
+              <h2 style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: '9px', fontWeight: 700,
+                letterSpacing: '3px', textTransform: 'uppercase', color: GOLD, margin: 0,
+              }}>
                 {category}
               </h2>
             </div>
@@ -106,30 +130,37 @@ export default function FAQPage() {
               const key = `${category}-${i}`;
               const isOpen = open === key;
               return (
-                <div key={key} style={{ borderBottom: '1px solid #e8e8e8' }}>
+                <div key={key} style={{ borderBottom: '1px solid #ece8e3' }}>
                   <button
                     onClick={() => toggle(key)}
                     style={{
-                      width: '100%',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      padding: '22px 0',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                      textAlign: 'left',
-                      gap: '16px',
+                      width: '100%', display: 'flex',
+                      justifyContent: 'space-between', alignItems: 'center',
+                      padding: '22px 0', background: 'none', border: 'none',
+                      cursor: 'pointer', textAlign: 'left', gap: '16px',
                     }}
                   >
-                    <span style={{ fontSize: '15px', fontWeight: isOpen ? 700 : 500, color: '#000', lineHeight: 1.4 }}>{q}</span>
-                    <span style={{ fontSize: '20px', color: gold, flexShrink: 0, fontWeight: 300, transition: 'transform 0.2s', transform: isOpen ? 'rotate(45deg)' : 'none' }}>
-                      +
-                    </span>
+                    <span style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: '13px', fontWeight: isOpen ? 600 : 500,
+                      color: isOpen ? DARK : '#444', lineHeight: 1.5,
+                      transition: 'color 0.2s',
+                    }}>{q}</span>
+                    <span style={{
+                      width: '20px', height: '20px', border: `1px solid ${isOpen ? GOLD : '#d0ccc8'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0, color: GOLD,
+                      fontFamily: "'Montserrat', sans-serif", fontSize: '16px', fontWeight: 300,
+                      transition: 'transform 0.2s, border-color 0.2s',
+                      transform: isOpen ? 'rotate(45deg)' : 'none',
+                    }}>+</span>
                   </button>
                   {isOpen && (
-                    <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.85, paddingBottom: '24px', paddingRight: '32px' }}>
+                    <p style={{
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: '13px', color: '#666', lineHeight: 1.9,
+                      paddingBottom: '24px', paddingRight: '40px', fontWeight: 300,
+                    }}>
                       {a}
                     </p>
                   )}
@@ -140,17 +171,45 @@ export default function FAQPage() {
         ))}
 
         {/* Still need help */}
-        <div style={{ background: '#0e0e0e', padding: '48px 40px', textAlign: 'center', marginTop: '32px' }}>
-          <p style={{ fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', color: gold, marginBottom: '16px' }}>Still have a question?</p>
-          <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>Talk to a real person</h3>
-          <p style={{ fontSize: '13px', color: '#555', marginBottom: '28px' }}>Our team responds within 2 hours, Monday through Saturday.</p>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <a href="/contact" style={{ padding: '13px 28px', background: gold, color: '#000', textDecoration: 'none', fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-              Email Us
-            </a>
-            <a href="https://wa.me/923244577066" target="_blank" rel="noopener noreferrer" style={{ padding: '13px 28px', background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', textDecoration: 'none', fontSize: '11px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-              WhatsApp
-            </a>
+        <div style={{
+          background: DARK, padding: '56px 48px', textAlign: 'center', marginTop: '32px',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{
+            position: 'absolute', inset: 0, opacity: 0.03,
+            backgroundImage: 'linear-gradient(rgba(200,169,110,1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,1) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ width: '28px', height: '1px', background: GOLD, margin: '0 auto 24px' }} />
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '3px', textTransform: 'uppercase', color: GOLD, fontWeight: 600, marginBottom: '16px' }}>
+              Still have a question?
+            </p>
+            <h3 style={{
+              fontFamily: "'Cormorant', serif",
+              fontSize: '1.8rem', fontWeight: 600, fontStyle: 'italic',
+              color: '#fff', marginBottom: '12px',
+            }}>Talk to a Real Person</h3>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#555', marginBottom: '32px', fontWeight: 300 }}>
+              Our team responds within 2 hours, Monday through Saturday.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <a href="/contact" style={{
+                padding: '13px 32px', background: GOLD, color: '#fff',
+                textDecoration: 'none', fontFamily: "'Montserrat', sans-serif",
+                fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', cursor: 'pointer',
+              }}>
+                Email Us
+              </a>
+              <a href="https://wa.me/923244577066" target="_blank" rel="noopener noreferrer" style={{
+                padding: '13px 32px', background: 'transparent', color: '#fff',
+                border: '1px solid rgba(255,255,255,0.15)',
+                textDecoration: 'none', fontFamily: "'Montserrat', sans-serif",
+                fontSize: '10px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', cursor: 'pointer',
+              }}>
+                WhatsApp
+              </a>
+            </div>
           </div>
         </div>
       </section>

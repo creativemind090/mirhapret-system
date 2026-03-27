@@ -511,7 +511,7 @@ export default function Home() {
           <div className="brand-stats brand-stats-grid" style={{ flex: '0 0 44%', gap: '1px', background: 'rgba(200,169,110,0.08)' }}>
             {[
               { num: '300+', label: 'Products' },
-              { num: '10K+', label: 'Happy Customers' },
+              { num: '5K+', label: 'Happy Customers' },
               { num: '3', label: 'Collections' },
               { num: '2016', label: 'Established' },
             ].map((stat, i) => (

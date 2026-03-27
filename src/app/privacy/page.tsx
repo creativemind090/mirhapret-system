@@ -6,7 +6,9 @@ export const metadata = {
   description: 'How MirhaPret collects, uses, and protects your personal information.',
 };
 
-const gold = '#c8a96e';
+const GOLD = '#c8a96e';
+const DARK = '#080808';
+const CREAM = '#FAFAF8';
 
 const sections = [
   {
@@ -63,43 +65,78 @@ const sections = [
 
 export default function PrivacyPage() {
   return (
-    <div style={{ background: '#fff', color: '#000' }}>
+    <div style={{ background: CREAM, color: '#0a0a0a' }}>
       <SiteHeader />
 
-      <section style={{ background: '#0e0e0e', color: '#fff', padding: '80px 60px', minHeight: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-        <p style={{ fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase', color: gold, fontWeight: 600, marginBottom: '16px' }}>
-          Your Privacy Matters
-        </p>
-        <h1 style={{ fontSize: 'clamp(2.2rem, 4vw, 4rem)', fontWeight: 800, letterSpacing: '-2px', lineHeight: 1.05 }}>
-          Privacy Policy
-        </h1>
-        <p style={{ fontSize: '12px', color: '#555', marginTop: '16px' }}>Last updated: January 2026</p>
+      {/* ─── Hero ─── */}
+      <section style={{
+        background: DARK, color: '#fff',
+        padding: 'clamp(80px,10vw,120px) clamp(24px,6vw,80px) clamp(60px,8vw,96px)',
+        minHeight: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+        position: 'relative', overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.03,
+          backgroundImage: 'linear-gradient(rgba(200,169,110,1) 1px, transparent 1px), linear-gradient(90deg, rgba(200,169,110,1) 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }} />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '24px' }} />
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, fontWeight: 600, marginBottom: '16px' }}>
+            Your Privacy Matters
+          </p>
+          <h1 style={{
+            fontFamily: "'Cormorant', serif",
+            fontSize: 'clamp(2.8rem, 5.5vw, 5rem)',
+            fontWeight: 600, fontStyle: 'italic',
+            letterSpacing: '-1px', lineHeight: 1.05, color: '#fff', margin: '0 0 16px',
+          }}>
+            Privacy Policy
+          </h1>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#444', fontWeight: 300 }}>Last updated: January 2026</p>
+        </div>
       </section>
 
-      <section style={{ padding: '80px 60px' }}>
+      <section style={{ padding: 'clamp(60px,8vw,100px) clamp(24px,6vw,80px)', background: '#fff' }}>
 
-        <p style={{ fontSize: '16px', color: '#444', lineHeight: 1.9, marginBottom: '64px', fontWeight: 300 }}>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: '#888', lineHeight: 1.9, marginBottom: '64px', fontWeight: 300, maxWidth: '640px' }}>
           MirhaPret is committed to protecting your privacy. This policy explains what information we collect, how we use it, and the choices you have. We do not use confusing legal language. If anything is unclear, please contact us directly.
         </p>
 
         {sections.map(({ title, body }) => (
           <div key={title} style={{ marginBottom: '52px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-              <div style={{ width: '32px', height: '1px', background: gold, flexShrink: 0 }} />
-              <h2 style={{ fontSize: '13px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: gold }}>{title}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ width: '28px', height: '1px', background: GOLD, flexShrink: 0 }} />
+              <h2 style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: '9px', fontWeight: 700,
+                letterSpacing: '3px', textTransform: 'uppercase', color: GOLD, margin: 0,
+              }}>{title}</h2>
             </div>
             {body.map((para, i) => (
-              <p key={i} style={{ fontSize: '14px', color: '#444', lineHeight: 1.9, marginBottom: '12px', paddingLeft: '52px' }}>
+              <p key={i} style={{
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: '13px', color: '#666', lineHeight: 1.9,
+                marginBottom: '12px', paddingLeft: '44px', fontWeight: 300,
+              }}>
                 {para}
               </p>
             ))}
           </div>
         ))}
 
-        <div style={{ background: '#faf9f6', padding: '32px', borderLeft: `3px solid ${gold}`, marginTop: '32px' }}>
-          <p style={{ fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>Questions about this policy?</p>
-          <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.7 }}>
-            Contact our privacy team at <a href="mailto:privacy@mirhapret.com" style={{ color: '#000', fontWeight: 600 }}>privacy@mirhapret.com</a>. We respond to all enquiries within 5 business days.
+        <div style={{
+          background: CREAM, padding: '32px 40px',
+          borderLeft: `3px solid ${GOLD}`, marginTop: '32px',
+        }}>
+          <p style={{ fontFamily: "'Cormorant', serif", fontSize: '1.2rem', fontWeight: 600, fontStyle: 'italic', marginBottom: '10px', color: DARK }}>
+            Questions about this policy?
+          </p>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#777', lineHeight: 1.7, fontWeight: 300 }}>
+            Contact our privacy team at{' '}
+            <a href="mailto:privacy@mirhapret.com" style={{ color: DARK, fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: '3px' }}>
+              privacy@mirhapret.com
+            </a>. We respond to all enquiries within 5 business days.
           </p>
         </div>
       </section>
