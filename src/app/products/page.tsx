@@ -34,7 +34,7 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([{ id: 'all', name: 'All Products' }]);
   const [activePromotions, setActivePromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const sizes = ['S', 'M', 'L'];
 
   useEffect(() => {
     const fetchData = async () => {

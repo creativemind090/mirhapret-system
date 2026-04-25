@@ -230,7 +230,7 @@ export default function Home() {
 
       {/* ─── Announcement Bar ─────────────────────────────── */}
       <div style={{ background: DARK, color: '#fff', textAlign: 'center', padding: '11px 20px', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 500, fontFamily: "'Montserrat', sans-serif" }}>
-        Free Shipping above PKR 5,000
+        Nationwide delivery across Pakistan
         <span style={{ color: GOLD, margin: '0 16px', fontSize: '8px', verticalAlign: 'middle' }}>◆</span>
         New: Octa West 2026 Now Live
         <span style={{ color: GOLD, margin: '0 16px', fontSize: '8px', verticalAlign: 'middle' }}>◆</span>

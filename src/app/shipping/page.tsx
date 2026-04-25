@@ -46,7 +46,7 @@ export default function ShippingPage() {
       <section style={{ padding: 'clamp(60px,8vw,100px) clamp(24px,6vw,80px)', background: '#fff' }}>
 
         <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '14px', color: '#888', lineHeight: 1.9, marginBottom: '64px', fontWeight: 300, maxWidth: '640px' }}>
-          Every MirhaPret piece is carefully packed and dispatched with the same attention to detail that goes into making it. We partner with Pakistan's most reliable couriers to ensure your order arrives beautifully and on time.
+          Every MirhaPret piece is carefully packed and dispatched with the same attention to detail that goes into making it. We partner with Pakistan&apos;s most reliable couriers to ensure your order arrives beautifully and on time.
         </p>
 
         {/* Domestic */}
@@ -59,37 +59,13 @@ export default function ShippingPage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1px', background: '#ece8e3' }}>
             {[
-              { city: 'Lahore', time: '1 to 2 business days', rate: 'Free on orders above PKR 5,000' },
-              { city: 'Karachi', time: '2 to 3 business days', rate: 'Free on orders above PKR 5,000' },
-              { city: 'Islamabad', time: '2 to 3 business days', rate: 'Free on orders above PKR 5,000' },
-              { city: 'All Other Cities', time: '3 to 5 business days', rate: 'PKR 250 flat rate' },
+              { city: 'Lahore', time: '1 to 2 business days', rate: 'PKR 300 flat rate' },
+              { city: 'Karachi', time: '2 to 3 business days', rate: 'PKR 300 flat rate' },
+              { city: 'Islamabad', time: '2 to 3 business days', rate: 'PKR 300 flat rate' },
+              { city: 'All Other Cities', time: '3 to 5 business days', rate: 'PKR 300 flat rate' },
             ].map(({ city, time, rate }) => (
               <div key={city} style={{ background: CREAM, padding: '28px 24px' }}>
                 <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '10px', color: DARK }}>{city}</p>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#888', marginBottom: '8px', fontWeight: 300 }}>{time}</p>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: GOLD, fontWeight: 600 }}>{rate}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* International */}
-        <div style={{ marginBottom: '64px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-            <div style={{ width: '28px', height: '1px', background: GOLD }} />
-            <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '3px', textTransform: 'uppercase', color: GOLD, margin: 0 }}>
-              International Shipping
-            </h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1px', background: '#ece8e3' }}>
-            {[
-              { region: 'UAE & Gulf', time: '5 to 7 business days', rate: 'PKR 1,500' },
-              { region: 'United Kingdom', time: '7 to 10 business days', rate: 'PKR 2,500' },
-              { region: 'United States', time: '8 to 12 business days', rate: 'PKR 3,000' },
-              { region: 'Rest of World', time: '10 to 15 business days', rate: 'Calculated at checkout' },
-            ].map(({ region, time, rate }) => (
-              <div key={region} style={{ background: CREAM, padding: '28px 24px' }}>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '10px', color: DARK }}>{region}</p>
                 <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#888', marginBottom: '8px', fontWeight: 300 }}>{time}</p>
                 <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: GOLD, fontWeight: 600 }}>{rate}</p>
               </div>
@@ -117,11 +93,7 @@ export default function ShippingPage() {
               },
               {
                 title: 'Packaging',
-                body: 'Each piece is folded in tissue, placed in a signature MirhaPret box, and sealed with a wax stamp. Your order arrives as a gift, even to yourself.',
-              },
-              {
-                title: 'Customs and Duties',
-                body: 'International orders may be subject to import duties and taxes levied by the destination country. These charges are the responsibility of the recipient.',
+                body: 'Each piece is carefully folded, protected, and packed in MirhaPret packaging before dispatch.',
               },
             ].map(({ title, body }) => (
               <div key={title}>

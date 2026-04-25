@@ -20,10 +20,6 @@ const faqs = [
         q: 'Can I modify or cancel my order after placing it?',
         a: 'Orders can be modified or cancelled within 2 hours of placement. After this window, our fulfillment process begins and changes may not be possible. Reach out to us on WhatsApp for the fastest response.',
       },
-      {
-        q: 'Do you offer gift wrapping?',
-        a: 'Every MirhaPret order is dispatched in our signature branded packaging at no extra cost. For a fully personalised gift experience with a handwritten note, please mention it in the order notes at checkout.',
-      },
     ],
   },
   {
