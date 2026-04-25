@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCartContext } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
@@ -14,7 +15,7 @@ interface PageHeaderProps {
   isScrolled?: boolean;
 }
 
-export function PageHeader({ isScrolled = false }: PageHeaderProps) {
+export function PageHeader({ isScrolled: _isScrolled = true }: PageHeaderProps) {
   const router = useRouter();
   const { itemCount } = useCartContext();
   const { user, isLoggedIn, logout } = useAuth();
@@ -44,8 +45,9 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
           left: 0,
           right: 0,
           height: '60px',
-          background: isScrolled ? '#ffffff' : 'transparent',
-          borderBottom: isScrolled ? '1px solid #ece8e3' : 'none',
+          background: '#ffffff',
+          borderBottom: '1px solid #ece8e3',
+          boxShadow: _isScrolled ? '0 1px 0 rgba(236,232,227,0.45)' : '0 1px 0 rgba(236,232,227,0.45)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -56,9 +58,9 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
         }}
       >
         {/* Logo - Left */}
-        <a href="/" style={{ cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+        <Link href="/" style={{ cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
           <MirhaPretLogo height={46} color="black" />
-        </a>
+        </Link>
 
         {/* Hamburger - show on mobile */}
         <button className="nav-hamburger" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
@@ -67,11 +69,11 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
 
         {/* Nav Links - Center desktop only */}
         <div className="nav-links" style={{ gap: '36px' }}>
-          <a href="/" style={navLinkStyle}>Home</a>
-          <a href="/products" style={navLinkStyle}>Shop</a>
-          <a href="/blog" style={navLinkStyle}>Journal</a>
-          <a href="/about" style={navLinkStyle}>About</a>
-          <a href="/contact" style={navLinkStyle}>Contact</a>
+          <Link href="/" style={navLinkStyle}>Home</Link>
+          <Link href="/products" style={navLinkStyle}>Shop</Link>
+          <Link href="/blog" style={navLinkStyle}>Journal</Link>
+          <Link href="/about" style={navLinkStyle}>About</Link>
+          <Link href="/contact" style={navLinkStyle}>Contact</Link>
         </div>
 
         {/* Cart & Profile - Right */}
@@ -251,30 +253,30 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
       {/* Mobile nav overlay */}
       <div className={`mobile-nav-overlay${isMobileMenuOpen ? ' open' : ''}`}>
         <button className="mobile-nav-close" onClick={() => setIsMobileMenuOpen(false)}>×</button>
-        <a href="/" style={{ textDecoration: 'none', marginBottom: '32px', display: 'block' }}>
+        <Link href="/" style={{ textDecoration: 'none', marginBottom: '32px', display: 'block' }}>
           <MirhaPretLogo height={80} color="black" />
-        </a>
+        </Link>
         {['/', '/products', '/blog', '/about', '/contact'].map((href, i) => (
-          <a key={href} href={href} onClick={() => setIsMobileMenuOpen(false)}
+          <Link key={href} href={href} onClick={() => setIsMobileMenuOpen(false)}
             style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
             {['Home', 'Shop', 'Journal', 'About', 'Contact'][i]}
-          </a>
+          </Link>
         ))}
         <div style={{ marginTop: '32px', borderTop: '1px solid #f0ece8', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '0' }}>
           {isLoggedIn ? (
             <>
-              <a href="/my-profile" onClick={() => setIsMobileMenuOpen(false)}
-                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Profile</a>
-              <a href="/my-orders" onClick={() => setIsMobileMenuOpen(false)}
-                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Orders</a>
-              <a href="/my-wishlist" onClick={() => setIsMobileMenuOpen(false)}
-                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>Wishlist</a>
+              <Link href="/my-profile" onClick={() => setIsMobileMenuOpen(false)}
+                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Profile</Link>
+              <Link href="/my-orders" onClick={() => setIsMobileMenuOpen(false)}
+                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Orders</Link>
+              <Link href="/my-wishlist" onClick={() => setIsMobileMenuOpen(false)}
+                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>Wishlist</Link>
               <button className="nav-link-btn" onClick={() => { logout(); setIsMobileMenuOpen(false); router.push('/'); }}
                 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '1px', color: '#b03020' }}>Logout</button>
             </>
           ) : (
-            <a href="/signin" onClick={() => setIsMobileMenuOpen(false)}
-              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Sign In →</a>
+            <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}
+              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Sign In →</Link>
           )}
         </div>
       </div>

@@ -15,6 +15,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const GOLD = '#c8a96e';
 const DARK = '#080808';
 const CREAM = '#FAFAF8';
+const AVAILABLE_SIZES = ['S', 'M', 'L'];
 
 const fieldLabel: React.CSSProperties = {
   fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700,
@@ -58,15 +59,16 @@ export default function ProductDetailPage() {
           const res = await api.get(`/products/slug/${slug}`);
           p = res.data.data ?? res.data;
         }
+        const availableSizes = (p.available_sizes ?? []).filter((size: string) => AVAILABLE_SIZES.includes(size));
         setProduct({
           id: p.id, slug: p.slug, name: p.name,
           category: p.category?.name ?? '', price: Number(p.price),
           inStock: p.is_active, description: p.description ?? '',
-          sizes: p.available_sizes ?? [],
+          sizes: availableSizes,
           images: p.images?.length ? p.images : (p.main_image ? [p.main_image] : []),
           main_image: p.main_image, size_guide_html: p.size_guide_html ?? '', sku: p.sku,
         });
-        if (p.available_sizes?.length) setSelectedSize(p.available_sizes[0]);
+        if (availableSizes.length) setSelectedSize(availableSizes[0]);
         setIsInWishlist(getWishlistIds().includes(p.id));
         const sessionKey = `viewed_${p.id}`;
         if (!sessionStorage.getItem(sessionKey)) {
