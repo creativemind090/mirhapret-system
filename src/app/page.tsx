@@ -149,7 +149,7 @@ export default function Home() {
     const fetchHomeData = async () => {
       setProductsLoading(true);
       const [prodsRes, catsRes, promoRes] = await Promise.allSettled([
-        api.get('/products?is_active=true&sort_by=view_ratio&take=8').catch(() => api.get('/products?is_active=true&take=8')),
+        api.get('/products?is_active=true&sort_by=view_ratio&take=12').catch(() => api.get('/products?is_active=true&take=12')),
         api.get('/categories'),
         api.get('/promotions/active'),
       ]);
@@ -174,6 +174,19 @@ export default function Home() {
     if (!item?.created_at) return false;
     return Date.now() - new Date(item.created_at).getTime() < 3 * 24 * 60 * 60 * 1000;
   };
+
+  // Returns the first product image matching a category — used for category tiles
+  const getCategoryImage = (catId: any): string | null => {
+    const match = featuredProducts.find(
+      (p: any) => String(p.category_id) === String(catId) || String(p.category?.id) === String(catId)
+    );
+    return match?.main_image ?? null;
+  };
+
+  // Hero product: prefer "Perk 2PC" by name, else first featured product
+  const heroProduct = featuredProducts.find(
+    (p: any) => p.name?.toLowerCase().includes('perk')
+  ) ?? featuredProducts[0] ?? null;
 
   const heroSlides = [
     { tag: 'New Season · 2026', title: 'Dressed to\nBe Remembered', subtitle: 'Premium Pret & Haute Couture for the modern Pakistani woman.', cta: 'Shop Collection', ctaLink: '/products' },
@@ -240,6 +253,135 @@ export default function Home() {
       {/* ─── Header ───────────────────────────────────────── */}
       <PageHeader isScrolled={isScrolled} />
 
+      {/* ═══ MOBILE HOMEPAGE (hidden on desktop) ═══════════ */}
+
+      {/* Hero */}
+      <section className="m-hero">
+        <div
+          className="m-hero-inner"
+          style={heroProduct?.main_image ? { backgroundImage: `url(${heroProduct.main_image})` } : undefined}
+        >
+          <div className="m-hero-overlay" />
+          <div className="m-hero-body">
+            <p className="m-hero-eyebrow">New Season · 2026</p>
+            <h1 className="m-hero-title">
+              {heroProduct?.name ? heroProduct.name.split(' - ')[0] : 'New Collection'}
+            </h1>
+            {heroProduct?.price && (
+              <p className="m-hero-price">PKR {Number(heroProduct.price).toLocaleString()}</p>
+            )}
+            <a
+              href={heroProduct ? `/products/${heroProduct.slug || heroProduct.id}` : '/products'}
+              className="m-hero-btn"
+            >
+              Shop Now
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Category pills */}
+      <div className="m-pills">
+        <a href="/products" className="m-pill m-pill-active">All</a>
+        {(apiCategories.length > 0 ? apiCategories : [
+          { id: 'pret', name: 'Premium Pret' },
+          { id: 'octa-west', name: 'Octa West' },
+          { id: 'desire', name: 'Desire Edit' },
+        ]).slice(0, 4).map((cat: any) => (
+          <a key={cat.id} href={`/products?category=${cat.id}`} className="m-pill">{cat.name}</a>
+        ))}
+      </div>
+
+      {/* Shop by Collection tiles */}
+      {collections.length > 0 && (
+        <section className="m-collections">
+          <div className="m-section-hd">
+            <span className="m-section-title">Shop by Collection</span>
+            <a href="/products" className="m-section-link">See all →</a>
+          </div>
+          <div className="m-coll-grid">
+            {collections.slice(0, 3).map((col: any, idx: number) => {
+              const tileImg = col.image_url || getCategoryImage(col.id);
+              return (
+                <a key={idx} href={`/products?category=${col.id}`} className="m-coll-tile"
+                  style={tileImg ? { backgroundImage: `url(${tileImg})` } : undefined}>
+                  <div className="m-coll-overlay" />
+                  <div className="m-coll-body">
+                    <p className="m-coll-name">{col.name}</p>
+                    <span className="m-coll-btn">Shop →</span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Featured Products — 12 items in 2-column grid */}
+      <section className="m-products">
+        <div className="m-section-hd">
+          <span className="m-section-title">Featured Products</span>
+          <a href="/products" className="m-section-link">See all →</a>
+        </div>
+        <div className="m-grid">
+          {(productsLoading ? Array.from({ length: 4 }) : featuredProducts.slice(0, 12)).map((item: any, idx: number) => {
+            if (!item) return (
+              <div key={idx} className="m-skel">
+                <div className="m-skel-img" /><div className="m-skel-line" /><div className="m-skel-line m-skel-sm" />
+              </div>
+            );
+            const disc = getHomeDiscount(item);
+            const origPrice = Number(item.price);
+            const salePrice = disc > 0 ? Math.round(origPrice * (1 - disc / 100)) : origPrice;
+            const saveAmount = disc > 0 ? origPrice - salePrice : 0;
+            const sizes: string[] = item.available_sizes ?? item.sizes ?? [];
+            return (
+              <a key={item.id} href={`/products/${item.slug || item.id}`} className="m-card">
+                <div className="m-card-img">
+                  {item.main_image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={item.main_image} alt={item.name} />
+                    : <div className="m-card-fallback"><span>{item.name?.slice(0, 2).toUpperCase()}</span></div>
+                  }
+                  {disc > 0 && <span className="m-disc-badge">-{disc}%</span>}
+                  {isNewProduct(item) && !disc && <span className="m-new-badge">NEW</span>}
+                </div>
+                <div className="m-card-info">
+                  <p className="m-card-name">{item.name}</p>
+                  {disc > 0 ? (
+                    <>
+                      <p className="m-price-sale">PKR {salePrice.toLocaleString()}</p>
+                      <p className="m-price-was">PKR {origPrice.toLocaleString()}</p>
+                      <p className="m-price-save">Save PKR {saveAmount.toLocaleString()}</p>
+                    </>
+                  ) : (
+                    <p className="m-price-regular">PKR {origPrice.toLocaleString()}</p>
+                  )}
+                  {sizes.length > 0 && (
+                    <div className="m-sizes">
+                      {sizes.slice(0, 4).map((s: string) => (
+                        <span key={s} className="m-size-chip">{s}</span>
+                      ))}
+                      {sizes.length > 4 && <span className="m-size-chip m-size-more">+{sizes.length - 4}</span>}
+                    </div>
+                  )}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+        <a href="/products" className="m-view-all">View All Products</a>
+      </section>
+
+      {/* Trust badges */}
+      <div className="m-trust">
+        <div className="m-trust-item"><span className="m-trust-icon">↺</span><span>7-Day Exchange</span></div>
+        <div className="m-trust-item"><span className="m-trust-icon">✓</span><span>100% Authentic</span></div>
+        <div className="m-trust-item"><span className="m-trust-icon">🚚</span><span>Nationwide Delivery</span></div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════════ */}
+
       {/* ─── Hero ─────────────────────────────────────────── */}
       <section className="hero-section">
         {heroSlides.map((slide, idx) => (
@@ -303,6 +445,7 @@ export default function Home() {
         ))}
       </section>
 
+
       {/* ─── USP Strip ────────────────────────────────────── */}
       <section className="usp-strip" style={{ borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', background: '#FAFAF8' }}>
         <div className="usp-grid">
@@ -324,7 +467,7 @@ export default function Home() {
       </section>
 
       {/* ─── Marquee Strip ────────────────────────────────── */}
-      <div style={{ background: DARK, overflow: 'hidden', padding: '16px 0', borderBottom: `1px solid rgba(200,169,110,0.12)` }}>
+      <div className="marquee-section" style={{ background: DARK, overflow: 'hidden', padding: '16px 0', borderBottom: `1px solid rgba(200,169,110,0.12)` }}>
         <div className="marquee-track" style={{ display: 'flex', whiteSpace: 'nowrap', animation: 'marquee 24s linear infinite' }}>
           {[...Array(2)].map((_, r) => (
             <div key={r} style={{ display: 'flex', flexShrink: 0 }}>
@@ -340,7 +483,7 @@ export default function Home() {
       </div>
 
       {/* ─── Collections ──────────────────────────────────── */}
-      <section className="home-section">
+      <section className="home-section desktop-collections-section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <p style={label()}>Shop By Collection</p>
