@@ -123,7 +123,7 @@ export default function ProductsPage() {
         }} />
         <div style={{ zIndex: 1 }}>
           <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, marginBottom: '10px', fontWeight: 600 }}>MirhaPret</p>
-          <h1 style={{ fontFamily: "'Cormorant', serif", fontSize: 'clamp(2.4rem,5vw,4.2rem)', fontWeight: 600, fontStyle: 'italic', letterSpacing: '-1px', color: '#fff', lineHeight: 1 }}>
+          <h1 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 'clamp(2.4rem,5vw,4.2rem)', fontWeight: 600, letterSpacing: '-1px', color: '#fff', lineHeight: 1 }}>
             {pageTitle}
           </h1>
         </div>
@@ -224,7 +224,7 @@ export default function ProductsPage() {
             <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#aaa', letterSpacing: '1px', fontWeight: 300 }}>
               {loading ? 'Loading…' : `${filteredProducts.length} result${filteredProducts.length !== 1 ? 's' : ''}`}
             </p>
-            <button onClick={() => setShowFilters(!showFilters)}
+            <button className="products-filter-toggle" onClick={() => setShowFilters(!showFilters)}
               style={{ padding: '9px 18px', background: 'transparent', color: DARK, border: `1px solid #e0dcd8`, fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', transition: 'border-color 0.2s' }}>
               {showFilters ? 'Hide Filters' : 'Show Filters'}
             </button>
@@ -233,7 +233,7 @@ export default function ProductsPage() {
           {!loading && filteredProducts.length === 0 && (
             <div style={{ textAlign: 'center', padding: '80px 20px' }}>
               <div style={{ width: '1px', height: '48px', background: GOLD, margin: '0 auto 28px' }} />
-              <p style={{ fontFamily: "'Cormorant', serif", fontSize: '1.3rem', fontStyle: 'italic', color: '#888', marginBottom: '28px' }}>No pieces found</p>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.3rem', color: '#888', marginBottom: '28px' }}>No pieces found</p>
               <button onClick={() => { setSearchQuery(''); setPriceRange([0, 50000]); setSelectedSizes([]); setSelectedCategory('all'); }}
                 style={{ padding: '12px 32px', background: DARK, color: '#fff', border: 'none', fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', cursor: 'pointer' }}>
                 Clear All Filters
@@ -262,7 +262,7 @@ export default function ProductsPage() {
                         style={{ objectFit: 'cover', transform: isHovered ? 'scale(1.06)' : 'scale(1)', transition: 'transform 0.5s ease' }} />
                     ) : (
                       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: isHovered ? '#e8e4e0' : '#ede9e4', transition: 'background 0.3s' }}>
-                        <span style={{ fontFamily: "'Cormorant', serif", fontSize: '2rem', fontWeight: 600, fontStyle: 'italic', color: '#ccc' }}>{product.name.slice(0, 2).toUpperCase()}</span>
+                        <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '2rem', fontWeight: 600, color: '#ccc' }}>{product.name.slice(0, 2).toUpperCase()}</span>
                         <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '8px', color: '#bbb', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '6px' }}>MirhaPret</span>
                       </div>
                     )}
@@ -289,12 +289,13 @@ export default function ProductsPage() {
 
                     {/* Wishlist */}
                     <button
+                      className="product-wishlist-btn"
                       onClick={e => { e.stopPropagation(); setWishlist(prev => prev.includes(product.id) ? prev.filter(id => id !== product.id) : [...prev, product.id]); }}
                       style={{
                         position: 'absolute', top: '10px', right: '10px',
-                        width: '32px', height: '32px', background: '#fff', border: 'none',
+                        width: '36px', height: '36px', background: '#fff', border: 'none',
                         cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '14px', opacity: isHovered || wishlist.includes(product.id) ? 1 : 0,
+                        fontSize: '16px', opacity: isHovered || wishlist.includes(product.id) ? 1 : 0,
                         transition: 'opacity 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                         color: wishlist.includes(product.id) ? GOLD : '#555',
                       }}>
@@ -310,7 +311,7 @@ export default function ProductsPage() {
 
                   {/* Info */}
                   <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', letterSpacing: '2px', textTransform: 'uppercase', color: '#bbb', marginBottom: '5px', fontWeight: 600 }}>{product.category || 'MirhaPret'}</p>
-                  <h4 style={{ fontFamily: "'Cormorant', serif", fontSize: '15px', fontWeight: 600, fontStyle: 'italic', color: '#0a0a0a', marginBottom: '5px', lineHeight: 1.3 }}>{product.name}</h4>
+                  <h4 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '15px', fontWeight: 600, color: '#0a0a0a', marginBottom: '5px', lineHeight: 1.3 }}>{product.name}</h4>
                   {product.sizes.length > 0 && (
                     <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#ccc', marginBottom: '8px', letterSpacing: '0.5px' }}>
                       {product.sizes.slice(0, 4).join(' · ')}{product.sizes.length > 4 ? ' +more' : ''}

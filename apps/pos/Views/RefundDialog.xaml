@@ -1,0 +1,165 @@
+<Window x:Class="pos.Views.RefundDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Process Refund"
+        Height="360"
+        Width="440"
+        Background="Transparent"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True">
+    <Window.Resources>
+        <Style x:Key="DialogInput" TargetType="TextBox">
+            <Setter Property="Background" Value="#f9f8f6"/>
+            <Setter Property="Foreground" Value="#111111"/>
+            <Setter Property="BorderBrush" Value="#eae8e3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="AcceptsReturn" Value="True"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#c8a96e"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="1.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border Background="#ffffff" CornerRadius="12" BorderBrush="#eae8e3" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="4" Opacity="0.14"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#111111" CornerRadius="12,12,0,0" Padding="20,16">
+                <Grid>
+                    <StackPanel>
+                        <TextBlock Text="Process Refund" Foreground="#ffffff"
+                                   FontSize="15" FontWeight="SemiBold" FontFamily="Segoe UI"/>
+                        <TextBlock Text="{Binding Order.OrderNumber, StringFormat='Order #{0}'}"
+                                   Foreground="#888888" FontSize="11" FontFamily="Segoe UI" Margin="0,3,0,0"/>
+                    </StackPanel>
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Width="4" Height="28" CornerRadius="2" Background="#e74c3c"/>
+                </Grid>
+            </Border>
+
+            <!-- Body -->
+            <StackPanel Grid.Row="1" Margin="24,20,24,8">
+                <!-- Order summary -->
+                <Border Background="#faf7f0" CornerRadius="7" Padding="14,10" Margin="0,0,0,16">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Customer" Foreground="#888888" FontSize="10" FontFamily="Segoe UI"/>
+                            <TextBlock Text="{Binding Order.CustomerName}" Foreground="#111111"
+                                       FontSize="13" FontWeight="SemiBold" FontFamily="Segoe UI"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                            <TextBlock Text="Total" Foreground="#888888" FontSize="10"
+                                       FontFamily="Segoe UI" HorizontalAlignment="Right"/>
+                            <TextBlock Text="{Binding Order.Total, StringFormat='PKR {0:N0}'}"
+                                       Foreground="#c8a96e" FontSize="13" FontWeight="Bold"
+                                       FontFamily="Segoe UI" HorizontalAlignment="Right"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Reason -->
+                <TextBlock Text="Refund Reason" Foreground="#555555"
+                           FontSize="12" FontWeight="SemiBold" FontFamily="Segoe UI"
+                           Margin="0,0,0,6"/>
+                <TextBox Style="{StaticResource DialogInput}"
+                         Height="72"
+                         Text="{Binding RefundReason, UpdateSourceTrigger=PropertyChanged}"
+                         VerticalContentAlignment="Top"/>
+            </StackPanel>
+
+            <!-- Footer -->
+            <Border Grid.Row="2" Padding="24,12,24,20" BorderBrush="#eae8e3" BorderThickness="0,1,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="Cancel"
+                            Background="#f5f4f0" Foreground="#666666"
+                            BorderBrush="#eae8e3" BorderThickness="1"
+                            FontSize="13" FontWeight="SemiBold"
+                            Padding="0,12" Cursor="Hand"
+                            Command="{Binding CancelCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#eae8e3"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Grid.Column="2" Content="Confirm Refund"
+                            Background="#e74c3c" Foreground="#ffffff"
+                            BorderBrush="#e74c3c" BorderThickness="1"
+                            FontSize="13" FontWeight="Bold"
+                            Padding="0,12" Cursor="Hand"
+                            Command="{Binding ConfirmCommand}">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="Background" Value="#c0392b"/>
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="#c0392b"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter TargetName="Bd" Property="Opacity" Value="0.5"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

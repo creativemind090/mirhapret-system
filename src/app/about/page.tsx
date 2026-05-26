@@ -44,7 +44,7 @@ export default function AboutPage() {
         {/* Watermark */}
         <div style={{
           position: 'absolute', bottom: '-40px', right: '-20px',
-          fontFamily: "'Cormorant', serif", fontSize: '20vw', fontWeight: 700,
+          fontFamily: "'Montserrat', sans-serif", fontSize: '20vw', fontWeight: 700,
           color: 'rgba(255,255,255,0.02)', lineHeight: 1, userSelect: 'none', letterSpacing: '-4px',
         }}>MP</div>
 
@@ -54,9 +54,9 @@ export default function AboutPage() {
             Est. 2016
           </p>
           <h1 style={{
-            fontFamily: "'Cormorant', serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: 'clamp(2.8rem, 5.5vw, 5rem)',
-            fontWeight: 600, fontStyle: 'italic',
+            fontWeight: 600,
             letterSpacing: '-1px', lineHeight: 1.05, color: '#fff', margin: 0,
           }}>
             Our Story
@@ -86,9 +86,9 @@ export default function AboutPage() {
               Why We Exist
             </p>
             <h2 style={{
-              fontFamily: "'Cormorant', serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: 'clamp(1.8rem, 3vw, 2.8rem)',
-              fontWeight: 600, fontStyle: 'italic',
+              fontWeight: 600,
               letterSpacing: '-0.5px', marginBottom: '28px', lineHeight: 1.15,
               color: DARK,
             }}>
@@ -102,21 +102,16 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Stats grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: '#ece8e3' }}>
             {[
-              { num: '500+', label: 'Unique Pieces' },
-              { num: '5K+', label: 'Happy Customers' },
-              { num: '3', label: 'Collections' },
-              { num: '2016', label: 'Est.' },
-            ].map((s, i) => (
+              { heading: 'Craftsmanship First', body: 'Every piece is thoughtfully designed and quality-checked before it reaches you.' },
+              { heading: 'Pakistani Heritage', body: 'Rooted in the textile traditions of Pakistan, made for the modern woman.' },
+              { heading: 'Nationwide Delivery', body: 'We deliver to every city across Pakistan with Cash on Delivery.' },
+              { heading: 'Honest Pricing', body: 'Luxury quality without the unnecessary markup — always.' },
+            ].map(({ heading, body }, i) => (
               <div key={i} style={{ background: CREAM, padding: '40px 32px' }}>
-                <p style={{
-                  fontFamily: "'Cormorant', serif",
-                  fontSize: '2.8rem', fontWeight: 600, fontStyle: 'italic',
-                  color: DARK, letterSpacing: '-1px', marginBottom: '8px', lineHeight: 1,
-                }}>{s.num}</p>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', color: '#aaa', letterSpacing: '2.5px', textTransform: 'uppercase', fontWeight: 600 }}>{s.label}</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', color: GOLD, marginBottom: '10px' }}>{heading}</p>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#888', lineHeight: 1.8, fontWeight: 300 }}>{body}</p>
               </div>
             ))}
           </div>
@@ -134,9 +129,9 @@ export default function AboutPage() {
             What We Stand For
           </p>
           <h2 style={{
-            fontFamily: "'Cormorant', serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: 'clamp(1.8rem, 3vw, 2.5rem)',
-            fontWeight: 600, fontStyle: 'italic',
+            fontWeight: 600,
             letterSpacing: '-0.5px', color: DARK, margin: 0,
           }}>
             Our Core Values
@@ -160,8 +155,8 @@ export default function AboutPage() {
             <div key={i} style={{ background: '#fff', padding: '48px 40px', border: '1px solid #ece8e3' }}>
               <div style={{ width: '28px', height: '1px', background: GOLD, marginBottom: '28px' }} />
               <h3 style={{
-                fontFamily: "'Cormorant', serif",
-                fontSize: '1.4rem', fontWeight: 600, fontStyle: 'italic',
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: '1.4rem', fontWeight: 600,
                 letterSpacing: '-0.3px', marginBottom: '18px', color: DARK,
               }}>{v.title}</h3>
               <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#777', lineHeight: 1.85, fontWeight: 300 }}>{v.text}</p>
@@ -181,9 +176,9 @@ export default function AboutPage() {
             <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '20px' }} />
             <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, fontWeight: 600, marginBottom: '10px' }}>Our Lines</p>
             <h2 style={{
-              fontFamily: "'Cormorant', serif",
+              fontFamily: "'Montserrat', sans-serif",
               fontSize: 'clamp(1.8rem, 3vw, 2.5rem)',
-              fontWeight: 600, fontStyle: 'italic',
+              fontWeight: 600,
               letterSpacing: '-0.5px', color: DARK, margin: 0,
             }}>The Collections</h2>
           </div>
@@ -218,14 +213,14 @@ export default function AboutPage() {
               }} />
               <span style={{
                 position: 'absolute', top: '28px', left: '36px',
-                fontFamily: "'Cormorant', serif",
+                fontFamily: "'Montserrat', sans-serif",
                 fontSize: '11px', letterSpacing: '4px', color: GOLD, fontWeight: 600,
               }}>{col.num}</span>
               <div style={{ position: 'relative', zIndex: 1 }}>
                 <div style={{ width: '24px', height: '1px', background: GOLD, marginBottom: '16px' }} />
                 <h3 style={{
-                  fontFamily: "'Cormorant', serif",
-                  fontSize: '1.5rem', fontWeight: 600, fontStyle: 'italic',
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontSize: '1.5rem', fontWeight: 600,
                   color: '#fff', marginBottom: '12px', letterSpacing: '-0.3px',
                 }}>{col.name}</h3>
                 <p style={{
@@ -262,9 +257,9 @@ export default function AboutPage() {
             Join the Family
           </p>
           <h2 style={{
-            fontFamily: "'Cormorant', serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: 'clamp(1.8rem, 3.5vw, 3rem)',
-            fontWeight: 600, fontStyle: 'italic',
+            fontWeight: 600,
             color: '#fff', letterSpacing: '-0.5px', marginBottom: '36px', lineHeight: 1.1,
           }}>
             Discover Your Next<br />Favourite Piece
