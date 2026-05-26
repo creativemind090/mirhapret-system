@@ -483,7 +483,7 @@ export default function Home() {
       </div>
 
       {/* ─── Collections ──────────────────────────────────── */}
-      <section className="home-section">
+      <section className="home-section desktop-collections-section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '48px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <p style={label()}>Shop By Collection</p>

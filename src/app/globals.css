@@ -801,6 +801,7 @@ img {
   /* ── Hide heavy desktop-only sections on mobile ──────── */
   .marquee-section { display: none !important; }
   .usp-strip { display: none !important; }
+  .desktop-collections-section { display: none !important; }
 
   /* ── Compress desktop sections that still show ────────── */
   .collections-grid { grid-template-columns: 1fr; height: auto; gap: 8px; }
