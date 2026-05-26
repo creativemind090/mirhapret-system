@@ -510,6 +510,32 @@ export default function ProductDetailPage() {
       </section>
 
       <SiteFooter />
+
+      {/* ─── Mobile Sticky Add-to-Cart ─── */}
+      {product.inStock && (
+        <div className="mobile-sticky-atc">
+          {product.sizes.length > 0 && (
+            <select
+              value={selectedSize}
+              onChange={e => setSelectedSize(e.target.value)}
+              className="mobile-atc-size"
+              aria-label="Select size"
+            >
+              <option value="">Size</option>
+              {product.sizes.map((s: string) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          )}
+          <button
+            className="mobile-atc-btn"
+            onClick={handleAddToCart}
+            style={{ background: addedToCart ? '#1a7a4a' : GOLD }}
+          >
+            {addedToCart ? '✓ Added to Cart' : 'Add to Cart'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

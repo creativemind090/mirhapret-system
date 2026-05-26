@@ -82,7 +82,7 @@ export default function SignInPage() {
         {/* Giant watermark */}
         <div style={{
           position: 'absolute', bottom: '-60px', right: '-30px',
-          fontFamily: "'Cormorant', serif", fontSize: '22vw', fontWeight: 700,
+          fontFamily: "'Montserrat', sans-serif", fontSize: '22vw', fontWeight: 700,
           color: 'rgba(255,255,255,0.025)', lineHeight: 1,
           userSelect: 'none', letterSpacing: '-4px',
         }}>MP</div>
@@ -95,7 +95,7 @@ export default function SignInPage() {
         }} />
 
         <a href="/" style={{
-          fontFamily: "'Cormorant', serif", fontSize: '26px', fontWeight: 700,
+          fontFamily: "'Montserrat', sans-serif", fontSize: '26px', fontWeight: 700,
           letterSpacing: '3px', color: '#fff', textDecoration: 'none',
           textTransform: 'uppercase', zIndex: 1,
         }}>MirhaPret</a>
@@ -103,9 +103,9 @@ export default function SignInPage() {
         <div style={{ zIndex: 1 }}>
           <div style={{ width: '48px', height: '1px', background: GOLD, marginBottom: '32px' }} />
           <h2 style={{
-            fontFamily: "'Cormorant', serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: 'clamp(2rem, 2.8vw, 3.2rem)',
-            fontWeight: 600, fontStyle: 'italic',
+            fontWeight: 600,
             color: '#fff', lineHeight: 1.15, marginBottom: '20px', letterSpacing: '-0.5px',
           }}>
             Dressed to<br />Be Remembered.
@@ -113,11 +113,11 @@ export default function SignInPage() {
           <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#666', lineHeight: 1.9, maxWidth: '300px', fontWeight: 300 }}>
             Sign in to access your orders, wishlist, and exclusive member offers.
           </p>
-          <div style={{ display: 'flex', gap: '32px', marginTop: '36px' }}>
-            {[{ num: '5K+', label: 'Customers' }, { num: '500+', label: 'Pieces' }, { num: '3', label: 'Collections' }].map((s, i) => (
-              <div key={i}>
-                <p style={{ fontFamily: "'Cormorant', serif", fontSize: '2rem', fontWeight: 600, fontStyle: 'italic', color: GOLD, lineHeight: 1 }}>{s.num}</p>
-                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', color: '#555', letterSpacing: '2px', textTransform: 'uppercase', marginTop: '4px' }}>{s.label}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '36px' }}>
+            {['Exclusive access to new arrivals', 'Track orders & manage returns', 'Save favourites to your wishlist'].map((benefit, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '4px', height: '4px', background: GOLD, borderRadius: '50%', flexShrink: 0 }} />
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#666', fontWeight: 300 }}>{benefit}</p>
               </div>
             ))}
           </div>
@@ -136,8 +136,8 @@ export default function SignInPage() {
             Welcome Back
           </p>
           <h1 style={{
-            fontFamily: "'Cormorant', serif", fontSize: 'clamp(2rem, 3vw, 2.8rem)',
-            fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.5px',
+            fontFamily: "'Montserrat', sans-serif", fontSize: 'clamp(2rem, 3vw, 2.8rem)',
+            fontWeight: 600, letterSpacing: '-0.5px',
             color: '#0a0a0a', marginBottom: '8px', lineHeight: 1.1,
           }}>
             Sign In

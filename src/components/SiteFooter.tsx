@@ -23,8 +23,7 @@ export function SiteFooter() {
   const companyLinks: [string, string][] = [
     ['About Us', '/about'],
     ['Our Story', '/our-story'],
-    ['Careers', '/careers'],
-    ['Instagram', 'https://instagram.com/mirhapret'],
+    ['Instagram', 'https://www.instagram.com/mirhapret_official'],
     ['WhatsApp', 'https://wa.me/923244577066'],
   ];
 
@@ -55,8 +54,8 @@ export function SiteFooter() {
             <div style={{ width: '28px', height: '1px', background: GOLD, marginBottom: '20px' }} />
             <a href="/" style={{ textDecoration: 'none' }}>
               <h4 style={{
-                fontFamily: "'Cormorant', serif",
-                fontSize: '1.5rem', fontWeight: 600, fontStyle: 'italic',
+                fontFamily: "'Montserrat', sans-serif",
+                fontSize: '1.5rem', fontWeight: 600,
                 letterSpacing: '1px', color: '#fff', marginBottom: '16px',
               }}>
                 MirhaPret

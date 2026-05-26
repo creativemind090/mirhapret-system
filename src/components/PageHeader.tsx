@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useCartContext } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { CartSidebar } from './CartSidebar';
@@ -14,8 +15,9 @@ interface PageHeaderProps {
   isScrolled?: boolean;
 }
 
-export function PageHeader({ isScrolled = false }: PageHeaderProps) {
+export function PageHeader({ isScrolled: _isScrolled = true }: PageHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { itemCount } = useCartContext();
   const { user, isLoggedIn, logout } = useAuth();
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -44,8 +46,9 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
           left: 0,
           right: 0,
           height: '60px',
-          background: isScrolled ? '#ffffff' : 'transparent',
-          borderBottom: isScrolled ? '1px solid #ece8e3' : 'none',
+          background: '#ffffff',
+          borderBottom: '1px solid #ece8e3',
+          boxShadow: _isScrolled ? '0 1px 0 rgba(236,232,227,0.45)' : '0 1px 0 rgba(236,232,227,0.45)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -56,9 +59,9 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
         }}
       >
         {/* Logo - Left */}
-        <a href="/" style={{ cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+        <Link href="/" style={{ cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
           <MirhaPretLogo height={46} color="black" />
-        </a>
+        </Link>
 
         {/* Hamburger - show on mobile */}
         <button className="nav-hamburger" onClick={() => setIsMobileMenuOpen(true)} aria-label="Open menu">
@@ -67,11 +70,11 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
 
         {/* Nav Links - Center desktop only */}
         <div className="nav-links" style={{ gap: '36px' }}>
-          <a href="/" style={navLinkStyle}>Home</a>
-          <a href="/products" style={navLinkStyle}>Shop</a>
-          <a href="/blog" style={navLinkStyle}>Journal</a>
-          <a href="/about" style={navLinkStyle}>About</a>
-          <a href="/contact" style={navLinkStyle}>Contact</a>
+          <Link href="/" style={navLinkStyle}>Home</Link>
+          <Link href="/products" style={navLinkStyle}>Shop</Link>
+          <Link href="/blog" style={navLinkStyle}>Journal</Link>
+          <Link href="/about" style={navLinkStyle}>About</Link>
+          <Link href="/contact" style={navLinkStyle}>Contact</Link>
         </div>
 
         {/* Cart & Profile - Right */}
@@ -251,33 +254,98 @@ export function PageHeader({ isScrolled = false }: PageHeaderProps) {
       {/* Mobile nav overlay */}
       <div className={`mobile-nav-overlay${isMobileMenuOpen ? ' open' : ''}`}>
         <button className="mobile-nav-close" onClick={() => setIsMobileMenuOpen(false)}>×</button>
-        <a href="/" style={{ textDecoration: 'none', marginBottom: '32px', display: 'block' }}>
+        <Link href="/" style={{ textDecoration: 'none', marginBottom: '32px', display: 'block' }}>
           <MirhaPretLogo height={80} color="black" />
-        </a>
+        </Link>
         {['/', '/products', '/blog', '/about', '/contact'].map((href, i) => (
-          <a key={href} href={href} onClick={() => setIsMobileMenuOpen(false)}
+          <Link key={href} href={href} onClick={() => setIsMobileMenuOpen(false)}
             style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
             {['Home', 'Shop', 'Journal', 'About', 'Contact'][i]}
-          </a>
+          </Link>
         ))}
         <div style={{ marginTop: '32px', borderTop: '1px solid #f0ece8', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '0' }}>
           {isLoggedIn ? (
             <>
-              <a href="/my-profile" onClick={() => setIsMobileMenuOpen(false)}
-                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Profile</a>
-              <a href="/my-orders" onClick={() => setIsMobileMenuOpen(false)}
-                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Orders</a>
-              <a href="/my-wishlist" onClick={() => setIsMobileMenuOpen(false)}
-                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>Wishlist</a>
+              <Link href="/my-profile" onClick={() => setIsMobileMenuOpen(false)}
+                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Profile</Link>
+              <Link href="/my-orders" onClick={() => setIsMobileMenuOpen(false)}
+                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>My Orders</Link>
+              <Link href="/my-wishlist" onClick={() => setIsMobileMenuOpen(false)}
+                style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 500, letterSpacing: '1px' }}>Wishlist</Link>
               <button className="nav-link-btn" onClick={() => { logout(); setIsMobileMenuOpen(false); router.push('/'); }}
                 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '1px', color: '#b03020' }}>Logout</button>
             </>
           ) : (
-            <a href="/signin" onClick={() => setIsMobileMenuOpen(false)}
-              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Sign In →</a>
+            <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}
+              style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase' }}>Sign In →</Link>
           )}
         </div>
       </div>
+
+      {/* ─── Mobile Bottom Navigation ─── */}
+      <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
+
+        {/* Home */}
+        <Link href="/" className={`mbn-item${pathname === '/' ? ' mbn-active' : ''}`}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+            <path d="M9 22V12h6v10" />
+          </svg>
+          <span>Home</span>
+        </Link>
+
+        {/* Shop */}
+        <Link href="/products" className={`mbn-item${pathname.startsWith('/products') ? ' mbn-active' : ''}`}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span>Shop</span>
+        </Link>
+
+        {/* Wishlist */}
+        <Link href="/my-wishlist" className={`mbn-item${pathname === '/my-wishlist' ? ' mbn-active' : ''}`}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+          <span>Wishlist</span>
+        </Link>
+
+        {/* Cart */}
+        <button
+          onClick={() => setIsCartOpen(true)}
+          className="mbn-item"
+          aria-label="Open cart"
+          style={{ background: 'none', border: 'none' }}
+        >
+          <span style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            {itemCount > 0 && (
+              <span className="mbn-badge">{itemCount > 9 ? '9+' : itemCount}</span>
+            )}
+          </span>
+          <span>Cart</span>
+        </button>
+
+        {/* Profile */}
+        <Link
+          href={isLoggedIn ? '/my-profile' : '/signin'}
+          className={`mbn-item${pathname === '/my-profile' || pathname === '/signin' ? ' mbn-active' : ''}`}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <span>{isLoggedIn ? (user?.first_name?.split(' ')[0] || 'Me') : 'Sign In'}</span>
+        </Link>
+
+      </nav>
     </>
   );
 }
+

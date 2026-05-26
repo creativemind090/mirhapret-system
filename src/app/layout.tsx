@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { FloatingChat } from "@/components/FloatingChat";
+// import { FloatingChat } from "@/components/FloatingChat";
 import { ReviewPopup } from "@/components/ReviewPopup";
 import { SessionGuard } from "@/components/SessionGuard";
 import Script from "next/script";
@@ -73,7 +73,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
 
@@ -115,7 +115,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             {children}
-            <FloatingChat />
+            {/* <FloatingChat /> */}
             <ReviewPopup />
             <SessionGuard />
           </CartProvider>

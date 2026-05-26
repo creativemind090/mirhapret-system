@@ -20,10 +20,6 @@ const faqs = [
         q: 'Can I modify or cancel my order after placing it?',
         a: 'Orders can be modified or cancelled within 2 hours of placement. After this window, our fulfillment process begins and changes may not be possible. Reach out to us on WhatsApp for the fastest response.',
       },
-      {
-        q: 'Do you offer gift wrapping?',
-        a: 'Every MirhaPret order is dispatched in our signature branded packaging at no extra cost. For a fully personalised gift experience with a handwritten note, please mention it in the order notes at checkout.',
-      },
     ],
   },
   {
@@ -31,7 +27,7 @@ const faqs = [
     items: [
       {
         q: 'What if the size I ordered does not fit?',
-        a: 'We offer free exchanges within 14 days of delivery. Simply reach out with your order number and the size you would like, and we will arrange a pickup and dispatch the correct size at no charge.',
+        a: 'We offer exchanges within 14 days of delivery. Simply reach out with your order number and the size you would like, and our team will guide you through the process.',
       },
       {
         q: 'Are your sizes true to label?',
@@ -61,11 +57,11 @@ const faqs = [
     items: [
       {
         q: 'What payment methods do you accept?',
-        a: 'We accept all major debit and credit cards, Easypaisa, JazzCash, and bank transfer. Cash on delivery is available in Lahore, Karachi, and Islamabad.',
+        a: 'We currently accept Cash on Delivery (COD) nationwide across Pakistan. Additional payment methods including card payments are coming soon.',
       },
       {
-        q: 'Is my payment information secure?',
-        a: 'Absolutely. All transactions are processed through PCI DSS compliant payment gateways. We do not store your card details on our servers.',
+        q: 'Is Cash on Delivery available in my city?',
+        a: 'Yes, Cash on Delivery is available across all cities in Pakistan. Simply place your order and pay when your parcel arrives at your door.',
       },
     ],
   },
@@ -97,9 +93,9 @@ export default function FAQPage() {
             We Have Answers
           </p>
           <h1 style={{
-            fontFamily: "'Cormorant', serif",
+            fontFamily: "'Montserrat', sans-serif",
             fontSize: 'clamp(2.8rem, 5.5vw, 5rem)',
-            fontWeight: 600, fontStyle: 'italic',
+            fontWeight: 600,
             letterSpacing: '-1px', lineHeight: 1.05, color: '#fff', margin: 0,
           }}>
             Frequently Asked<br />Questions
@@ -186,8 +182,8 @@ export default function FAQPage() {
               Still have a question?
             </p>
             <h3 style={{
-              fontFamily: "'Cormorant', serif",
-              fontSize: '1.8rem', fontWeight: 600, fontStyle: 'italic',
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: '1.8rem', fontWeight: 600,
               color: '#fff', marginBottom: '12px',
             }}>Talk to a Real Person</h3>
             <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#555', marginBottom: '32px', fontWeight: 300 }}>
