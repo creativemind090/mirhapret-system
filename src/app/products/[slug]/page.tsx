@@ -123,7 +123,7 @@ export default function ProductDetailPage() {
         <SiteHeader />
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '24px' }}>
           <div style={{ width: '1px', height: '48px', background: GOLD }} />
-          <p style={{ fontFamily: "'Cormorant', serif", fontSize: '1.4rem', fontStyle: 'italic', color: '#888' }}>Product not found</p>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.4rem', color: '#888' }}>Product not found</p>
           <a href="/products" style={{ padding: '13px 32px', background: DARK, color: '#fff', textDecoration: 'none', fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
             Back to Products
           </a>
@@ -166,7 +166,7 @@ export default function ProductDetailPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
               <div>
                 <div style={{ width: '28px', height: '1px', background: GOLD, marginBottom: '12px' }} />
-                <h2 style={{ fontFamily: "'Cormorant', serif", fontSize: '1.6rem', fontWeight: 600, fontStyle: 'italic' }}>Size Guide</h2>
+                <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.6rem', fontWeight: 600 }}>Size Guide</h2>
               </div>
               <button onClick={() => setIsSizeGuideOpen(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#bbb', lineHeight: 1 }}>×</button>
             </div>
@@ -217,7 +217,7 @@ export default function ProductDetailPage() {
                 {image ? (
                   <img src={image} alt={`${product.name} ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  <span style={{ fontFamily: "'Cormorant', serif", fontSize: '11px', fontStyle: 'italic', color: '#bbb' }}>{idx + 1}</span>
+                  <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#bbb' }}>{idx + 1}</span>
                 )}
               </button>
             ))}
@@ -242,7 +242,7 @@ export default function ProductDetailPage() {
                   style={{ width: '100%', height: '600px', objectFit: 'cover', display: 'block' }} />
               ) : (
                 <div style={{ width: '100%', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ede9e4' }}>
-                  <span style={{ fontFamily: "'Cormorant', serif", fontSize: '5rem', fontWeight: 600, fontStyle: 'italic', color: '#ccc' }}>{product.name.slice(0, 2).toUpperCase()}</span>
+                  <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '5rem', fontWeight: 600, color: '#ccc' }}>{product.name.slice(0, 2).toUpperCase()}</span>
                 </div>
               )}
             </div>
@@ -263,18 +263,34 @@ export default function ProductDetailPage() {
           <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '3px', textTransform: 'uppercase', color: GOLD, marginBottom: '12px', fontWeight: 600 }}>
             {product.category}
           </p>
-          <h1 style={{ fontFamily: "'Cormorant', serif", fontSize: 'clamp(1.8rem,2.8vw,2.8rem)', fontWeight: 600, fontStyle: 'italic', letterSpacing: '-0.5px', marginBottom: '16px', lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: 'clamp(1.8rem,2.8vw,2.8rem)', fontWeight: 600, letterSpacing: '-0.5px', marginBottom: '16px', lineHeight: 1.1 }}>
             {product.name}
           </h1>
-          <p style={{ fontFamily: "'Cormorant', serif", fontSize: '2rem', fontWeight: 600, fontStyle: 'italic', marginBottom: '28px', color: DARK }}>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '2rem', fontWeight: 600, marginBottom: '28px', color: DARK }}>
             PKR {product.price.toLocaleString()}
           </p>
           <div style={{ width: '40px', height: '1px', background: GOLD, marginBottom: '24px' }} />
 
           {product.description && (
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#666', lineHeight: 1.9, marginBottom: '32px', fontWeight: 300 }}>
-              {product.description}
-            </p>
+            <div style={{ marginBottom: '32px' }}>
+              {product.description.split('\n').map((line: string, i: number) => {
+                if (!line.trim()) return <div key={i} style={{ height: '8px' }} />;
+                const match = line.match(/^([^:]+):\s*(.+)$/);
+                if (match) {
+                  return (
+                    <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '5px', alignItems: 'baseline' }}>
+                      <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, color: '#333', letterSpacing: '1.5px', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{match[1]}</span>
+                      <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#666', fontWeight: 300 }}>{match[2]}</span>
+                    </div>
+                  );
+                }
+                return (
+                  <p key={i} style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '13px', color: '#666', lineHeight: 1.9, marginBottom: '12px', fontWeight: 300 }}>
+                    {line}
+                  </p>
+                );
+              })}
+            </div>
           )}
 
           {/* Size selection */}
@@ -377,7 +393,7 @@ export default function ProductDetailPage() {
             <div>
               <div style={{ width: '32px', height: '1px', background: GOLD, marginBottom: '16px' }} />
               <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '3px', textTransform: 'uppercase', color: GOLD, fontWeight: 600, marginBottom: '8px' }}>Customer Reviews</p>
-              <h2 style={{ fontFamily: "'Cormorant', serif", fontSize: '2rem', fontWeight: 600, fontStyle: 'italic', margin: '0 0 4px', letterSpacing: '-0.5px' }}>
+              <h2 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '2rem', fontWeight: 600, margin: '0 0 4px', letterSpacing: '-0.5px' }}>
                 {avgRating.toFixed(1)} / 5
               </h2>
               <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '11px', color: '#bbb', fontWeight: 300 }}>
@@ -408,7 +424,7 @@ export default function ProductDetailPage() {
                         ))}
                       </div>
                       {review.title && (
-                        <p style={{ fontFamily: "'Cormorant', serif", fontSize: '15px', fontWeight: 600, fontStyle: 'italic', margin: '4px 0 0', color: '#0a0a0a' }}>{review.title}</p>
+                        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '15px', fontWeight: 600, margin: '4px 0 0', color: '#0a0a0a' }}>{review.title}</p>
                       )}
                     </div>
                     <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#ccc', fontWeight: 300 }}>
@@ -430,7 +446,7 @@ export default function ProductDetailPage() {
           {isLoggedIn ? (
             <div>
               <div style={{ width: '28px', height: '1px', background: GOLD, marginBottom: '20px' }} />
-              <h3 style={{ fontFamily: "'Cormorant', serif", fontSize: '1.4rem', fontWeight: 600, fontStyle: 'italic', marginBottom: '28px' }}>Write a Review</h3>
+              <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.4rem', fontWeight: 600, marginBottom: '28px' }}>Write a Review</h3>
 
               {reviewSuccess && (
                 <div style={{ marginBottom: '20px', padding: '14px 18px', borderLeft: `3px solid #1a7a4a`, background: '#f0fdf4', fontFamily: "'Montserrat', sans-serif", fontSize: '12px', color: '#166534' }}>{reviewSuccess}</div>
@@ -484,7 +500,7 @@ export default function ProductDetailPage() {
           ) : (
             <div style={{ padding: '32px', background: CREAM, border: '1px solid #e8e4e0', textAlign: 'center' }}>
               <div style={{ width: '1px', height: '36px', background: GOLD, margin: '0 auto 20px' }} />
-              <p style={{ fontFamily: "'Cormorant', serif", fontSize: '1.2rem', fontStyle: 'italic', color: '#888', margin: '0 0 20px' }}>Sign in to leave a review</p>
+              <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '1.2rem', color: '#888', margin: '0 0 20px' }}>Sign in to leave a review</p>
               <a href="/signin" style={{ display: 'inline-block', padding: '12px 32px', background: DARK, color: '#fff', textDecoration: 'none', fontFamily: "'Montserrat', sans-serif", fontSize: '9px', fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase' }}>
                 Sign In
               </a>
