@@ -43,7 +43,7 @@ export default function MyWishlistPage() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      router.push('/signin');
+      router.replace('/signin?redirect=/my-wishlist');
       return;
     }
 

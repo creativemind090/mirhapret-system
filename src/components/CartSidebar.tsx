@@ -30,11 +30,11 @@ export function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       />
       {/* Drawer */}
       <div
+        className="cart-drawer"
         style={{
           position: 'fixed',
           top: 0,
           right: 0,
-          width: '420px',
           height: '100vh',
           background: '#ffffff',
           border: '1px solid #e0e0e0',

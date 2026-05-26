@@ -110,7 +110,13 @@ img {
 .product-detail-section { padding: 48px 60px 80px; display: grid; grid-template-columns: auto 1fr 1fr; gap: 40px; align-items: start; }
 .product-thumbnails-col { display: flex; flex-direction: column; gap: 8px; position: sticky; top: 110px; }
 
-/* Cart */
+/* Cart drawer */
+.cart-drawer { width: 420px; }
+@media (max-width: 768px) {
+  .cart-drawer { width: 82vw !important; max-width: 360px !important; }
+}
+
+/* Cart page layout */
 .cart-layout { display: grid; grid-template-columns: 1fr 360px; gap: 60px; align-items: start; max-width: 1200px; margin: 0 auto; }
 .cart-item-header { display: grid; grid-template-columns: 80px 1fr 80px auto 120px 32px; gap: 16px; padding-bottom: 16px; border-bottom: 1.5px solid #000; margin-bottom: 0; }
 .cart-item-row { display: grid; grid-template-columns: 80px 1fr 80px auto 120px 32px; gap: 16px; align-items: center; padding: 24px 0; border-bottom: 1px solid #e8e8e8; }
@@ -226,8 +232,14 @@ img {
     margin-right: 4px;
   }
 
-  /* Sign in split panel */
-  .signin-brand-panel { display: none !important; }
+  /* Sign in split panel — class is auth-brand-panel in JSX */
+  .auth-brand-panel { display: none !important; }
+  /* Sign in form panel: full width, centred, proper padding */
+  .signin-form-panel {
+    flex: 1 1 100% !important;
+    padding: 48px 24px !important;
+    align-items: flex-start !important;
+  }
 
   /* Footer */
   footer { padding: 48px 20px 32px !important; }
