@@ -425,8 +425,8 @@ img {
 .m-hero { display: none; }
 .m-hero-inner {
   position: relative;
-  height: calc(100svh - 40px);
-  min-height: 520px;
+  height: calc(100svh - 100px); /* 100px = ~40px announcement bar + 60px nav */
+  min-height: 460px;
   background: #111;
   overflow: hidden;
   display: flex;
@@ -782,6 +782,12 @@ img {
   .site-nav button, .site-nav a {
     min-height: 44px; min-width: 44px;
     display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── Sticky nav on mobile so announcement bar is visible ── */
+  .site-nav {
+    position: sticky !important;
+    top: 0 !important;
   }
 
   /* ── Show mobile homepage sections ───────────────────── */
