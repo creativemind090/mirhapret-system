@@ -1,0 +1,163 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bull';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { AppController } from './app.controller';
+import {
+  User,
+  Category,
+  Product,
+  ProductSizeInventory,
+  Promotion,
+  PromoCode,
+  PromoCodeUsage,
+  Order,
+  OrderItem,
+  PaymentTransaction,
+  CustomerAddress,
+  Wishlist,
+  ProductAnalytic,
+  ProductReview,
+  PaymentMethod,
+  POSSyncLog,
+  Blog,
+  NewsletterSubscription,
+} from './entities';
+import { AuthModule } from './modules/auth/auth.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { ProductsModule } from './modules/products/products.module';
+import { OrdersModule } from './modules/orders/orders.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
+import { PromotionsModule } from './modules/promotions/promotions.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { UsersModule } from './modules/users/users.module';
+import { WishlistsModule } from './modules/wishlists/wishlists.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { POSSyncModule } from './modules/pos-sync/pos-sync.module';
+import { SearchModule } from './modules/search/search.module';
+import { ProductAnalyticsModule } from './modules/product-analytics/product-analytics.module';
+import { RolesGuard } from './common/guards/roles.guard';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { EventsModule } from './modules/events/events.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { BlogsModule } from './modules/blogs/blogs.module';
+import { AppCacheModule } from './common/cache/cache.module';
+import { EmailModule } from './modules/email/email.module';
+
+@Module({
+  imports: [
+    // Environment Configuration - must be first
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env', '.env.example'],
+      expandVariables: true,
+    }),
+
+    // Database Configuration
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        host: config.get('DB_HOST'),
+        port: +config.get('DB_PORT'),
+        username: config.get('DB_USERNAME'),
+        password: config.get('DB_PASSWORD'),
+        database: config.get('DB_DATABASE'),
+        entities: [
+          User,
+          Category,
+          Product,
+          ProductSizeInventory,
+          Promotion,
+          PromoCode,
+          PromoCodeUsage,
+          Order,
+          OrderItem,
+          PaymentTransaction,
+          CustomerAddress,
+          Wishlist,
+          ProductAnalytic,
+          ProductReview,
+          PaymentMethod,
+          POSSyncLog,
+          Blog,
+          NewsletterSubscription,
+        ],
+        synchronize: config.get('DB_SYNCHRONIZE') === 'true',
+        logging: config.get('DB_LOGGING') === 'true',
+        ssl:
+          config.get('NODE_ENV') === 'production'
+            ? { rejectUnauthorized: false }
+            : false,
+      }),
+      inject: [ConfigService],
+    }),
+
+    // Bull Queue Configuration (Redis-based job queue)
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => ({
+        redis: {
+          host: config.get('REDIS_HOST'),
+          port: +config.get('REDIS_PORT'),
+          db: +config.get('REDIS_DB', 0),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+
+    // Rate Limiting — tiered: short burst + sustained per minute
+    ThrottlerModule.forRoot([
+      { name: 'short', ttl: 1000,  limit: 10  },  // 10 req/sec  burst protection
+      { name: 'long',  ttl: 60000, limit: 100 },  // 100 req/min sustained limit
+    ]),
+
+    // Feature Modules
+    AuthModule,
+    CategoriesModule,
+    ProductsModule,
+    OrdersModule,
+    InventoryModule,
+    PromotionsModule,
+    AnalyticsModule,
+    CloudinaryModule,
+    UsersModule,
+    WishlistsModule,
+    AddressesModule,
+    ReviewsModule,
+    PaymentsModule,
+    POSSyncModule,
+    SearchModule,
+    ProductAnalyticsModule,
+    EventsModule,
+    NotificationsModule,
+    BlogsModule,
+    AppCacheModule,
+    EmailModule,
+  ],
+  controllers: [AppController],
+  providers: [
+    // Rate limiting enforced on every route
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    // JWT auth runs globally before RolesGuard so request.user is populated
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    // Role-based access control
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
+})
+export class AppModule {}
