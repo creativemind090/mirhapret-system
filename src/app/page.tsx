@@ -292,14 +292,39 @@ export default function Home() {
         ))}
       </div>
 
-      {/* New Arrivals grid */}
+      {/* Shop by Collection tiles */}
+      {collections.length > 0 && (
+        <section className="m-collections">
+          <div className="m-section-hd">
+            <span className="m-section-title">Shop by Collection</span>
+            <a href="/products" className="m-section-link">See all →</a>
+          </div>
+          <div className="m-coll-grid">
+            {collections.slice(0, 3).map((col: any, idx: number) => {
+              const tileImg = col.image_url || getCategoryImage(col.id);
+              return (
+                <a key={idx} href={`/products?category=${col.id}`} className="m-coll-tile"
+                  style={tileImg ? { backgroundImage: `url(${tileImg})` } : undefined}>
+                  <div className="m-coll-overlay" />
+                  <div className="m-coll-body">
+                    <p className="m-coll-name">{col.name}</p>
+                    <span className="m-coll-btn">Shop →</span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Featured Products — 12 items in 2-column grid */}
       <section className="m-products">
         <div className="m-section-hd">
-          <span className="m-section-title">New Arrivals</span>
+          <span className="m-section-title">Featured Products</span>
           <a href="/products" className="m-section-link">See all →</a>
         </div>
         <div className="m-grid">
-          {(productsLoading ? Array.from({ length: 4 }) : featuredProducts.slice(0, 4)).map((item: any, idx: number) => {
+          {(productsLoading ? Array.from({ length: 4 }) : featuredProducts.slice(0, 12)).map((item: any, idx: number) => {
             if (!item) return (
               <div key={idx} className="m-skel">
                 <div className="m-skel-img" /><div className="m-skel-line" /><div className="m-skel-line m-skel-sm" />
@@ -345,33 +370,8 @@ export default function Home() {
             );
           })}
         </div>
-        {!productsLoading && <a href="/products" className="m-view-all">View All Products</a>}
+        <a href="/products" className="m-view-all">View All Products</a>
       </section>
-
-      {/* Shop by Collection tiles */}
-      {collections.length > 0 && (
-        <section className="m-collections">
-          <div className="m-section-hd">
-            <span className="m-section-title">Shop by Collection</span>
-            <a href="/products" className="m-section-link">See all →</a>
-          </div>
-          <div className="m-coll-grid">
-            {collections.slice(0, 3).map((col: any, idx: number) => {
-              const tileImg = col.image_url || getCategoryImage(col.id);
-              return (
-                <a key={idx} href={`/products?category=${col.id}`} className="m-coll-tile"
-                  style={tileImg ? { backgroundImage: `url(${tileImg})` } : undefined}>
-                  <div className="m-coll-overlay" />
-                  <div className="m-coll-body">
-                    <p className="m-coll-name">{col.name}</p>
-                    <span className="m-coll-btn">Shop →</span>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        </section>
-      )}
 
       {/* Trust badges */}
       <div className="m-trust">
