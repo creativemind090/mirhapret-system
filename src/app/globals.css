@@ -466,6 +466,12 @@ img {
   font-weight: 400; line-height: 1.5;
   margin-bottom: 20px;
 }
+.m-hero-price {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #fff; margin-bottom: 20px;
+  letter-spacing: 0.3px;
+}
 .m-hero-btn {
   display: inline-block; padding: 13px 28px;
   background: #fff; color: #111;
@@ -609,11 +615,11 @@ img {
 }
 
 /* Collection tiles */
-.m-collections { display: none; background: #fff; padding-bottom: 8px; }
-.m-coll-grid { display: flex; flex-direction: column; gap: 8px; padding: 0 12px; }
+.m-collections { display: none; background: #fff; padding-bottom: 16px; }
+.m-coll-grid { display: flex; flex-direction: column; gap: 4px; padding: 0; }
 .m-coll-tile {
-  position: relative; height: 200px;
-  background: #111; overflow: hidden;
+  position: relative; height: 240px;
+  background: #1a1a1a; overflow: hidden;
   display: flex; align-items: flex-end;
   text-decoration: none;
   background-size: cover; background-position: center;

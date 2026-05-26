@@ -149,7 +149,7 @@ export default function Home() {
     const fetchHomeData = async () => {
       setProductsLoading(true);
       const [prodsRes, catsRes, promoRes] = await Promise.allSettled([
-        api.get('/products?is_active=true&sort_by=view_ratio&take=8').catch(() => api.get('/products?is_active=true&take=8')),
+        api.get('/products?is_active=true&sort_by=view_ratio&take=12').catch(() => api.get('/products?is_active=true&take=12')),
         api.get('/categories'),
         api.get('/promotions/active'),
       ]);
@@ -174,6 +174,19 @@ export default function Home() {
     if (!item?.created_at) return false;
     return Date.now() - new Date(item.created_at).getTime() < 3 * 24 * 60 * 60 * 1000;
   };
+
+  // Returns the first product image matching a category — used for category tiles
+  const getCategoryImage = (catId: any): string | null => {
+    const match = featuredProducts.find(
+      (p: any) => String(p.category_id) === String(catId) || String(p.category?.id) === String(catId)
+    );
+    return match?.main_image ?? null;
+  };
+
+  // Hero product: prefer "Perk 2PC" by name, else first featured product
+  const heroProduct = featuredProducts.find(
+    (p: any) => p.name?.toLowerCase().includes('perk')
+  ) ?? featuredProducts[0] ?? null;
 
   const heroSlides = [
     { tag: 'New Season · 2026', title: 'Dressed to\nBe Remembered', subtitle: 'Premium Pret & Haute Couture for the modern Pakistani woman.', cta: 'Shop Collection', ctaLink: '/products' },
@@ -244,14 +257,25 @@ export default function Home() {
 
       {/* Hero */}
       <section className="m-hero">
-        <div className="m-hero-inner" style={featuredProducts[0]?.main_image
-          ? { backgroundImage: `url(${featuredProducts[0].main_image})` } : undefined}>
+        <div
+          className="m-hero-inner"
+          style={heroProduct?.main_image ? { backgroundImage: `url(${heroProduct.main_image})` } : undefined}
+        >
           <div className="m-hero-overlay" />
           <div className="m-hero-body">
             <p className="m-hero-eyebrow">New Season · 2026</p>
-            <h1 className="m-hero-title">Dressed to<br />Be Remembered</h1>
-            <p className="m-hero-sub">Premium Pret &amp; Haute Couture for the modern Pakistani woman.</p>
-            <a href="/products" className="m-hero-btn">Shop Now</a>
+            <h1 className="m-hero-title">
+              {heroProduct?.name ? heroProduct.name.split(' - ')[0] : 'New Collection'}
+            </h1>
+            {heroProduct?.price && (
+              <p className="m-hero-price">PKR {Number(heroProduct.price).toLocaleString()}</p>
+            )}
+            <a
+              href={heroProduct ? `/products/${heroProduct.slug || heroProduct.id}` : '/products'}
+              className="m-hero-btn"
+            >
+              Shop Now
+            </a>
           </div>
         </div>
       </section>
@@ -329,18 +353,22 @@ export default function Home() {
         <section className="m-collections">
           <div className="m-section-hd">
             <span className="m-section-title">Shop by Collection</span>
+            <a href="/products" className="m-section-link">See all →</a>
           </div>
           <div className="m-coll-grid">
-            {collections.slice(0, 2).map((col: any, idx: number) => (
-              <a key={idx} href={`/products?category=${col.id}`} className="m-coll-tile"
-                style={col.image_url ? { backgroundImage: `url(${col.image_url})` } : undefined}>
-                <div className="m-coll-overlay" />
-                <div className="m-coll-body">
-                  <p className="m-coll-name">{col.name}</p>
-                  <span className="m-coll-btn">Shop →</span>
-                </div>
-              </a>
-            ))}
+            {collections.slice(0, 3).map((col: any, idx: number) => {
+              const tileImg = col.image_url || getCategoryImage(col.id);
+              return (
+                <a key={idx} href={`/products?category=${col.id}`} className="m-coll-tile"
+                  style={tileImg ? { backgroundImage: `url(${tileImg})` } : undefined}>
+                  <div className="m-coll-overlay" />
+                  <div className="m-coll-body">
+                    <p className="m-coll-name">{col.name}</p>
+                    <span className="m-coll-btn">Shop →</span>
+                  </div>
+                </a>
+              );
+            })}
           </div>
         </section>
       )}
