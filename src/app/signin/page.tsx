@@ -127,7 +127,7 @@ export default function SignInPage() {
       </div>
 
       {/* ─── Right Form Panel ─── */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 40px', background: '#fff' }}>
+      <div className="signin-form-panel" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 40px', background: '#fff' }}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
 
           <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '28px' }} />
