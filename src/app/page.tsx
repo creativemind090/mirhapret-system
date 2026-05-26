@@ -282,7 +282,10 @@ export default function Home() {
               </div>
             );
             const disc = getHomeDiscount(item);
-            const salePrice = disc > 0 ? Math.round(Number(item.price) * (1 - disc / 100)) : 0;
+            const origPrice = Number(item.price);
+            const salePrice = disc > 0 ? Math.round(origPrice * (1 - disc / 100)) : origPrice;
+            const saveAmount = disc > 0 ? origPrice - salePrice : 0;
+            const sizes: string[] = item.available_sizes ?? item.sizes ?? [];
             return (
               <a key={item.id} href={`/products/${item.slug || item.id}`} className="m-card">
                 <div className="m-card-img">
@@ -291,15 +294,28 @@ export default function Home() {
                     ? <img src={item.main_image} alt={item.name} />
                     : <div className="m-card-fallback"><span>{item.name?.slice(0, 2).toUpperCase()}</span></div>
                   }
-                  {disc > 0 && <span className="m-badge">SALE</span>}
-                  {isNewProduct(item) && !disc && <span className="m-badge m-badge-new">NEW</span>}
+                  {disc > 0 && <span className="m-disc-badge">-{disc}%</span>}
+                  {isNewProduct(item) && !disc && <span className="m-new-badge">NEW</span>}
                 </div>
                 <div className="m-card-info">
                   <p className="m-card-name">{item.name}</p>
-                  {disc > 0
-                    ? <p className="m-card-price"><b style={{ color: GOLD }}>PKR {salePrice.toLocaleString()}</b> <s style={{ color: '#bbb', fontWeight: 400 }}>PKR {Number(item.price).toLocaleString()}</s></p>
-                    : <p className="m-card-price">PKR {Number(item.price).toLocaleString()}</p>
-                  }
+                  {disc > 0 ? (
+                    <>
+                      <p className="m-price-sale">PKR {salePrice.toLocaleString()}</p>
+                      <p className="m-price-was">PKR {origPrice.toLocaleString()}</p>
+                      <p className="m-price-save">Save PKR {saveAmount.toLocaleString()}</p>
+                    </>
+                  ) : (
+                    <p className="m-price-regular">PKR {origPrice.toLocaleString()}</p>
+                  )}
+                  {sizes.length > 0 && (
+                    <div className="m-sizes">
+                      {sizes.slice(0, 4).map((s: string) => (
+                        <span key={s} className="m-size-chip">{s}</span>
+                      ))}
+                      {sizes.length > 4 && <span className="m-size-chip m-size-more">+{sizes.length - 4}</span>}
+                    </div>
+                  )}
                 </div>
               </a>
             );
