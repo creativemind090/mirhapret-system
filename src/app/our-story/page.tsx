@@ -58,7 +58,7 @@ export default function OurStoryPage() {
           </div>
           <div style={{ background: '#0e0e0e', aspectRatio: '3/4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div style={{ textAlign: 'center', padding: '32px' }}>
-              <p style={{ fontSize: '48px', fontWeight: 800, color: gold, letterSpacing: '-2px', lineHeight: 1 }}>2019</p>
+              <p style={{ fontSize: '48px', fontWeight: 800, color: gold, letterSpacing: '-2px', lineHeight: 1 }}>2016</p>
               <p style={{ fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', color: '#555', marginTop: '12px' }}>Founded in Lahore</p>
             </div>
           </div>
@@ -97,7 +97,7 @@ export default function OurStoryPage() {
         <div style={{ background: '#0e0e0e', padding: '64px 48px', marginBottom: '80px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '40px', textAlign: 'center' }}>
             {[
-              { number: '6', label: 'Collections Launched' },
+              { number: '3', label: 'Collections' },
               { number: '42', label: 'Master Karigars' },
               { number: '14', label: 'Cities Served' },
               { number: '18k', label: 'Customers' },
@@ -126,7 +126,7 @@ export default function OurStoryPage() {
               A Brand That Grows With Its Women
             </h2>
             <p style={{ fontSize: '15px', color: '#444', lineHeight: 1.9, marginBottom: '16px' }}>
-              Today, MirhaPret ships to 14 cities across Pakistan and to the Pakistani diaspora in the Gulf, the UK, and North America. Our flagship store in Lahore opened in 2023 and became our most visited address within a year.
+              Today, MirhaPret serves customers across Pakistan from Lahore, the city that shaped our sense of craft, fit, and occasionwear. Every collection remains rooted in the rhythm of Pakistani women and the artisans who make each piece possible.
             </p>
             <p style={{ fontSize: '15px', color: '#444', lineHeight: 1.9 }}>
               We are building something that lasts. Not a trend. A brand that a mother and daughter both want to wear, for different reasons, on the same occasion.

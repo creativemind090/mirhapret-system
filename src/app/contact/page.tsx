@@ -42,22 +42,22 @@ export default function ContactPage() {
   const infoItems = [
     {
       title: 'Email Us',
-      lines: ['hello@mirhapret.com', 'support@mirhapret.com'],
+      lines: ['mirhapret@gmail.com'],
       sub: 'We respond within 24 hours',
     },
     {
-      title: 'Call Us',
-      lines: ['+92 321 000 0000'],
+      title: 'Phone',
+      lines: ['+92 324 457 7066'],
       sub: 'Mon – Sat, 10am – 7pm PKT',
     },
     {
-      title: 'Visit Us',
-      lines: ['123 Fashion Street', 'DHA Phase 6, Lahore'],
+      title: 'Location',
+      lines: ['Lahore, Pakistan'],
       sub: 'By appointment preferred',
     },
     {
       title: 'WhatsApp',
-      lines: ['+92 321 000 0000'],
+      lines: ['+92 324 457 7066'],
       sub: 'Fastest response guaranteed',
     },
   ];
@@ -81,7 +81,7 @@ export default function ContactPage() {
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '24px' }} />
           <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', color: GOLD, fontWeight: 600, marginBottom: '16px' }}>
-            We'd Love to Hear From You
+            We&apos;d Love to Hear From You
           </p>
           <h1 style={{
             fontFamily: "'Cormorant', serif",
@@ -102,7 +102,7 @@ export default function ContactPage() {
           <div>
             <div style={{ width: '36px', height: '1px', background: GOLD, marginBottom: '36px' }} />
 
-            {infoItems.map((info, i) => (
+            {infoItems.filter(info => info.title !== 'Phone' && info.title !== 'Location').map((info, i) => (
               <div key={i} style={{ display: 'flex', gap: '20px', marginBottom: '36px', alignItems: 'flex-start' }}>
                 <div style={{ width: '6px', height: '6px', background: GOLD, transform: 'rotate(45deg)', marginTop: '6px', flexShrink: 0 }} />
                 <div>
@@ -225,7 +225,7 @@ export default function ContactPage() {
                     Send Message
                   </button>
                   <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '10px', color: '#bbb', marginTop: '12px', textAlign: 'center', fontWeight: 300 }}>
-                    We'll respond within 24 hours.
+                    We&apos;ll respond within 24 hours.
                   </p>
                 </div>
               </form>

@@ -6,7 +6,7 @@ import { IoClose, IoSend, IoChevronBack, IoChevronForward } from 'react-icons/io
 import { FaWhatsapp } from 'react-icons/fa';
 import { MdSupportAgent } from 'react-icons/md';
 
-const CHATBOT_URL = process.env.NEXT_PUBLIC_CHATBOT_URL || 'http://localhost:3004';
+const CHATBOT_URL = process.env.NEXT_PUBLIC_CHATBOT_URL || '';
 const STORAGE_KEY = 'mirhapret_chat_session';
 const MAX_STORED_MESSAGES = 40;
 const GOLD = '#c8a96e';
@@ -175,6 +175,10 @@ export function FloatingChat() {
     const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
     try {
+      if (!CHATBOT_URL) {
+        throw new Error('CHATBOT_UNAVAILABLE');
+      }
+
       const res = await fetch(`${CHATBOT_URL}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -219,10 +223,14 @@ export function FloatingChat() {
       }, 16);
 
       setHistory(newHistory);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : '';
+      const fallbackText = message === 'CHATBOT_UNAVAILABLE' || message === 'Failed to fetch'
+        ? "Mira is temporarily unavailable. Please message us on WhatsApp at +92 324 457 7066 and we'll help you right away."
+        : message || "Sorry, I'm having trouble connecting. Please try again or reach us on WhatsApp.";
       const errMsg: Message = {
         role: 'assistant',
-        text: err?.message || "Sorry, I'm having trouble connecting. Please try again or reach us on WhatsApp.",
+        text: fallbackText,
       };
       setMessages(prev => [...prev.filter(m => !m.isTyping), errMsg]);
     } finally {

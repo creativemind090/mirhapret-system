@@ -11,36 +11,24 @@ type Category = typeof categories[number];
 
 const sizeData: Record<Category, { size: string; chest: string; waist: string; hip: string; length: string }[]> = {
   Kurta: [
-    { size: 'XS', chest: '32"', waist: '26"', hip: '34"', length: '40"' },
     { size: 'S',  chest: '34"', waist: '28"', hip: '36"', length: '41"' },
     { size: 'M',  chest: '36"', waist: '30"', hip: '38"', length: '42"' },
     { size: 'L',  chest: '38"', waist: '32"', hip: '40"', length: '43"' },
-    { size: 'XL', chest: '40"', waist: '34"', hip: '42"', length: '44"' },
-    { size: 'XXL',chest: '42"', waist: '36"', hip: '44"', length: '45"' },
   ],
   'Shalwar Kameez': [
-    { size: 'XS', chest: '32"', waist: '24"', hip: '34"', length: '52"' },
     { size: 'S',  chest: '34"', waist: '26"', hip: '36"', length: '53"' },
     { size: 'M',  chest: '36"', waist: '28"', hip: '38"', length: '54"' },
     { size: 'L',  chest: '38"', waist: '30"', hip: '40"', length: '55"' },
-    { size: 'XL', chest: '40"', waist: '32"', hip: '42"', length: '56"' },
-    { size: 'XXL',chest: '42"', waist: '34"', hip: '44"', length: '57"' },
   ],
   Trousers: [
-    { size: 'XS', chest: 'N/A', waist: '24"', hip: '34"', length: '38"' },
     { size: 'S',  chest: 'N/A', waist: '26"', hip: '36"', length: '39"' },
     { size: 'M',  chest: 'N/A', waist: '28"', hip: '38"', length: '39"' },
     { size: 'L',  chest: 'N/A', waist: '30"', hip: '40"', length: '40"' },
-    { size: 'XL', chest: 'N/A', waist: '32"', hip: '42"', length: '40"' },
-    { size: 'XXL',chest: 'N/A', waist: '34"', hip: '44"', length: '41"' },
   ],
   Dupatta: [
     { size: 'S',  chest: 'N/A', waist: 'N/A', hip: 'N/A', length: '2.0 m' },
     { size: 'M',  chest: 'N/A', waist: 'N/A', hip: 'N/A', length: '2.25 m' },
     { size: 'L',  chest: 'N/A', waist: 'N/A', hip: 'N/A', length: '2.5 m' },
-    { size: 'XL', chest: 'N/A', waist: 'N/A', hip: 'N/A', length: '2.75 m' },
-    { size: 'XXL',chest: 'N/A', waist: 'N/A', hip: 'N/A', length: '3.0 m' },
-    { size: 'XXL',chest: 'N/A', waist: 'N/A', hip: 'N/A', length: '3.0 m' },
   ],
 };
 
