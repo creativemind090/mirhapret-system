@@ -214,14 +214,7 @@ img {
     padding-right: 20px !important;
   }
 
-  /* ── Announcement bar ────────────────────────────── */
-  .site-announcement {
-    font-size: 10px !important;
-    letter-spacing: 0.8px !important;
-    padding: 8px 16px !important;
-    white-space: normal !important;
-    line-height: 1.4 !important;
-  }
+  /* ── Announcement bar — no override needed, ticker handles it ── */
 
   /* ── Nav reordering (Shopify style) ─────────────── */
   .site-nav {
@@ -425,8 +418,8 @@ img {
 .m-hero { display: none; }
 .m-hero-inner {
   position: relative;
-  height: calc(100svh - 40px);
-  min-height: 520px;
+  height: calc(100svh - 100px); /* 100px = ~40px announcement bar + 60px nav */
+  min-height: 460px;
   background: #111;
   overflow: hidden;
   display: flex;
@@ -784,6 +777,12 @@ img {
     display: flex; align-items: center; justify-content: center;
   }
 
+  /* ── Sticky nav on mobile so announcement bar is visible ── */
+  .site-nav {
+    position: sticky !important;
+    top: 0 !important;
+  }
+
   /* ── Show mobile homepage sections ───────────────────── */
   .hero-section { display: none !important; }
   .m-hero { display: block; }
@@ -835,6 +834,48 @@ img {
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* ─── Announcement ticker ────────────────────────────── */
+.ann-bar {
+  background: #080808;
+  height: 36px;
+  overflow: hidden;
+  position: relative;
+}
+.ann-track {
+  display: flex;
+  white-space: nowrap;
+  animation: marquee 20s linear infinite;
+  height: 100%;
+  align-items: center;
+}
+.ann-bar:hover .ann-track { animation-play-state: paused; }
+.ann-set {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+}
+.ann-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 0 8px;
+}
+.ann-dot {
+  color: #c8a96e;
+  font-size: 6px;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ann-track { animation: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

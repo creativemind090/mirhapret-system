@@ -241,13 +241,20 @@ export default function Home() {
   return (
     <div style={{ background: '#fff', color: '#0a0a0a', overflowX: 'hidden', fontFamily: "'Montserrat', sans-serif" }}>
 
-      {/* ─── Announcement Bar ─────────────────────────────── */}
-      <div style={{ background: DARK, color: '#fff', textAlign: 'center', padding: '11px 20px', fontSize: '11px', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 500, fontFamily: "'Montserrat', sans-serif" }}>
-        Nationwide delivery across Pakistan
-        <span style={{ color: GOLD, margin: '0 16px', fontSize: '8px', verticalAlign: 'middle' }}>◆</span>
-        New: Octa West 2026 Now Live
-        <span style={{ color: GOLD, margin: '0 16px', fontSize: '8px', verticalAlign: 'middle' }}>◆</span>
-        7-Day Easy Exchange
+      {/* ─── Announcement Bar (ticker) ────────────────────── */}
+      <div className="ann-bar">
+        <div className="ann-track">
+          {[0, 1].map(r => (
+            <div key={r} className="ann-set" aria-hidden={r === 1}>
+              {['Nationwide Delivery Across Pakistan', 'New: Octa West 2026 Now Live', '7-Day Easy Exchange', 'Premium Pret & Haute Couture'].map((msg, i) => (
+                <span key={i} className="ann-item">
+                  {msg}
+                  <span className="ann-dot">◆</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ─── Header ───────────────────────────────────────── */}
