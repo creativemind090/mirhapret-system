@@ -241,47 +241,11 @@ img {
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
   .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
 
-  /* ── Hero (compact, white bg, collections peek below) */
-  .hero-section { height: 60vh; min-height: 360px; max-height: 460px; }
-  .hero-left {
-    flex: 0 0 100%;
-    background: #fff !important;
-    padding: 0 24px 28px;
-    padding-top: 72px;
-    justify-content: flex-end;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-right { display: none; }
-
-  /* Hero text — compact */
-  .hero-tag { margin-bottom: 8px !important; }
-  .hero-title {
-    font-size: clamp(1.7rem, 8vw, 2.4rem) !important;
-    letter-spacing: -1px !important;
-    margin-bottom: 10px !important;
-    white-space: normal !important;
-  }
-  .hero-sub {
-    font-size: 0.85rem !important;
-    line-height: 1.5 !important;
-    margin-bottom: 20px !important;
-    max-width: 100% !important;
-  }
-
-  /* Hero CTAs — compact side-by-side */
-  .hero-ctas { flex-direction: row !important; gap: 8px !important; flex-wrap: nowrap !important; }
-  .hero-cta-primary  { flex: 1; text-align: center; padding: 11px 12px !important; font-size: 11px !important; }
-  .hero-cta-secondary { flex: 1; text-align: center; padding: 11px 12px !important; font-size: 11px !important; }
-
-  /* Slide indicators — compact */
-  .hero-indicators { margin-top: 16px !important; }
-  .hero-indicator { min-height: unset !important; }
-  .hero-indicator-active { }
-  .hero-counter { }
+  /* ── Mobile New Arrivals strip ───────────────────────── */
+  .mobile-new-arrivals { display: block; }
 
   /* ── USP ─────────────────────────────────────────── */
-  .usp-grid { grid-template-columns: 1fr; }
+  .usp-grid { grid-template-columns: 1fr 1fr; }
   .usp-item-border { border-right: none; border-bottom: 1px solid #e8e8e8; }
 
   /* ── Collections ─────────────────────────────────── */
@@ -452,6 +416,201 @@ img {
   .home-section-sm { padding: 0 16px 48px; }
 }
 
+/* ════════════════════════════════════════════════════════
+   MOBILE HOMEPAGE — Shopify-style clean layout
+   All .m-* classes are display:none on desktop, shown on mobile
+   ════════════════════════════════════════════════════════ */
+
+/* Hero */
+.m-hero { display: none; }
+.m-hero-inner {
+  position: relative;
+  height: calc(100svh - 40px);
+  min-height: 520px;
+  background: #111;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  background-size: cover;
+  background-position: center center;
+}
+.m-hero-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.88) 0%,
+    rgba(0,0,0,0.45) 45%,
+    rgba(0,0,0,0.1) 100%
+  );
+}
+.m-hero-body {
+  position: relative; z-index: 1;
+  padding: 0 20px 40px; width: 100%;
+}
+.m-hero-eyebrow {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; letter-spacing: 3.5px;
+  text-transform: uppercase; color: #c8a96e;
+  font-weight: 600; margin-bottom: 12px;
+}
+.m-hero-title {
+  font-family: 'Cormorant', serif;
+  font-size: clamp(2.8rem, 12vw, 3.6rem);
+  font-weight: 600; font-style: italic;
+  color: #fff; line-height: 1.0;
+  letter-spacing: -1.5px; margin-bottom: 12px;
+}
+.m-hero-sub {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px; color: rgba(255,255,255,0.5);
+  font-weight: 300; line-height: 1.6;
+  margin-bottom: 24px;
+}
+.m-hero-btn {
+  display: block; width: 100%; padding: 16px;
+  background: #c8a96e; color: #fff;
+  text-align: center; text-decoration: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+}
+
+/* Category pills */
+.m-pills { display: none; }
+.m-pill {
+  flex-shrink: 0; white-space: nowrap;
+  padding: 8px 16px;
+  border: 1.5px solid #e0e0e0;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: #555; text-decoration: none;
+}
+.m-pill-active { background: #111; border-color: #111; color: #fff; }
+
+/* Products section */
+.m-products { display: none; background: #fff; }
+.m-section-hd {
+  display: flex; justify-content: space-between;
+  align-items: center; padding: 24px 16px 16px;
+}
+.m-section-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: #111; letter-spacing: 0.3px;
+}
+.m-section-link {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 600; color: #111;
+  text-decoration: none; border-bottom: 1px solid #111;
+  padding-bottom: 1px;
+}
+.m-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; padding: 0 12px;
+}
+.m-card { display: block; text-decoration: none; color: inherit; }
+.m-card-img {
+  aspect-ratio: 3/4; overflow: hidden;
+  position: relative; background: #f5f5f3;
+  margin-bottom: 10px;
+}
+.m-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.m-card-fallback {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+.m-card-fallback span {
+  font-family: 'Cormorant', serif;
+  font-size: 2.2rem; font-style: italic;
+  color: #ccc; font-weight: 400; line-height: 1;
+}
+.m-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: #c8a96e; color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 7px; font-weight: 800;
+  padding: 3px 7px; letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.m-badge-new { background: #111; }
+.m-card-info { padding: 0 2px; }
+.m-card-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 500; color: #111;
+  margin-bottom: 5px;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.m-card-price {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px; font-weight: 600; color: #111; margin: 0;
+}
+
+/* Skeleton */
+.m-skel { display: block; }
+.m-skel-img {
+  aspect-ratio: 3/4; margin-bottom: 10px;
+  background: linear-gradient(90deg, #f0f0ee 25%, #e8e8e6 50%, #f0f0ee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.m-skel-line {
+  height: 10px; width: 80%; background: #eee;
+  margin-bottom: 6px; border-radius: 2px;
+}
+.m-skel-sm { width: 50%; }
+
+.m-view-all {
+  display: block; margin: 20px 12px 32px;
+  padding: 15px 20px; text-align: center;
+  border: 1.5px solid #111;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: #111; text-decoration: none;
+}
+
+/* Collection tiles */
+.m-collections { display: none; background: #fff; padding-bottom: 8px; }
+.m-coll-grid { display: flex; flex-direction: column; gap: 8px; padding: 0 12px; }
+.m-coll-tile {
+  position: relative; height: 200px;
+  background: #111; overflow: hidden;
+  display: flex; align-items: flex-end;
+  text-decoration: none;
+  background-size: cover; background-position: center;
+}
+.m-coll-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 60%);
+  pointer-events: none;
+}
+.m-coll-body { position: relative; z-index: 1; padding: 20px; }
+.m-coll-name {
+  font-family: 'Cormorant', serif;
+  font-size: 1.5rem; font-weight: 600; font-style: italic;
+  color: #fff; margin-bottom: 6px; line-height: 1.1;
+}
+.m-coll-btn {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: #c8a96e;
+}
+
+/* Trust badges */
+.m-trust { display: none; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+.m-trust-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  padding: 20px 8px; text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.5px; color: #555;
+}
+.m-trust-item + .m-trust-item { border-left: 1px solid #f0f0f0; }
+.m-trust-icon { font-size: 18px; }
+
 /* ─── Mobile Bottom Navigation ──────────────────────── */
 .mobile-bottom-nav {
   display: none;
@@ -560,30 +719,48 @@ img {
 
 /* ─── Mobile (≤768px) additions ──────────────────────── */
 @media (max-width: 768px) {
-  /* Show bottom nav */
+  /* Bottom nav */
   .mobile-bottom-nav { display: flex; }
 
-  /* Show sticky ATC on product detail */
+  /* Sticky ATC on product detail */
   .mobile-sticky-atc { display: flex; }
 
-  /* Add bottom clearance so footer content clears bottom nav */
+  /* Clear space for bottom nav */
   body { padding-bottom: 64px; }
 
-  /* Wishlist always visible on mobile (no hover) */
+  /* Wishlist always visible (no hover state on touch) */
   .product-wishlist-btn { opacity: 1 !important; }
 
-  /* Hide desktop filter toggle on mobile — sidebar is always hidden */
+  /* Hide desktop filter toggle */
   .products-filter-toggle { display: none !important; }
 
-  /* Prevent page header icons being too small to tap */
-  .site-nav button,
-  .site-nav a {
-    min-height: 44px;
-    min-width: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* Tap target sizing */
+  .site-nav button, .site-nav a {
+    min-height: 44px; min-width: 44px;
+    display: flex; align-items: center; justify-content: center;
   }
+
+  /* ── Show mobile homepage sections ───────────────────── */
+  .hero-section { display: none !important; }
+  .m-hero { display: block; }
+  .m-pills {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding: 12px 16px; background: #fff;
+    border-bottom: 1px solid #efefed;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .m-pills::-webkit-scrollbar { display: none; }
+  .m-products { display: block; }
+  .m-collections { display: block; }
+  .m-trust { display: flex; }
+
+  /* ── Hide heavy desktop-only sections on mobile ──────── */
+  .marquee-section { display: none !important; }
+  .usp-strip { display: none !important; }
+
+  /* ── Compress desktop sections that still show ────────── */
+  .collections-grid { grid-template-columns: 1fr; height: auto; gap: 8px; }
+  .products-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
 }
 
 /* Scrollbar */
